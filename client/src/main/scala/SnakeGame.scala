@@ -55,15 +55,6 @@ object SnakeGame extends js.JSApp {
 
     step()
 
-//    val gameLoop = Observable
-//      .interval(100 millis)
-//      .map(l => module)
-//      .takeWhile(m => !m.ended)
-//      .foreach(l => {
-//        module.step()
-//        CanvasRenderer.render(ctx, module.world)
-//      })
-
     inputStream.foreach(kv => {
       kv.keyCode match {
         case 37 => module.changeDir(id, domain.Left)
