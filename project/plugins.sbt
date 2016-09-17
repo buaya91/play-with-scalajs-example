@@ -7,8 +7,6 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 resolvers += Resolver.url("heroku-sbt-plugin-releases",
   url("https://dl.bintray.com/heroku/sbt-plugins/"))(Resolver.ivyStylePatterns)
 
-resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
-
 
 // Sbt plugins
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.6")
@@ -23,4 +21,3 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.1")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.4")
