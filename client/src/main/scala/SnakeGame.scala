@@ -9,6 +9,8 @@ import org.scalajs.dom.raw.HTMLCanvasElement
 
 import scala.scalajs.js.annotation.JSExport
 import scala.concurrent.duration._
+import scala.scalajs.js.timers._
+
 
 @JSExport
 object SnakeGame extends js.JSApp {
@@ -34,14 +36,33 @@ object SnakeGame extends js.JSApp {
     canvas.focus()
     val inputStream = InputControl.captureEvents(canvas)
 
-    val gameLoop = Observable
-      .interval(300 millis)
-      .map(l => module)
-      .takeWhile(m => !m.ended)
-      .foreach(l => {
-        module.step()
-        CanvasRenderer.render(ctx, module.world)
-      })
+    var pace = 200
+
+    def step(): Unit = {
+      val n = module.world.snakes.head.body.size
+      if (n > 10) {
+        pace = 100
+      } else if (n > 20) {
+        pace = 50
+      }
+
+      module.step()
+      CanvasRenderer.render(ctx, module.world)
+      setTimeout(pace) {
+        step()
+      }
+    }
+
+    step()
+
+//    val gameLoop = Observable
+//      .interval(100 millis)
+//      .map(l => module)
+//      .takeWhile(m => !m.ended)
+//      .foreach(l => {
+//        module.step()
+//        CanvasRenderer.render(ctx, module.world)
+//      })
 
     inputStream.foreach(kv => {
       kv.keyCode match {
