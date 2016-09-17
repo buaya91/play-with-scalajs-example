@@ -24,6 +24,7 @@ object SnakeGame extends js.JSApp {
     canvas.width = w.toInt
 
     val id = "user"
+
     val module = new SnakeApiModule(id, w.toInt / 10, h.toInt / 10)
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
@@ -33,15 +34,16 @@ object SnakeGame extends js.JSApp {
     canvas.focus()
     val inputStream = InputControl.captureEvents(canvas)
 
-    Observable
+    val gameLoop = Observable
       .interval(300 millis)
+      .map(l => module)
+      .takeWhile(m => !m.ended)
       .foreach(l => {
         module.step()
         CanvasRenderer.render(ctx, module.world)
       })
 
     inputStream.foreach(kv => {
-      println(kv.key)
       kv.keyCode match {
         case 37 => module.changeDir(id, domain.Left)
         case 38 => module.changeDir(id, domain.Up)

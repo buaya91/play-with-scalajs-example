@@ -9,6 +9,8 @@ trait SnakeApi {
 }
 
 class SnakeApiModule(id: String, x: Int, y: Int) extends SnakeApi {
+  var ended = false
+
   var world = GameWorld((x, y), Seq(Snake.build(id, Position(x / 2, y / 2), Right)), Seq())
 
   override def changeDir(id: String, dir: Direction): Unit = {
@@ -26,9 +28,18 @@ class SnakeApiModule(id: String, x: Int, y: Int) extends SnakeApi {
   override def step(): Unit = {
     val addedSnacks = world.throwSnacks
 
-    val movedSnakes = world.snakes.map(_.move)
+    val movedSnakes = world.snakes
+      .map(_.move)
+      .filterNot(_.bumpedToSelf)
 
-    val eatenSnakes = movedSnakes.map(s => {
+    val snakeAlive = movedSnakes.filterNot(s1 => {
+      (for {
+        s2 <- movedSnakes
+        if s1 != s2 && s1.overlapped(s2.body)
+      } yield true).nonEmpty
+    })
+
+    val eatenSnakes = snakeAlive.map(s => {
       val eaten = addedSnacks.exists(s2 => s.overlapped(s2.position))
       if (eaten)
         s.add
@@ -37,6 +48,9 @@ class SnakeApiModule(id: String, x: Int, y: Int) extends SnakeApi {
     })
 
     val eatenSnacks = addedSnacks.filter(s => !movedSnakes.exists(_.overlapped(s.position)))
+
+    if (eatenSnakes.isEmpty)
+      ended = true
 
     world = world.copy(snacks = eatenSnacks, snakes = eatenSnakes)
   }

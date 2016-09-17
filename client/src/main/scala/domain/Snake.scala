@@ -11,6 +11,7 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
       case Right => oldHead.copy(x = oldHead.x + 1)
       case Left => oldHead.copy(x = oldHead.x - 1)
     }
+
     copy(body = newHead +: newTail)
   }
 
@@ -36,15 +37,21 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
   }
 
   def overlapped(position: Position): Boolean = body.contains(position)
+
+  def overlapped(positions: Seq[Position]): Boolean = {
+    positions.exists(overlapped)
+  }
+
+  def bumpedToSelf: Boolean = body.distinct.size != body.size
 }
 
 object Snake {
   def build(id: String, head: Position, direction: Direction): Snake = {
     def incrementFunc(n: Int): Position = direction match {
-      case Up => head.copy(y = head.y - n)
-      case Down => head.copy(y = head.y + n)
-      case Right => head.copy(x = head.x + n)
-      case Left => head.copy(x = head.x - n)
+      case Up => head.copy(y = head.y + n)
+      case Down => head.copy(y = head.y - n)
+      case Right => head.copy(x = head.x - n)
+      case Left => head.copy(x = head.x + n)
     }
 
     val pt = for {
