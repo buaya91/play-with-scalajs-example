@@ -1,0 +1,5 @@
+package infrastructure
+
+class InputControl {
+
+}

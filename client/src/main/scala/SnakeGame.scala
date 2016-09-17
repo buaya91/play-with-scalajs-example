@@ -17,9 +17,14 @@ object SnakeGame extends js.JSApp {
 
   @scala.scalajs.js.annotation.JSExport
   override def main(): Unit = {
+    val h = dom.window.innerHeight
+    val w = dom.window.innerWidth
     val canvas = dom.document.getElementById("canvas").asInstanceOf[HTMLCanvasElement]
 
-    val game = createGame("user", canvas.width / 10, canvas.height / 10)
+    canvas.height = h.toInt
+    canvas.width = w.toInt
+
+    val game = createGame("user", w.toInt / 10, h.toInt / 10)
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
