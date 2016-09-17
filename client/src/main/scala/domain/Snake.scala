@@ -6,10 +6,10 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
     val newTail = body.dropRight(1)
     val oldHead = body.head
     val newHead = direction match {
-      case Up => oldHead.copy(y = oldHead.y + 1)
-      case Down => oldHead.copy(y = oldHead.y - 1)
+      case Up => oldHead.copy(y = oldHead.y - 1)
+      case Down => oldHead.copy(y = oldHead.y + 1)
       case Right => oldHead.copy(x = oldHead.x + 1)
-      case Up => oldHead.copy(y = oldHead.y + 1)
+      case Left => oldHead.copy(x = oldHead.x - 1)
     }
     copy(body = newHead +: newTail)
   }
@@ -27,8 +27,8 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
   def add: Snake = {
     val last = body.last
     val newLast = direction match {
-      case Up => last.copy(y = last.y - 1)
-      case Down => last.copy(y = last.y + 1)
+      case Up => last.copy(y = last.y + 1)
+      case Down => last.copy(y = last.y - 1)
       case Right => last.copy(x = last.x - 1)
       case Left => last.copy(x = last.x + 1)
     }
@@ -41,8 +41,8 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
 object Snake {
   def build(id: String, head: Position, direction: Direction): Snake = {
     def incrementFunc(n: Int): Position = direction match {
-      case Up => head.copy(y = head.y + n)
-      case Down => head.copy(y = head.y - n)
+      case Up => head.copy(y = head.y - n)
+      case Down => head.copy(y = head.y + n)
       case Right => head.copy(x = head.x + n)
       case Left => head.copy(x = head.x - n)
     }
