@@ -8,8 +8,7 @@ lazy val server = (project in file("server")).settings(
   // triggers scalaJSPipeline when using compile or continuous compilation
   compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
   libraryDependencies ++= Seq(
-    "com.vmunier" %% "scalajs-scripts" % "1.0.0",
-    specs2 % Test
+    "com.vmunier" %% "scalajs-scripts" % "1.0.0"
   ),
   // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
   EclipseKeys.preTasks := Seq(compile in Compile)
@@ -21,7 +20,9 @@ lazy val client = (project in file("client")).settings(
   persistLauncher := true,
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+    "org.scala-js"                %%% "scalajs-dom"                  % "0.9.1",
+    "io.monix"                    %%% "monix"                        % "2.0-RC8",
+    "org.scalatest"               %%% "scalatest"                    % "3.0.0"     % "test"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
   dependsOn(sharedJs)
