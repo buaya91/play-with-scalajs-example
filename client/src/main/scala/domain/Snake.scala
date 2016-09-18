@@ -2,14 +2,22 @@ package domain
 
 case class Snake(id: String, body: Seq[Position], direction: Direction) {
 
-  def move: Snake = {
+  private def positiveModulo(a: Int, n: Int): Int = {
+    // to get positive mod
+    // we compute remainder, and add back the n
+    // to prevent result bigger than n which violate the rules
+    // we take the remainder again
+    ((a % n) + n) % n
+  }
+
+  def move(boundary: (Int, Int)): Snake = {
     val newTail = body.dropRight(1)
     val oldHead = body.head
     val newHead = direction match {
-      case Up => oldHead.copy(y = oldHead.y - 1)
-      case Down => oldHead.copy(y = oldHead.y + 1)
-      case Right => oldHead.copy(x = oldHead.x + 1)
-      case Left => oldHead.copy(x = oldHead.x - 1)
+      case Up => oldHead.copy(y = positiveModulo(oldHead.y - 1, boundary._2))
+      case Down => oldHead.copy(y = positiveModulo(oldHead.y + 1, boundary._2))
+      case Right => oldHead.copy(x = positiveModulo(oldHead.x + 1, boundary._1))
+      case Left => oldHead.copy(x = positiveModulo(oldHead.x - 1, boundary._1))
     }
 
     copy(body = newHead +: newTail)
@@ -38,8 +46,8 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
 
   def overlapped(position: Position): Boolean = body.contains(position)
 
-  def overlapped(positions: Seq[Position]): Boolean = {
-    positions.exists(overlapped)
+  def bumpToOthers(othersBody: Seq[Position]): Boolean = {
+    othersBody.contains(body.head)
   }
 
   def bumpedToSelf: Boolean = body.distinct.size != body.size

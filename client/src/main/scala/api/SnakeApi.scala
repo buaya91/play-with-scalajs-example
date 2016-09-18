@@ -29,14 +29,16 @@ class SnakeApiModule(id: String, x: Int, y: Int) extends SnakeApi {
     val addedSnacks = world.throwSnacks
 
     val movedSnakes = world.snakes
-      .map(_.move)
+      .map(_.move(world.size))
       .filterNot(_.bumpedToSelf)
 
     val snakeAlive = movedSnakes.filterNot(s1 => {
-      (for {
+      val bumpToOtherSnakes: Boolean = (for {
         s2 <- movedSnakes
-        if s1 != s2 && s1.overlapped(s2.body)
+        if s1 != s2 && s1.bumpToOthers(s2.body)
       } yield true).nonEmpty
+
+      bumpToOtherSnakes
     })
 
     val eatenSnakes = snakeAlive.map(s => {
