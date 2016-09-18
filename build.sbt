@@ -49,6 +49,11 @@ updateGh in Global := {
     val distFolder = FileSystems.getDefault.getPath("dist", "client-opt.js")
     Files.copy(fullOptTarget, distFolder, StandardCopyOption.REPLACE_EXISTING)
 
-
+    "git checkout gh-pages" #&&
+      "mv dist/ ." #&&
+      "git add client-launcher.js client-opt.js index.html main.css" #&&
+      "git commit -m 'Update gh'" #&&
+      "git push origin gh-pages" #&&
+      "git checkout master" !
   })
 }
