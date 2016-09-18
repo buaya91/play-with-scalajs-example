@@ -1,3 +1,9 @@
+import java.nio.file.{FileSystems, Files, StandardCopyOption}
+
+name := "Scalajs-snake"
+
+version := "0.1.0"
+
 lazy val scalaV = "2.11.8"
 
 lazy val server = (project in file("server")).settings(
@@ -34,3 +40,15 @@ lazy val sharedJs = shared.js
 
 // loads the server project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
+
+lazy val updateGh = taskKey[Unit]("Update js and push to github pages")
+
+updateGh in Global := {
+  (fullOptJS in Compile in client).value.map(f => {
+    val fullOptTarget = f.toPath
+    val distFolder = FileSystems.getDefault.getPath("dist", "client-opt.js")
+    Files.copy(fullOptTarget, distFolder, StandardCopyOption.REPLACE_EXISTING)
+
+
+  })
+}
