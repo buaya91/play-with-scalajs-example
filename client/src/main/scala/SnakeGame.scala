@@ -44,7 +44,7 @@ object SnakeGame extends js.JSApp {
       val n = module.world.snakes.head.body.size
 
       val pace = n match {
-        case x if x > 30 => 10
+        case x if x > 30 => 25
         case x if x > 20 => 50
         case x if x > 10 => 100
         case _ => 150
