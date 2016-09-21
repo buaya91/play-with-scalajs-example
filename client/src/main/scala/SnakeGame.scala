@@ -14,7 +14,7 @@ import scala.scalajs.js.timers._
 
 @JSExport
 object SnakeGame extends js.JSApp {
-  import api.SnakeGameApiModule
+  import api.SnakeApiModule
 
   @scala.scalajs.js.annotation.JSExport
   override def main(): Unit = {
@@ -27,7 +27,7 @@ object SnakeGame extends js.JSApp {
 
     val id = "user"
 
-    val module = new SnakeGameApiModule(id, w.toInt / 10, h.toInt / 10)
+    val module = new SnakeApiModule(id, w.toInt / 10, h.toInt / 10)
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
