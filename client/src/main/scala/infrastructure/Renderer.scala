@@ -10,15 +10,34 @@ trait Renderer[Context] {
 object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
   type canvasCtx = dom.CanvasRenderingContext2D
   override def render(ctx: canvasCtx, world: GameWorld): Unit = {
-    ctx.fillStyle = "black"
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    if (world.snakes.isEmpty) {
+      val txt =
+        """
+          |Game Over!
+          |Press any key to continue
+        """.stripMargin
+      ctx.fillStyle = "white"
+      val fontSize = ctx.canvas.width / 40
+      ctx.font = s"${fontSize}px sans-serif"
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
 
-    val snacks = world.snacks
-    val snakes = world.snakes
+      val w = dom.window.innerWidth / 2
+      val h = dom.window.innerHeight / 2
 
-    snakes.foreach(renderSnake(ctx, _))
-    snacks.foreach(renderSnack(ctx, _))
-    renderScore(ctx, snakes.head)
+      ctx.fillText(txt,  w, h)
+
+    } else {
+      ctx.fillStyle = "black"
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+      val snacks = world.snacks
+      val snakes = world.snakes
+
+      snakes.foreach(renderSnake(ctx, _))
+      snacks.foreach(renderSnack(ctx, _))
+      renderScore(ctx, snakes.head)
+    }
   }
 
   def drawPoint(ctx: canvasCtx, position: Position, scalingFactor: Int = 10): Unit = {

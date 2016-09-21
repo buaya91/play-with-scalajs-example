@@ -36,16 +36,18 @@ object SnakeGame extends js.JSApp {
     canvas.focus()
     val inputStream = InputControl.captureEvents(canvas)
 
-    var pace = 200
-
     def step(): Unit = {
+      if (module.ended) {
+        inputStream.take(1).foreach(kv => main())
+      }
+
       val n = module.world.snakes.head.body.size
-      if (n > 10) {
-        pace = 100
-      } else if (n > 20) {
-        pace = 50
-      } else if (n > 30) {
-        pace = 20
+
+      val pace = n match {
+        case x if x > 30 => 10
+        case x if x > 20 => 50
+        case x if x > 10 => 100
+        case _ => 150
       }
 
       module.step()
@@ -63,6 +65,7 @@ object SnakeGame extends js.JSApp {
         case 38 => module.changeDir(id, domain.Up)
         case 39 => module.changeDir(id, domain.Right)
         case 40 => module.changeDir(id, domain.Down)
+        case _  => // ignore others
       }
     })
   }
