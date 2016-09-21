@@ -18,6 +18,7 @@ object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
 
     snakes.foreach(renderSnake(ctx, _))
     snacks.foreach(renderSnack(ctx, _))
+    renderScore(ctx, snakes.head)
   }
 
   def drawPoint(ctx: canvasCtx, position: Position, scalingFactor: Int = 10): Unit = {
@@ -25,19 +26,32 @@ object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
   }
 
   def renderSnake(ctx: canvasCtx, snake: Snake): Unit = {
-    ctx.fillStyle = "red"
-    val snakeHead = snake.body.head
-    drawPoint(ctx, snakeHead)
+    ctx.fillStyle = snake.body.size match {
+      case x if x > 30 => "#ffff99"
+      case x if x > 20 => "#0099cc"
+      case x if x > 10 => "#00cc00"
+      case _           => "green"
+    }
 
-    ctx.fillStyle = "green"
-    snake.body.tail.foreach(drawPoint(ctx, _))
+    snake.body.foreach(drawPoint(ctx, _))
   }
 
   def renderSnack(ctx: canvasCtx, snacks: Snacks): Unit = {
     snacks match {
       case Chocolate(p) =>
-        ctx.fillStyle = "orange"
+        ctx.fillStyle = "#ff0066"
         drawPoint(ctx, p)
     }
+  }
+
+  def renderScore(ctx: canvasCtx, snake: Snake): Unit = {
+    val width = ctx.canvas.width
+    val fontSize = width / 50
+    ctx.font = s"${fontSize}px sans-serif"
+    ctx.fillStyle = "white"
+
+    val score = snake.body.size
+    val scoreTxt = s"Score: $score"
+    ctx.fillText(scoreTxt, 10, fontSize)
   }
 }

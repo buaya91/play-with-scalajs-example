@@ -44,6 +44,8 @@ object SnakeGame extends js.JSApp {
         pace = 100
       } else if (n > 20) {
         pace = 50
+      } else if (n > 30) {
+        pace = 20
       }
 
       module.step()
