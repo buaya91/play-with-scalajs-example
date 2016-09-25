@@ -11,6 +11,18 @@
   <body>
    @content
    <script src="https://cdn.rawgit.com/jondavidjohn/hidpi-canvas-polyfill/1.0.9/dist/hidpi-canvas.min.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase.js"></script>
+   <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyCXszODe-4D6v3ZHtylRQMTV1AQ8i1KTiM",
+        authDomain: "scalajs-snake.firebaseapp.com",
+        databaseURL: "https://scalajs-snake.firebaseio.com",
+        storageBucket: "scalajs-snake.appspot.com",
+        messagingSenderId: "186660334037"
+      };
+      firebase.initializeApp(config);
+    </script>
    @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
   </body>
 </html>
