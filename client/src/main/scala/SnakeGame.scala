@@ -1,3 +1,4 @@
+import domain.components.{Down, Left, Right, Up}
 import infrastructure.{CanvasRenderer, InputControl}
 import monix.reactive.Observable
 import monix.execution.Scheduler.Implicits.global
@@ -61,10 +62,10 @@ object SnakeGame extends js.JSApp {
 
     inputStream.foreach(kv => {
       kv.keyCode match {
-        case 37 => module.changeDir(id, domain.Left)
-        case 38 => module.changeDir(id, domain.Up)
-        case 39 => module.changeDir(id, domain.Right)
-        case 40 => module.changeDir(id, domain.Down)
+        case 37 => module.changeDir(id, Left)
+        case 38 => module.changeDir(id, Up)
+        case 39 => module.changeDir(id, Right)
+        case 40 => module.changeDir(id, Down)
         case _  => // ignore others
       }
     })

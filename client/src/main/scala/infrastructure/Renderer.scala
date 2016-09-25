@@ -1,6 +1,7 @@
 package infrastructure
 
 import domain._
+import domain.components.Position
 import org.scalajs.dom
 
 trait Renderer[Context] {
@@ -55,12 +56,9 @@ object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     snake.body.foreach(drawPoint(ctx, _))
   }
 
-  def renderSnack(ctx: canvasCtx, snacks: Snacks): Unit = {
-    snacks match {
-      case Chocolate(p) =>
-        ctx.fillStyle = "#ff0066"
-        drawPoint(ctx, p)
-    }
+  def renderSnack(ctx: canvasCtx, snacks: Apple): Unit = {
+    ctx.fillStyle = "#ff0066"
+    drawPoint(ctx, snacks.position)
   }
 
   def renderScore(ctx: canvasCtx, snake: Snake): Unit = {

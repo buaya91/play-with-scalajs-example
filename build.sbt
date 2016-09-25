@@ -28,8 +28,8 @@ lazy val client = (project in file("client")).settings(
     "io.monix"                    %%% "monix"                        % "2.0-RC8",
     "org.scalatest"               %%% "scalatest"                    % "3.0.0"     % "test"
   )
-).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
-  dependsOn(sharedJs)
+).enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .dependsOn(sharedJs)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
   settings(scalaVersion := scalaV).
