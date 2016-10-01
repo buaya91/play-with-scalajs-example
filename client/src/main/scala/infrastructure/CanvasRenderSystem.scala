@@ -5,7 +5,7 @@ import domain.components.Position
 import domain.systems.RenderSystem
 import org.scalajs.dom
 
-class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D, id: String) extends RenderSystem {
+class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem {
 
   def drawPoint(position: Position, scalingFactor: Int = 10): Unit = {
     ctx.fillRect(position.x * scalingFactor, position.y * scalingFactor,scalingFactor, scalingFactor)
@@ -26,6 +26,9 @@ class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D, id: String) extends 
     val areaComponents = world.areaComponents
     val isSnakeComponent = world.isSnakeComponents
 
+    ctx.fillStyle = "black"
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
     areaComponents.foreach {
       case (i, a) =>
         val isSnake = isSnakeComponent.getOrElse(i, false)
@@ -43,8 +46,8 @@ class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D, id: String) extends 
           a.foreach(drawPoint(_))
         }
 
-        if (i == id)
-          renderScore(a)
+//        if (i == id)
+//          renderScore(a)
     }
   }
 }

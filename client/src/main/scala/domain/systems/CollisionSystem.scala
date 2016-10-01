@@ -16,10 +16,10 @@ class CollisionSystem extends GameSystem {
   def increaseLength(snake: Seq[Position], direction: Direction): Seq[Position] = {
     val last = snake.last
     val newLast = direction match {
-      case Up => last.copy(y = last.y + 1)
-      case Down => last.copy(y = last.y - 1)
-      case Right => last.copy(x = last.x - 1)
-      case Left => last.copy(x = last.x + 1)
+      case Up() => last.copy(y = last.y + 1)
+      case Down() => last.copy(y = last.y - 1)
+      case Right() => last.copy(x = last.x - 1)
+      case Left() => last.copy(x = last.x + 1)
     }
 
     snake :+ newLast
@@ -51,6 +51,8 @@ class CollisionSystem extends GameSystem {
           case (true, false, Some(dir)) =>
             val newSnake = increaseLength(c1, dir)
             world.areaComponents.update(id1, newSnake)
+
+          case _ => // do nothing
         }
       }
     }

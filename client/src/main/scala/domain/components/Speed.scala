@@ -1,3 +1,3 @@
 package domain.components
 
-case class Speed(tilePerSecond: Int) extends AnyVal
+case class Speed(tilePerSecond: Int)

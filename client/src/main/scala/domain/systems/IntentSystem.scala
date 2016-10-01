@@ -16,10 +16,10 @@ class IntentSystem extends GameSystem {
 
           // do not change if direction is opposite
           (oldDir, dir) match {
-            case (Up, Down) =>
-            case (Down, Up) =>
-            case (components.Left, components.Right) =>
-            case (components.Right, components.Left) =>
+            case (Up(), Down()) =>
+            case (Down(), Up()) =>
+            case (components.Left(), components.Right()) =>
+            case (components.Right(), components.Left()) =>
             case _ => world.directionComponents.put(id, dir)
           }
         }
