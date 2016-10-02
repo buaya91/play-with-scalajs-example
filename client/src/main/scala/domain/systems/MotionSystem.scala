@@ -15,9 +15,17 @@ class MotionSystem(x: Double, y: Double) extends GameSystem {
 
         (speedOpt, dirOpt) match {
           case (Some(spd), Some(dir)) =>
-            val step: Double = spd.distancePerSecond / world.frameRate
+            val step: Double = spd.distancePerSecond.toDouble / world.frameRate.toDouble
 
-            val newTail = body.dropRight(1)
+            val diffBetweenEachElement = for {
+              i <- 1 until body.size
+            } yield {
+              val a = body(i - 1)
+              val b = body(i)
+
+              a - b
+            }
+
             val oldHead = body.head
 
             val newHead = dir match {
@@ -27,7 +35,14 @@ class MotionSystem(x: Double, y: Double) extends GameSystem {
               case components.Left => oldHead.copy(x = positiveModulo(oldHead.x - step, x))
             }
 
-            world.add(id, newHead +: newTail)
+            val movedBody = diffBetweenEachElement.foldLeft(Seq(newHead)) {
+              case (newBody, diff) =>
+                val last = newBody.last
+                val next = last - diff
+                newBody :+ next
+            }
+
+            world.add(id, movedBody)
 
           case _ => // do nothing
         }

@@ -34,8 +34,10 @@ class CollisionSystem extends GameSystem {
     } yield {
 
       // if snake bump to self, kill it
-      if (bumpedToSelf(c1))
+      if (bumpedToSelf(c1)) {
+        println("oh bump", c1)
         world.remove(id1)
+      }
 
       if (id1 != id2 && bumpToOthers(c1, c2)) {
         val c1IsSnake = world.isSnakeComponents.getOrElse(id1, false)

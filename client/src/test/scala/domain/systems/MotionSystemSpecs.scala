@@ -21,9 +21,11 @@ class MotionSystemSpecs extends WordSpec with Matchers {
 
       val moved = world.areaComponents("t")
 
+      val Eps = 1e-3
+
       moved should not be snake
       moved.size shouldBe snake.size
-      (moved.head.x - snake.head.x) shouldBe (2 / world.frameRate)
+      (moved.head.x - snake.head.x) shouldBe (2.0 / world.frameRate) +- Eps
     }
   }
 

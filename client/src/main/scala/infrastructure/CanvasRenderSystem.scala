@@ -33,23 +33,27 @@ class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem
     ctx.fillStyle = "black"
     ctx.fillRect(0, 0, width, height)
 
-    val scaleFactor = width / gameX
+    val scaleFactor = (width / gameX) / 2       // TODO: need consider HPI
+
+    ctx.fillStyle = "white"   // debug color
 
     areaComponents.foreach {
-      case (i, a) =>
-        val isSnake = isSnakeComponent.getOrElse(i, false)
+      case (id, area) =>
+
+        val isSnake = isSnakeComponent.getOrElse(id, false)
+
         if (isSnake) {
-          ctx.fillStyle = a.size match {
+          ctx.fillStyle = area.size match {
             case x if x > 30 => "#ffff99"
             case x if x > 20 => "#0099cc"
             case x if x > 10 => "#00cc00"
             case _           => "green"
           }
 
-          a.foreach(drawPoint(_, scaleFactor))
+          area.foreach(drawPoint(_, scaleFactor))
         } else {
           ctx.fillStyle = "#ff0066"
-          a.foreach(drawPoint(_, scaleFactor))
+          area.foreach(drawPoint(_, scaleFactor))
         }
 
 //        if (i == id)

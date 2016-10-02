@@ -39,7 +39,9 @@ class SnakeGameImpl(
 
   override def speedUp(id: String): Unit = ???
 
-  setInterval(300 millis) {
+  val updateInterval = (1 / world.frameRate) * 1000
+
+  setInterval(updateInterval millis) {
     world.process()
   }
 }

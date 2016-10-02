@@ -8,7 +8,7 @@ import configs.Config._
 import utils.Utility._
 
 trait SnakeApi {
-  def world: GameWorld
+  val world: GameWorld
 
   // to add new snake
   def addNewSnake(newSnakeId: String): Unit = {
@@ -19,7 +19,7 @@ trait SnakeApi {
     world.add(newSnakeId, snakeArea)
     world.add(newSnakeId, true)
     world.add(newSnakeId, direction)
-    world.add(newSnakeId, Speed(1))
+    world.add(newSnakeId, Speed(2))
   }
 
   def changeDir(id: String, dir: Direction): Unit
