@@ -26,7 +26,7 @@ lazy val client = (project in file("client")).settings(
   libraryDependencies ++= Seq(
     "org.scala-js"                %%% "scalajs-dom"                  % "0.9.1",
     "io.monix"                    %%% "monix"                        % "2.0-RC8",
-    "com.github.benhutchison"     %%% "prickle"                      % "1.1.11",
+    "com.github.benhutchison"     %%% "prickle"                      % "1.1.12",
     "org.scalatest"               %%% "scalatest"                    % "3.0.0"     % "test"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb)

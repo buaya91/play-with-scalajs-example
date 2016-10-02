@@ -26,8 +26,13 @@ class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem
     val areaComponents = world.areaComponents
     val isSnakeComponent = world.isSnakeComponents
 
+    val width = ctx.canvas.width
+    val height = ctx.canvas.height
+
     ctx.fillStyle = "black"
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    ctx.fillRect(0, 0, width, height)
+
+    val scaleFactor = width / gameX
 
     areaComponents.foreach {
       case (i, a) =>
@@ -40,10 +45,10 @@ class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem
             case _           => "green"
           }
 
-          a.foreach(drawPoint(_))
+          a.foreach(drawPoint(_, scaleFactor))
         } else {
           ctx.fillStyle = "#ff0066"
-          a.foreach(drawPoint(_))
+          a.foreach(drawPoint(_, scaleFactor))
         }
 
 //        if (i == id)

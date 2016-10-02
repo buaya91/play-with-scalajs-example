@@ -14,9 +14,9 @@ class GameWorld(
 
   // intent and event is private
   val intentComponents: mutable.Map[String, Intent] = mutable.HashMap()
-  val eventComponents: mutable.Seq[Event] = mutable.Seq()
+  val eventComponents: mutable.ArrayBuffer[Event] = mutable.ArrayBuffer()
 
-  val systems: mutable.Seq[GameSystem] = mutable.Seq()
+  val systems: mutable.ArrayBuffer[GameSystem] = mutable.ArrayBuffer()
 
   def add(id: String, area: Seq[Position]) = areaComponents.put(id, area)
   def add(id: String, isSnake: Boolean) = isSnakeComponents.put(id, isSnake)
@@ -24,9 +24,9 @@ class GameWorld(
   def add(id: String, direction: Direction) = directionComponents.put(id, direction)
   def add(id: String, intent: Intent) = intentComponents.put(id, intent)
 
-  def addEvent(event: Event) = eventComponents :+ event
+  def addEvent(event: Event) = eventComponents += event
 
-  def addSystem(sys: GameSystem) = systems :+ sys
+  def addSystem(sys: GameSystem) = systems += sys
 
   def remove(id: String) = {
     areaComponents.remove(id)

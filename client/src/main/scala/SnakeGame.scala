@@ -28,37 +28,36 @@ object SnakeGame extends js.JSApp {
 
     val dbRoot = Firebase.database().ref()
     dbRoot.once("value", (db: DataSnapshot) => {
-      if (db.`val`() == null) {
+//      if (db.`val`() == null) {
+      if (true) {
         val game = new SnakeGameImpl(canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D])
         game.addNewSnake(uid)
 
-        val gameDb = dbRoot.child("0")
-
-        game.world.areaComponents.foreach {
-          case (id, area) =>
-            val jsonArea = Pickle.intoString(area)
-            gameDb.child(s"area/$id").set(JSON.parse(jsonArea))
-        }
-
-        game.world.directionComponents.foreach {
-          case (id, dir) =>
-            val jsonArea = Pickle.intoString(dir)
-            println(jsonArea)
-            println(JSON.parse(jsonArea))
-            gameDb.child(s"dir/$id").set(JSON.parse(jsonArea))
-        }
-
-        game.world.isSnakeComponents.foreach {
-          case (id, isSnake) =>
-            val jsonArea = Pickle.intoString(isSnake)
-            gameDb.child(s"isSnake/$id").set(JSON.parse(jsonArea))
-        }
-
-        game.world.speedComponents.foreach {
-          case (id, speed) =>
-            val jsonArea = Pickle.intoString(speed)
-            gameDb.child(s"speed/$id").set(JSON.parse(jsonArea))
-        }
+//        val gameDb = dbRoot.child("0")
+//
+//        game.world.areaComponents.foreach {
+//          case (id, area) =>
+//            val jsonArea = Pickle.intoString(area)
+//            gameDb.child(s"area/$id").set(JSON.parse(jsonArea))
+//        }
+//
+//        game.world.directionComponents.foreach {
+//          case (id, dir) =>
+//            val jsonArea = Pickle.intoString(dir)
+//            gameDb.child(s"dir/$id").set(JSON.parse(jsonArea))
+//        }
+//
+//        game.world.isSnakeComponents.foreach {
+//          case (id, isSnake) =>
+//            val jsonArea = Pickle.intoString(isSnake)
+//            gameDb.child(s"isSnake/$id").set(JSON.parse(jsonArea))
+//        }
+//
+//        game.world.speedComponents.foreach {
+//          case (id, speed) =>
+//            val jsonArea = Pickle.intoString(speed)
+//            gameDb.child(s"speed/$id").set(JSON.parse(jsonArea))
+//        }
       }
     })
   }
