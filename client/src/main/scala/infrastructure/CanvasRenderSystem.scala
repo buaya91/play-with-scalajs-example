@@ -4,6 +4,7 @@ import domain.GameWorld
 import domain.components.Position
 import domain.systems.RenderSystem
 import org.scalajs.dom
+import configs.Config._
 
 class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem {
 

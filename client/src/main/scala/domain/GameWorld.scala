@@ -18,11 +18,11 @@ class GameWorld(
 
   val systems: mutable.ArrayBuffer[GameSystem] = mutable.ArrayBuffer()
 
-  def add(id: String, area: Seq[Position]) = areaComponents.put(id, area)
-  def add(id: String, isSnake: Boolean) = isSnakeComponents.put(id, isSnake)
-  def add(id: String, speed: Speed) = speedComponents.put(id, speed)
-  def add(id: String, direction: Direction) = directionComponents.put(id, direction)
-  def add(id: String, intent: Intent) = intentComponents.put(id, intent)
+  def add(id: String, area: Seq[Position]) = areaComponents.update(id, area)
+  def add(id: String, isSnake: Boolean) = isSnakeComponents.update(id, isSnake)
+  def add(id: String, speed: Speed) = speedComponents.update(id, speed)
+  def add(id: String, direction: Direction) = directionComponents.update(id, direction)
+  def add(id: String, intent: Intent) = intentComponents.update(id, intent)
 
   def addEvent(event: Event) = eventComponents += event
 

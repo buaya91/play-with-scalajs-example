@@ -2,17 +2,10 @@ package domain.systems
 
 import domain.{GameWorld, components}
 import domain.components._
+import utils.Utility._
 
 class MotionSystem(x: Int, y: Int) extends GameSystem {
   type EntityId = String
-
-  private def positiveModulo(a: Int, n: Int): Int = {
-    // to get positive mod
-    // we compute remainder, and add back the n
-    // to prevent result bigger than n which violate the rules
-    // we take the remainder again
-    ((a % n) + n) % n
-  }
 
   def process(world: GameWorld): Unit = {
     world.areaComponents.foreach {

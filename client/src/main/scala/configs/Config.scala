@@ -1,5 +1,6 @@
+package configs
 
-package object infrastructure {
+object Config {
   val gameX = 100
   val gameY = 100
 }

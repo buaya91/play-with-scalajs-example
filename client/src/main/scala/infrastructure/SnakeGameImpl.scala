@@ -8,9 +8,8 @@ import org.scalajs.dom
 import scala.scalajs.js.timers._
 import scala.concurrent.duration._
 import scala.collection.mutable
-import scala.util.Random
 
-import domain.components._
+import configs.Config._
 
 class SnakeGameImpl(
                      canvasCtx: dom.CanvasRenderingContext2D,
@@ -40,35 +39,7 @@ class SnakeGameImpl(
 
   override def speedUp(id: String): Unit = ???
 
-  override def addNewSnake(newSnakeId: String): Unit = {
-    val (x, y) = (Random.nextInt() % gameX, Random.nextInt() % gameY)
-    val direction = Right
-    val snakeArea = SnakeGameImpl.build(newSnakeId, Position(x, y), direction)
-
-    world.add(newSnakeId, snakeArea)
-    world.add(newSnakeId, true)
-    world.add(newSnakeId, direction)
-    world.add(newSnakeId, Speed(1))
-  }
-
   setInterval(300 millis) {
     world.process()
-  }
-}
-
-object SnakeGameImpl {
-  def build(id: String, head: Position, direction: Direction): Seq[Position] = {
-    def incrementFunc(n: Int): Position = direction match {
-      case Up => head.copy(y = head.y + n)
-      case Down => head.copy(y = head.y - n)
-      case Right => head.copy(x = head.x - n)
-      case Left => head.copy(x = head.x + n)
-    }
-
-    val pt = for {
-      i <- 1 to 5
-    } yield incrementFunc(i)
-
-    head +: pt
   }
 }
