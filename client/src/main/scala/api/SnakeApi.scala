@@ -14,7 +14,7 @@ trait SnakeApi {
   def addNewSnake(newSnakeId: String): Unit = {
     val (x, y) = (positiveModulo(Random.nextInt(), gameX), positiveModulo(Random.nextInt(), gameY))
     val direction = Right
-    val snakeArea = SnakeApi.build(newSnakeId, Position(x, y), direction)
+    val snakeArea = SnakeApi.build(Position(x, y), direction)
 
     world.add(newSnakeId, snakeArea)
     world.add(newSnakeId, true)
@@ -27,7 +27,7 @@ trait SnakeApi {
 }
 
 object SnakeApi {
-  def build(id: String, head: Position, direction: Direction): Seq[Position] = {
+  def build(head: Position, direction: Direction): Seq[Position] = {
     def incrementFunc(n: Int): Position = direction match {
       case Up => head.copy(y = head.y + n)
       case Down => head.copy(y = head.y - n)

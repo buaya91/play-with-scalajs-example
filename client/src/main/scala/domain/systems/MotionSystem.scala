@@ -19,6 +19,7 @@ class MotionSystem(x: Double, y: Double) extends GameSystem {
 
             val newTail = body.dropRight(1)
             val oldHead = body.head
+
             val newHead = dir match {
               case Up => oldHead.copy(y = positiveModulo(oldHead.y - step, y))
               case Down => oldHead.copy(y = positiveModulo(oldHead.y + step, y))
