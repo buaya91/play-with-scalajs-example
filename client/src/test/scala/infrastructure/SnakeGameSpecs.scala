@@ -23,8 +23,8 @@ class SnakeGameSpecs extends WordSpec with Matchers {
       val area = game.world.areaComponents("test")
 
       area.foreach(p => {
-        p.x should (be >= 0 and be <= gameX)
-        p.y should (be >= 0 and be <= gameY)
+        p.x should (be >= 0.0 and be <= gameX)
+        p.y should (be >= 0.0 and be <= gameY)
       })
     }
   }

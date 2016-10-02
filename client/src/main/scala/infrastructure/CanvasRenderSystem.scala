@@ -8,8 +8,8 @@ import configs.Config._
 
 class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem {
 
-  def drawPoint(position: Position, scalingFactor: Int = 10): Unit = {
-    ctx.fillRect(position.x * scalingFactor, position.y * scalingFactor,scalingFactor, scalingFactor)
+  def drawPoint(position: Position, scalingFactor: Double = 10): Unit = {
+    ctx.fillRect(position.x * scalingFactor, position.y * scalingFactor, scalingFactor, scalingFactor)
   }
 
   def renderScore(snake: Seq[Position]): Unit = {

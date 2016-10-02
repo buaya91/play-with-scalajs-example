@@ -9,7 +9,8 @@ class GameWorld(
                  val areaComponents: mutable.Map[String, Seq[Position]] = mutable.HashMap(),
                  val isSnakeComponents: mutable.Map[String, Boolean] = mutable.HashMap(),
                  val speedComponents: mutable.Map[String, Speed] = mutable.HashMap(),
-                 val directionComponents: mutable.Map[String, Direction] = mutable.HashMap()
+                 val directionComponents: mutable.Map[String, Direction] = mutable.HashMap(),
+                 val frameRate: Int = 30
                ) {
 
   // intent and event is private

@@ -1,3 +1,3 @@
 package domain.components
 
-case class Speed(tilePerSecond: Int)
+case class Speed(distancePerSecond: Int)

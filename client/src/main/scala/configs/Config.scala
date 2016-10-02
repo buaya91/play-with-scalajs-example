@@ -1,6 +1,6 @@
 package configs
 
 object Config {
-  val gameX = 100
-  val gameY = 100
+  val gameX: Double = 100
+  val gameY: Double = 100
 }
