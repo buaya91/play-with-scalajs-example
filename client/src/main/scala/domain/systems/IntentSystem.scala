@@ -14,6 +14,7 @@ class IntentSystem extends GameSystem {
 
           val oldDir = world.directionComponents.getOrElse(id, throw new IndexOutOfBoundsException(s"$id does not have direction"))
 
+          println(oldDir, dir)
           // do not change if direction is opposite
           (oldDir, dir) match {
             case (Up, Down) =>

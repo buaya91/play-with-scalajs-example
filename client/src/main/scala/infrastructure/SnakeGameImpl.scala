@@ -24,7 +24,7 @@ class SnakeGameImpl(
   override val world: GameWorld = new GameWorld(areaComponents, isSnakeComponents, speedComponents, directionComponents)
 
   override def changeDir(id: String, dir: Direction): Unit = {
-    directionComponents.update(id, dir)
+    world.intentComponents.update(id, ChangeDirection(dir))
   }
 
   override def speedUp(id: String): Unit = ???
@@ -54,12 +54,4 @@ class SnakeGameImpl(
   setInterval(updateInterval millis) {
     world.process()
   }
-
-//  setTimeout(1000 millis) {
-//    world.process()
-//  }
-//
-//  setTimeout(2000 millis) {
-//    world.process()
-//  }
 }
