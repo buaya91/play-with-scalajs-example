@@ -12,7 +12,8 @@ trait SnakeApi {
 
   // to add new snake
   def addNewSnake(newSnakeId: String): Unit = {
-    val (x, y) = (positiveModulo(Random.nextInt(), gameX), positiveModulo(Random.nextInt(), gameY))
+//    val (x, y) = (positiveModulo(Random.nextInt(), gameX), positiveModulo(Random.nextInt(), gameY))
+    val (x, y) = (gameX, gameY / 2)
     val direction = Right
     val snakeArea = SnakeApi.build(Position(x, y), direction)
 

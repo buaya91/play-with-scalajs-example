@@ -30,7 +30,7 @@ object SnakeGame extends js.JSApp {
     dbRoot.once("value", (db: DataSnapshot) => {
 //      if (db.`val`() == null) {
       if (true) {
-        val game = new SnakeGameImpl(canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D])
+        val game = new SnakeGameImpl(uid, canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D])
         game.addNewSnake(uid)
 
 //        val gameDb = dbRoot.child("0")
