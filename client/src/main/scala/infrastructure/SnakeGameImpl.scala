@@ -1,39 +1,29 @@
 package infrastructure
 
 import api.SnakeApi
-import domain.GameWorld
+import domain.{GameRepo, GameWorld}
 import domain.components._
-import domain.systems.{CollisionSystem, IntentSystem, MotionSystem}
+import domain.systems.{CollisionSystem, CommunicationSystem, IntentSystem, MotionSystem}
 import monix.execution.Scheduler.Implicits.global
 import org.scalajs.dom
+
 import scala.scalajs.js.timers._
 import scala.concurrent.duration._
-import scala.collection.mutable
-
 import configs.Config._
 
+// the actual game instance, one per browser session
 class SnakeGameImpl(
-                     clientId: String,
                      canvasCtx: dom.CanvasRenderingContext2D,
-                     val areaComponents: mutable.Map[String, Seq[Position]] = mutable.HashMap(),
-                     val isSnakeComponents: mutable.Map[String, Boolean] = mutable.HashMap(),
-                     val speedComponents: mutable.Map[String, Speed] = mutable.HashMap(),
-                     val directionComponents: mutable.Map[String, Direction] = mutable.HashMap()
+                     val world: GameWorld = new GameWorld()
                    ) extends SnakeApi {
-
-  override val world: GameWorld = new GameWorld(areaComponents, isSnakeComponents, speedComponents, directionComponents)
-
-  override def changeDir(id: String, dir: Direction): Unit = {
-    world.intentComponents.update(id, ChangeDirection(dir))
-  }
-
-  override def speedUp(id: String): Unit = ???
 
   val intentSystem = new IntentSystem()
   val collisionSystem = new CollisionSystem()
   val motionSystem = new MotionSystem(gameX, gameY)
   val renderSystem = new CanvasRenderSystem(canvasCtx)
-  val communicationSystem = new FirebaseCommunicationSystem()
+  val communicationSystem = new CommunicationSystem {
+    override val gameRepo: GameRepo = FirebaseGameRepo
+  }
 
   world.addSystem(intentSystem)
   world.addSystem(motionSystem)

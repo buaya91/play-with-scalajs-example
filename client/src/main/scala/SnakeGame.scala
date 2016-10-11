@@ -1,16 +1,12 @@
-import firebase.{DataSnapshot, Firebase}
-import infrastructure.SnakeGameImpl
+import infrastructure.{FirebaseGameRepo, SnakeGameImpl}
+
 import org.scalajs.dom
 import org.scalajs.dom.raw.{CanvasRenderingContext2D, HTMLCanvasElement}
-import prickle._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
-import domain.components.Direction._
-import domain.components._
 
-import scala.scalajs.js.JSON
-import scala.util.Failure
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @JSExport
 object SnakeGame extends js.JSApp {
@@ -24,41 +20,19 @@ object SnakeGame extends js.JSApp {
     canvas.height = 600
     canvas.width = 600
 
-    implicit val customConfig = JsConfig("xx", false)    // todo: test if we could remove it
+    val canvasCtx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    val dbRoot = Firebase.database().ref()
-    dbRoot.once("value", (db: DataSnapshot) => {
-//      if (db.`val`() == null) {
-      if (true) {
-        val game = new SnakeGameImpl(uid, canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D])
-        game.addNewSnake(uid)
+    val game = FirebaseGameRepo.init()
+      .map(w => new SnakeGameImpl(canvasCtx, w))
+      .map(_.addNewSnake(uid))
 
-//        val gameDb = dbRoot.child("0")
-//
-//        game.world.areaComponents.foreach {
-//          case (id, area) =>
-//            val jsonArea = Pickle.intoString(area)
-//            gameDb.child(s"area/$id").set(JSON.parse(jsonArea))
-//        }
-//
-//        game.world.directionComponents.foreach {
-//          case (id, dir) =>
-//            val jsonArea = Pickle.intoString(dir)
-//            gameDb.child(s"dir/$id").set(JSON.parse(jsonArea))
-//        }
-//
-//        game.world.isSnakeComponents.foreach {
-//          case (id, isSnake) =>
-//            val jsonArea = Pickle.intoString(isSnake)
-//            gameDb.child(s"isSnake/$id").set(JSON.parse(jsonArea))
-//        }
-//
-//        game.world.speedComponents.foreach {
-//          case (id, speed) =>
-//            val jsonArea = Pickle.intoString(speed)
-//            gameDb.child(s"speed/$id").set(JSON.parse(jsonArea))
-//        }
-      }
-    })
+    /**
+      * 1. Prompt user for id
+      * 2. Check uniqueness, if unique, create user, else go to 1.
+      * 3. Get game instance from backend, create and sync back if none, there's a chance of conflict, ignore ATM
+      * 4. Subscribe to game events
+      * 5. Publish events
+      */
+
   }
 }

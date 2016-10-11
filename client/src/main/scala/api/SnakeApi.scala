@@ -1,11 +1,8 @@
 package api
 
 import domain._
-import domain.components.{Direction, Down, Left, Position, Right, Speed, Up}
-import scala.util.Random
+import domain.components._
 import configs.Config._
-
-import utils.Utility._
 
 trait SnakeApi {
   val world: GameWorld
@@ -15,16 +12,23 @@ trait SnakeApi {
 //    val (x, y) = (positiveModulo(Random.nextInt(), gameX), positiveModulo(Random.nextInt(), gameY))
     val (x, y) = (gameX, gameY / 2)
     val direction = Right
+    val spd = Speed(2)
     val snakeArea = SnakeApi.build(Position(x, y), direction)
 
     world.add(newSnakeId, snakeArea)
     world.add(newSnakeId, true)
     world.add(newSnakeId, direction)
-    world.add(newSnakeId, Speed(2))
+    world.add(newSnakeId, spd)
+
+    val event = SnakedAdded(newSnakeId, snakeArea, direction, spd)
+    world.addEvent(event)
   }
 
-  def changeDir(id: String, dir: Direction): Unit
-  def speedUp(id: String): Unit
+  def changeDir(id: String, dir: Direction): Unit = {
+    world.intentComponents.update(id, ChangeDirection(dir))
+  }
+
+  def speedUp(id: String): Unit = ???
 }
 
 object SnakeApi {

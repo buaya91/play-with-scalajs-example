@@ -1,6 +1,6 @@
 package domain.systems
 import domain.{GameWorld, components}
-import domain.components.{ChangeDirection, Down, SpeedUp, Up}
+import domain.components._
 
 class IntentSystem extends GameSystem {
   override def process(world: GameWorld): Unit = {
@@ -14,14 +14,15 @@ class IntentSystem extends GameSystem {
 
           val oldDir = world.directionComponents.getOrElse(id, throw new IndexOutOfBoundsException(s"$id does not have direction"))
 
-          println(oldDir, dir)
           // do not change if direction is opposite
           (oldDir, dir) match {
             case (Up, Down) =>
             case (Down, Up) =>
             case (components.Left, components.Right) =>
             case (components.Right, components.Left) =>
-            case _ => world.directionComponents.put(id, dir)
+            case _ =>
+              world.directionComponents.put(id, dir)
+              world.addEvent(DirectionChanged(id, dir))
           }
         }
 
