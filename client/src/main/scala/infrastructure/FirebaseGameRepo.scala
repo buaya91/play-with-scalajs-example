@@ -1,11 +1,12 @@
 package infrastructure
 
 import domain.{GameRepo, GameWorld}
-import domain.components.{Direction, GlobalEvent, Position, Speed}
+import domain.components._
 import firebase.{DataSnapshot, Firebase}
-import monix.reactive.Observable
+import monix.reactive.{Observable, OverflowStrategy}
 import prickle._
 
+import scala.language.implicitConversions
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.{Dictionary, Dynamic, JSON}
@@ -13,7 +14,11 @@ import scala.util.{Failure, Success, Try}
 
 object FirebaseGameRepo extends GameRepo {
 
-  val dbRoot = Firebase.database().ref()
+  lazy val dbRoot = Firebase.database().ref()
+  lazy val areaRoot = dbRoot.child("area")
+  lazy val isSnakeRoot = dbRoot.child("isSnake")
+  lazy val speedRoot = dbRoot.child("speed")
+  lazy val directionRoot = dbRoot.child("direction")
 
   implicit val customConfig = JsConfig("xx", false)    // todo: test if we could remove it
 
@@ -29,6 +34,10 @@ object FirebaseGameRepo extends GameRepo {
       case (_, (id, Failure(e))) => Failure(e)
     }
   }
+
+  dbRoot.on("child_added", (db: DataSnapshot) => {
+    println(db.`val`())
+  })
 
   override def init(): Future[GameWorld] = {
     val p: Promise[GameWorld] = Promise()
@@ -71,7 +80,19 @@ object FirebaseGameRepo extends GameRepo {
     p.future
   }
 
-  override def subscribeToAllEvents(): Observable[GlobalEvent] = ???
+  override def subscribeToAllEvents(): Observable[GlobalEvent] = {
+//    Observable.create(OverflowStrategy.Unbounded) { sync =>
+//
+//    }
+    ???
+  }
 
-  override def broadcastEvent(ev: GlobalEvent): Unit = ???
+  override def broadcastEvent(ev: GlobalEvent): Unit = ev match {
+    case SnakeAdded(id, body, dir, spd) =>
+      areaRoot.child(id).set(Pickle.intoString(body))
+      directionRoot.child(id).set(Pickle.intoString(dir))
+      speedRoot.child(id).set(Pickle.intoString(spd))
+      isSnakeRoot.child(id).set(Pickle.intoString(true))
+    case _ =>
+  }
 }

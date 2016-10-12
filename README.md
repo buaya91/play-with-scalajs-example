@@ -25,3 +25,12 @@ Snake Added | Collision
 Apple Eaten |
 Direction Changed |
 Snake Removed |
+
+
+## Event handling design choices
+
+Treat events from server and events to server separately
+this will
+
+1. Events generated internally, to be broadcast to server
+2. Events received from server

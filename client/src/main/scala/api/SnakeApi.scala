@@ -9,7 +9,6 @@ trait SnakeApi {
 
   // to add new snake
   def addNewSnake(newSnakeId: String): Unit = {
-//    val (x, y) = (positiveModulo(Random.nextInt(), gameX), positiveModulo(Random.nextInt(), gameY))
     val (x, y) = (gameX, gameY / 2)
     val direction = Right
     val spd = Speed(2)
@@ -20,7 +19,7 @@ trait SnakeApi {
     world.add(newSnakeId, direction)
     world.add(newSnakeId, spd)
 
-    val event = SnakedAdded(newSnakeId, snakeArea, direction, spd)
+    val event = SnakeAdded(newSnakeId, snakeArea, direction, spd)
     world.addEvent(event)
   }
 

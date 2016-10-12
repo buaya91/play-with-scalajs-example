@@ -1,4 +1,4 @@
-import infrastructure.{FirebaseGameRepo, SnakeGameImpl}
+import infrastructure.{FirebaseGameRepo, MultiplayerSnakeGameImpl}
 
 import org.scalajs.dom
 import org.scalajs.dom.raw.{CanvasRenderingContext2D, HTMLCanvasElement}
@@ -23,8 +23,10 @@ object SnakeGame extends js.JSApp {
     val canvasCtx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
     val game = FirebaseGameRepo.init()
-      .map(w => new SnakeGameImpl(canvasCtx, w))
-      .map(_.addNewSnake(uid))
+      .map(w => {
+        val game = new MultiplayerSnakeGameImpl(uid, canvasCtx, w)
+        game.addNewSnake(uid)
+      })
 
     /**
       * 1. Prompt user for id

@@ -1,6 +1,5 @@
 package infrastructure
 
-import api.SnakeApi
 import domain.{GameRepo, GameWorld}
 import domain.components._
 import domain.systems.{CollisionSystem, CommunicationSystem, IntentSystem, MotionSystem}
@@ -10,12 +9,14 @@ import org.scalajs.dom
 import scala.scalajs.js.timers._
 import scala.concurrent.duration._
 import configs.Config._
+import monix.reactive.Observable
 
 // the actual game instance, one per browser session
-class SnakeGameImpl(
-                     canvasCtx: dom.CanvasRenderingContext2D,
-                     val world: GameWorld = new GameWorld()
-                   ) extends SnakeApi {
+class MultiplayerSnakeGameImpl(
+                                selfId: String,
+                                canvasCtx: dom.CanvasRenderingContext2D,
+                                val world: GameWorld = new GameWorld()
+                   ) extends MultiplayerSnakeApi {
 
   val intentSystem = new IntentSystem()
   val collisionSystem = new CollisionSystem()
@@ -33,15 +34,31 @@ class SnakeGameImpl(
 
   InputControl.captureEvents(canvasCtx.canvas).foreach(kv =>
     kv.keyCode match {
-      case 37 => this.changeDir(clientId, Left)
-      case 38 => this.changeDir(clientId, Up)
-      case 39 => this.changeDir(clientId, Right)
-      case 40 => this.changeDir(clientId, Down)
+      case 37 => this.changeDir(selfId, Left)
+      case 38 => this.changeDir(selfId, Up)
+      case 39 => this.changeDir(selfId, Right)
+      case 40 => this.changeDir(selfId, Down)
       case _  => // ignore others
     })
 
   val updateInterval = (1 / world.frameRate) * 1000
   setInterval(updateInterval millis) {
     world.process()
+  }
+
+  override def onServerEvents(eventStream: Observable[GlobalEvent]): Unit = {
+    eventStream.foreach {
+      case SnakeAdded(id, body, dir, spd) =>
+        world.add(id, body)
+        world.add(id, dir)
+        world.add(id, spd)
+        world.add(id, true)
+
+      case AppleAdded(id, p) => world.add(id, Seq(p))
+
+      case DirectionChanged(id, newDir) => this.changeDir(id, newDir)
+
+      case EntityRemoved(id) => this.world.remove(id)
+    }
   }
 }
