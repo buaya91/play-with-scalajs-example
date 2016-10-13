@@ -97,13 +97,11 @@ object FirebaseGameRepo extends GameRepo {
 
         val worldFromDB =
           for {
-            area    <- Try(rawAreaComponents.get).flatten
-            isSnake <- Try(rawIsSnakeComponents.get).flatten
-            speed   <- Try(rawSpeedComponents.get).flatten
-            dir     <- Try(rawDirComponents.get).flatten
+            area    <- Try(rawAreaComponents.getOrElse(Success(mutable.Map.empty[String, Seq[Position]]))).flatten
+            isSnake <- Try(rawIsSnakeComponents.getOrElse(Success(mutable.Map.empty[String, Boolean]))).flatten
+            speed   <- Try(rawSpeedComponents.getOrElse(Success(mutable.Map.empty[String, Speed]))).flatten
+            dir     <- Try(rawDirComponents.getOrElse(Success(mutable.Map.empty[String, Direction]))).flatten
           } yield new GameWorld(area, isSnake, speed, dir)
-
-        println("world" + worldFromDB)
 
         p.complete(worldFromDB)
       }
