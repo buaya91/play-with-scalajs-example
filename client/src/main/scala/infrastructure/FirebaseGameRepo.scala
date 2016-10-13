@@ -9,8 +9,9 @@ import prickle._
 import scala.language.implicitConversions
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
-import scala.scalajs.js.{Dictionary, Dynamic, JSON}
+import scala.scalajs.js.{Dictionary, Dynamic, JSON, isUndefined}
 import scala.util.{Failure, Success, Try}
+
 
 object FirebaseGameRepo extends GameRepo {
 
@@ -36,8 +37,22 @@ object FirebaseGameRepo extends GameRepo {
   }
 
   dbRoot.on("child_added", (db: DataSnapshot) => {
-    println(db.`val`())
+    println("child added", db.`val`())
   })
+
+//  def printJs[D](js: Dictionary[D]) = {
+//    println("Wat" + JSON.stringify(js))
+//  }
+
+  def proceedIfDefined[T](obj: Dynamic)(op: Dynamic => T): Option[T] = {
+    if (isUndefined(obj))
+      None
+    else
+      Some(op(obj))
+  }
+
+  def castToDict(obj: Dynamic): Option[Dictionary[Dynamic]] =
+    proceedIfDefined(obj)(o => o.asInstanceOf[Dictionary[Dynamic]])
 
   override def init(): Future[GameWorld] = {
     val p: Promise[GameWorld] = Promise()
@@ -48,35 +63,51 @@ object FirebaseGameRepo extends GameRepo {
         p.complete(Success(new GameWorld()))
       } else {
 
-        val rawAreaComponents = dbVal.area.asInstanceOf[Dictionary[Dynamic]]
-        val rawIsSnakeComponents = dbVal.isSnake.asInstanceOf[Dictionary[Dynamic]]
-        val rawSpeedComponents = dbVal.speed.asInstanceOf[Dictionary[Dynamic]]
-        val rawDirComponents = dbVal.dir.asInstanceOf[Dictionary[Dynamic]]
+        val rawAreaComponents =
+          for {
+            areaJs  <- castToDict(dbVal.area)
+          } yield {
+            val area = areaJs.mapValues(jsObj => Unpickle[Seq[Position]].fromString(jsObj.toString))
+            mergeMapOfTry(area)
+          }
 
-        val areaComponents = rawAreaComponents
-          .mapValues(jsObj => Unpickle[Seq[Position]].fromString(JSON.stringify(jsObj)))
+        val rawIsSnakeComponents =
+          for {
+            isSnakeJs <- castToDict(dbVal.isSnake)
+          } yield {
+            val isSnake = isSnakeJs.mapValues(jsObj => Unpickle[Boolean].fromString(jsObj.toString))
+            mergeMapOfTry(isSnake)
+          }
 
-        val isSnakeComponents = rawIsSnakeComponents
-          .mapValues(jsObj => Unpickle[Boolean].fromString(JSON.stringify(jsObj)))
+        val rawSpeedComponents =
+          for {
+            speedJs <- castToDict(dbVal.speed)
+          } yield {
+            val speed = speedJs.mapValues(jsObj => Unpickle[Speed].fromString(jsObj.toString))
+            mergeMapOfTry(speed)
+          }
 
-        val speedComponents = rawSpeedComponents
-          .mapValues(jsObj => Unpickle[Speed].fromString(JSON.stringify(jsObj)))
+        val rawDirComponents =
+          for {
+            dirJs <- castToDict(dbVal.dir)
+          } yield {
+            val dir = dirJs.mapValues(jsObj => Unpickle[Direction].fromString(jsObj.toString))
+            mergeMapOfTry(dir)
+          }
 
-        val dirComponents = rawDirComponents
-          .mapValues(jsObj => Unpickle[Direction].fromString(JSON.stringify(jsObj)))
+        val worldFromDB =
+          for {
+            area    <- Try(rawAreaComponents.get).flatten
+            isSnake <- Try(rawIsSnakeComponents.get).flatten
+            speed   <- Try(rawSpeedComponents.get).flatten
+            dir     <- Try(rawDirComponents.get).flatten
+          } yield new GameWorld(area, isSnake, speed, dir)
 
-
-        val worldFromDB = for {
-          area <- mergeMapOfTry(areaComponents)
-          isSnake <- mergeMapOfTry(isSnakeComponents)
-          speed <- mergeMapOfTry(speedComponents)
-          dir <- mergeMapOfTry(dirComponents)
-        } yield new GameWorld(area, isSnake, speed, dir)
+        println("world" + worldFromDB)
 
         p.complete(worldFromDB)
       }
     })
-
     p.future
   }
 

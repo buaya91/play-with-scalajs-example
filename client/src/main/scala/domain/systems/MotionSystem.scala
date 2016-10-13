@@ -76,9 +76,7 @@ class MotionSystem(x: Double, y: Double) extends GameSystem {
 
             val newBody = diffBetweenEachElement.zip(body.tail).map {
               case (diff, pos) =>
-//                println(s"P: $pos")
-//                println(s"D: $diff")
-//                println(s"New: ${pos + (diff * step)}")
+
                 val ele = pos + (diff * step)
 
                 ele.copy(x = positiveModulo(ele.x, x), y = positiveModulo(ele.y, y))

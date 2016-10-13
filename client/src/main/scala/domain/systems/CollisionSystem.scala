@@ -35,7 +35,7 @@ class CollisionSystem extends GameSystem {
 
       // if snake bump to self, kill it
       if (bumpedToSelf(c1)) {
-        println("oh bump", c1)
+        println("bump to self", c1)
         world.remove(id1)
       }
 

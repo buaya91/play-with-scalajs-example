@@ -13,5 +13,7 @@ trait CommunicationSystem extends GameSystem {
       case global: GlobalEvent => gameRepo.broadcastEvent(global)
       case _ => // todo: handle others
     }
+
+    world.eventComponents.clear()
   }
 }
