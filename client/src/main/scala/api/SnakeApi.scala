@@ -4,12 +4,14 @@ import domain._
 import domain.components._
 import configs.Config._
 
+import scala.util.Random
+
 trait SnakeApi {
   val world: GameWorld
 
   // to add new snake
   def addNewSnake(newSnakeId: String): Unit = {
-    val (x, y) = (gameX, gameY / 2)
+    val (x, y) = (Random.nextInt(gameX.toInt), Random.nextInt(gameY.toInt))
     val direction = Right
     val spd = Speed(2)
     val snakeArea = SnakeApi.build(Position(x, y), direction)

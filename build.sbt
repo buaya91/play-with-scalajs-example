@@ -25,9 +25,13 @@ lazy val client = (project in file("client")).settings(
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js"                %%% "scalajs-dom"                  % "0.9.1",
+    "be.doeraene"                 %%% "scalajs-jquery"               % "0.9.0",
     "io.monix"                    %%% "monix"                        % "2.0-RC8",
     "com.github.benhutchison"     %%% "prickle"                      % "1.1.12",
     "org.scalatest"               %%% "scalatest"                    % "3.0.0"     % "test"
+  ),
+  jsDependencies ++= Seq(
+    "org.webjars" % "jquery" % "2.1.3" / "2.1.3/jquery.js"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb)
   .dependsOn(sharedJs)
