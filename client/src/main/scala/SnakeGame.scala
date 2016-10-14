@@ -1,5 +1,7 @@
+import domain.components.EntityRemoved
 import infrastructure.{FirebaseGameRepo, MultiplayerSnakeGameImpl}
 import org.scalajs.dom
+import org.scalajs.dom.BeforeUnloadEvent
 import org.scalajs.dom.raw.{CanvasRenderingContext2D, HTMLCanvasElement}
 import org.scalajs.jquery._
 
@@ -23,7 +25,15 @@ object SnakeGame extends js.JSApp {
       jQuery("#name-prompt").addClass("hidden")
     })
 
-    val uidF = namePromise.future
+    dom.window.onbeforeunload = (ev: BeforeUnloadEvent) => {
+      if (uidF.isCompleted) {
+        uidF.map(uid => {
+          FirebaseGameRepo.broadcastEvent(EntityRemoved(uid))
+        })
+      }
+    }
+
+    lazy val uidF = namePromise.future
 
     val canvas = dom.document.getElementById("canvas").asInstanceOf[HTMLCanvasElement]
 

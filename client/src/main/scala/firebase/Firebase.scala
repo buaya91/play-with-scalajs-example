@@ -20,6 +20,7 @@ trait Reference extends js.Any {
   def on(eventType: String, callback: js.Function1[DataSnapshot, Any]): Unit = js.native
   def once(eventType: String, callback: js.Function1[DataSnapshot, Any]): Unit = js.native
   def push(value: js.Any): js.Dynamic = js.native
+  def remove(): Unit = js.native
   def set(value: js.Any): js.Dynamic = js.native
 }
 

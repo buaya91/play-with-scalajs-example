@@ -89,7 +89,7 @@ object FirebaseGameRepo extends GameRepo {
 
         val rawDirComponents =
           for {
-            dirJs <- castToDict(dbVal.dir)
+            dirJs <- castToDict(dbVal.direction)
           } yield {
             val dir = dirJs.mapValues(jsObj => Unpickle[Direction].fromString(jsObj.toString))
             mergeMapOfTry(dir)
@@ -101,7 +101,12 @@ object FirebaseGameRepo extends GameRepo {
             isSnake <- Try(rawIsSnakeComponents.getOrElse(Success(mutable.Map.empty[String, Boolean]))).flatten
             speed   <- Try(rawSpeedComponents.getOrElse(Success(mutable.Map.empty[String, Speed]))).flatten
             dir     <- Try(rawDirComponents.getOrElse(Success(mutable.Map.empty[String, Direction]))).flatten
-          } yield new GameWorld(area, isSnake, speed, dir)
+          } yield {
+            println("snake " + isSnake)
+            println("spd " + speed)
+            println("dir " + dir)
+            new GameWorld(area, isSnake, speed, dir)
+          }
 
         p.complete(worldFromDB)
       }
@@ -122,6 +127,11 @@ object FirebaseGameRepo extends GameRepo {
       directionRoot.child(id).set(Pickle.intoString(dir))
       speedRoot.child(id).set(Pickle.intoString(spd))
       isSnakeRoot.child(id).set(Pickle.intoString(true))
+    case EntityRemoved(id) =>
+      areaRoot.child(id).remove()
+      directionRoot.child(id).remove()
+      speedRoot.child(id).remove()
+      isSnakeRoot.child(id).remove()
     case _ =>
   }
 }
