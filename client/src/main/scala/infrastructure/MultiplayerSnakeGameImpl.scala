@@ -13,10 +13,9 @@ import monix.reactive.Observable
 
 // the actual game instance, one per browser session
 class MultiplayerSnakeGameImpl(
-                                selfId: String,
                                 canvasCtx: dom.CanvasRenderingContext2D,
                                 val world: GameWorld = new GameWorld()
-                   ) extends MultiplayerSnakeApi {
+                              ) extends MultiplayerSnakeApi {
 
   val intentSystem = new IntentSystem()
   val collisionSystem = new CollisionSystem()
@@ -31,15 +30,6 @@ class MultiplayerSnakeGameImpl(
   world.addSystem(collisionSystem)
   world.addSystem(renderSystem)
   world.addSystem(communicationSystem)
-
-  InputControl.captureEvents(canvasCtx.canvas).foreach(kv =>
-    kv.keyCode match {
-      case 37 => this.changeDir(selfId, Left)
-      case 38 => this.changeDir(selfId, Up)
-      case 39 => this.changeDir(selfId, Right)
-      case 40 => this.changeDir(selfId, Down)
-      case _  => // ignore others
-    })
 
   val updateInterval = (1 / world.frameRate) * 1000
   setInterval(updateInterval millis) {

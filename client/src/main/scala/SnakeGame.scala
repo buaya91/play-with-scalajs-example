@@ -1,5 +1,5 @@
-import domain.components.EntityRemoved
-import infrastructure.{FirebaseGameRepo, MultiplayerSnakeGameImpl}
+import domain.components.{Down, EntityRemoved, Left, Right, Up}
+import infrastructure.{FirebaseGameRepo, InputControl, MultiplayerSnakeGameImpl}
 import org.scalajs.dom
 import org.scalajs.dom.BeforeUnloadEvent
 import org.scalajs.dom.raw.{CanvasRenderingContext2D, HTMLCanvasElement}
@@ -7,9 +7,10 @@ import org.scalajs.jquery._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Promise
 import scala.util.Success
+
+import monix.execution.Scheduler.Implicits.global
 
 @JSExport
 object SnakeGame extends js.JSApp {
@@ -42,13 +43,22 @@ object SnakeGame extends js.JSApp {
 
     val canvasCtx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    val game = for {
-      worldFromServer <- FirebaseGameRepo.init()
-      uid             <- uidF
-    } yield {
-      val game = new MultiplayerSnakeGameImpl(uid, canvasCtx, worldFromServer)
-      game.addNewSnake(uid)
-    }
+    FirebaseGameRepo.init().map(w => {
+      val gameImpl = new MultiplayerSnakeGameImpl(canvasCtx, w)
+      uidF.map(uid => {
+        gameImpl.addNewSnake(uid)
+
+        InputControl.captureEvents(canvasCtx.canvas).foreach(kv =>
+          kv.keyCode match {
+            case 37 => gameImpl.changeDir(uid, Left)
+            case 38 => gameImpl.changeDir(uid, Up)
+            case 39 => gameImpl.changeDir(uid, Right)
+            case 40 => gameImpl.changeDir(uid, Down)
+            case _  => // ignore others
+          })
+      })
+    })
+
 
     /**
       * 1. Prompt user for id
