@@ -39,11 +39,7 @@ object FirebaseGameRepo extends GameRepo {
   dbRoot.on("child_added", (db: DataSnapshot) => {
     println("child added", db.`val`())
   })
-
-//  def printJs[D](js: Dictionary[D]) = {
-//    println("Wat" + JSON.stringify(js))
-//  }
-
+  
   def proceedIfDefined[T](obj: Dynamic)(op: Dynamic => T): Option[T] = {
     if (isUndefined(obj))
       None
@@ -132,6 +128,7 @@ object FirebaseGameRepo extends GameRepo {
       directionRoot.child(id).remove()
       speedRoot.child(id).remove()
       isSnakeRoot.child(id).remove()
+    case DirectionChanged(id, dir) =>
     case _ =>
   }
 }
