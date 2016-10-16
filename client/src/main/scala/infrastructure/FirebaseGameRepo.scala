@@ -3,6 +3,7 @@ package infrastructure
 import domain.{GameRepo, GameWorld}
 import domain.components._
 import firebase.{DataSnapshot, Firebase}
+import monix.execution.Cancelable
 import monix.reactive.{Observable, OverflowStrategy}
 import prickle._
 
@@ -20,6 +21,7 @@ object FirebaseGameRepo extends GameRepo {
   lazy val isSnakeRoot = dbRoot.child("isSnake")
   lazy val speedRoot = dbRoot.child("speed")
   lazy val directionRoot = dbRoot.child("direction")
+  lazy val eventsRoot = dbRoot.child("events")
 
   implicit val customConfig = JsConfig("xx", false)    // todo: test if we could remove it
 
@@ -36,10 +38,6 @@ object FirebaseGameRepo extends GameRepo {
     }
   }
 
-  dbRoot.on("child_added", (db: DataSnapshot) => {
-    println("child added", db.`val`())
-  })
-  
   def proceedIfDefined[T](obj: Dynamic)(op: Dynamic => T): Option[T] = {
     if (isUndefined(obj))
       None
@@ -98,9 +96,6 @@ object FirebaseGameRepo extends GameRepo {
             speed   <- Try(rawSpeedComponents.getOrElse(Success(mutable.Map.empty[String, Speed]))).flatten
             dir     <- Try(rawDirComponents.getOrElse(Success(mutable.Map.empty[String, Direction]))).flatten
           } yield {
-            println("snake " + isSnake)
-            println("spd " + speed)
-            println("dir " + dir)
             new GameWorld(area, isSnake, speed, dir)
           }
 
@@ -111,24 +106,49 @@ object FirebaseGameRepo extends GameRepo {
   }
 
   override def subscribeToAllEvents(): Observable[GlobalEvent] = {
-//    Observable.create(OverflowStrategy.Unbounded) { sync =>
-//
-//    }
-    ???
+    Observable.create(OverflowStrategy.Unbounded) { sync =>
+      eventsRoot.on("child_changed", (data: DataSnapshot) => {
+        val jsObj = data.`val`()
+
+        println("Changed: " + JSON.stringify(jsObj))
+
+        for {
+          eventJs <- castToDict(jsObj)
+        } yield {
+          eventJs.mapValues(e => {
+            val unserialized = Unpickle[GlobalEvent].fromString(e.toString)
+            unserialized match {
+              case Success(ev) => sync.onNext(ev)
+              case Failure(err) => println(err)
+            }
+          })
+        }
+      })
+      Cancelable(() => {
+        sync.onComplete()
+      })
+    }
   }
 
   override def broadcastEvent(ev: GlobalEvent): Unit = ev match {
-    case SnakeAdded(id, body, dir, spd) =>
+    case ev @ SnakeAdded(id, body, dir, spd) =>
       areaRoot.child(id).set(Pickle.intoString(body))
       directionRoot.child(id).set(Pickle.intoString(dir))
       speedRoot.child(id).set(Pickle.intoString(spd))
       isSnakeRoot.child(id).set(Pickle.intoString(true))
-    case EntityRemoved(id) =>
+
+      eventsRoot.child(id).set(Pickle.intoString(ev))
+    case ev @ EntityRemoved(id) =>
       areaRoot.child(id).remove()
       directionRoot.child(id).remove()
       speedRoot.child(id).remove()
       isSnakeRoot.child(id).remove()
+
+      eventsRoot.child(id).set(Pickle.intoString(ev))
     case DirectionChanged(id, dir) =>
+      directionRoot.child(id).set(Pickle.intoString(dir))
+
+      eventsRoot.child(id).set(Pickle.intoString(ev))
     case _ =>
   }
 }
