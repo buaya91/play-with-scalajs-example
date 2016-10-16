@@ -24,6 +24,8 @@ trait CommunicationSystem extends GameSystem {
 
     globalEventsBuffer.foreach {
       case SnakeAdded(id, body, dir, spd) =>
+        println(s"$id is added")
+
         world.add(id, body)
         world.add(id, dir)
         world.add(id, spd)

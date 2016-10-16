@@ -23,7 +23,7 @@ object FirebaseGameRepo extends GameRepo {
   lazy val directionRoot = dbRoot.child("direction")
   lazy val eventsRoot = dbRoot.child("events")
 
-  implicit val customConfig = JsConfig("xx", false)    // todo: test if we could remove it
+  implicit val customConfig = JsConfig("xx", true)    // todo: test if we could remove it
 
   implicit def pimpImmutableMap[T](immutable: collection.Map[String, T]): mutable.Map[String, T] =
     mutable.Map(immutable.toSeq:_*)
@@ -107,23 +107,27 @@ object FirebaseGameRepo extends GameRepo {
 
   override def subscribeToAllEvents(): Observable[GlobalEvent] = {
     Observable.create(OverflowStrategy.Unbounded) { sync =>
-      eventsRoot.on("child_changed", (data: DataSnapshot) => {
-        val jsObj = data.`val`()
 
-        println("Changed: " + JSON.stringify(jsObj))
+      val eventsDataToObs = (data: DataSnapshot) => {
+        val jsObj = data.`val`()
 
         for {
           eventJs <- castToDict(jsObj)
         } yield {
-          eventJs.mapValues(e => {
-            val unserialized = Unpickle[GlobalEvent].fromString(e.toString)
-            unserialized match {
-              case Success(ev) => sync.onNext(ev)
-              case Failure(err) => println(err)
-            }
-          })
+          val unserialized = Unpickle[GlobalEvent].fromString(jsObj.toString)
+          unserialized match {
+            case Success(ev) =>
+              sync.onNext(ev)
+            case Failure(err) =>
+              println("UnpickleError: " + err)
+              err.getStackTrace.foreach(println)
+          }
         }
-      })
+      }
+
+      eventsRoot.on("child_changed", eventsDataToObs)
+      eventsRoot.on("child_added", eventsDataToObs)
+
       Cancelable(() => {
         sync.onComplete()
       })
@@ -137,18 +141,18 @@ object FirebaseGameRepo extends GameRepo {
       speedRoot.child(id).set(Pickle.intoString(spd))
       isSnakeRoot.child(id).set(Pickle.intoString(true))
 
-      eventsRoot.child(id).set(Pickle.intoString(ev))
+      eventsRoot.child(id).set(Pickle.intoString[GlobalEvent](ev))
     case ev @ EntityRemoved(id) =>
       areaRoot.child(id).remove()
       directionRoot.child(id).remove()
       speedRoot.child(id).remove()
       isSnakeRoot.child(id).remove()
 
-      eventsRoot.child(id).set(Pickle.intoString(ev))
+      eventsRoot.child(id).set(Pickle.intoString[GlobalEvent](ev))
     case DirectionChanged(id, dir) =>
       directionRoot.child(id).set(Pickle.intoString(dir))
 
-      eventsRoot.child(id).set(Pickle.intoString(ev))
+      eventsRoot.child(id).set(Pickle.intoString[GlobalEvent](ev))
     case _ =>
   }
 }
