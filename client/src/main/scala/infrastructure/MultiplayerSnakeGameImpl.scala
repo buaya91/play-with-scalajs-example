@@ -51,4 +51,9 @@ class MultiplayerSnakeGameImpl(
       case EntityRemoved(id) => this.world.remove(id)
     }
   }
+
+  // TODO: hacky way to tell canvas to render client differently
+  def setClientId(id: String) = {
+    renderSystem.clientId = Some(id)
+  }
 }

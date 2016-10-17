@@ -8,6 +8,8 @@ import configs.Config._
 
 class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem {
 
+  var clientId: Option[String] = None
+
   def drawPoint(position: Position, scalingFactor: Double = 10): Unit = {
     ctx.fillRect(position.x * scalingFactor, position.y * scalingFactor, scalingFactor, scalingFactor)
   }
@@ -42,19 +44,21 @@ class CanvasRenderSystem(ctx: dom.CanvasRenderingContext2D) extends RenderSystem
 
         val isSnake = isSnakeComponent.getOrElse(id, false)
 
-        if (isSnake) {
-          ctx.fillStyle = area.size match {
-            case x if x > 30 => "#ffff99"
-            case x if x > 20 => "#0099cc"
-            case x if x > 10 => "#00cc00"
-            case _           => "green"
-          }
-
-          area.foreach(drawPoint(_, scaleFactor))
-        } else {
-          ctx.fillStyle = "#ff0066"
-          area.foreach(drawPoint(_, scaleFactor))
+        (isSnake, clientId) match {
+          case (true, Some(client)) if client == id =>
+            ctx.fillStyle = "white"
+          case (true, _) =>
+            ctx.fillStyle = area.size match {
+              case x if x > 30 => "#ffff99"
+              case x if x > 20 => "#0099cc"
+              case x if x > 10 => "#00cc00"
+              case _           => "green"
+            }
+          case _ =>
+            ctx.fillStyle = "#ff0066"
         }
+
+        area.foreach(drawPoint(_, scaleFactor))
 
 //        if (i == id)
 //          renderScore(a)
