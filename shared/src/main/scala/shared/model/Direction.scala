@@ -1,4 +1,4 @@
-package domain
+package shared.model
 
 sealed trait Direction
 
