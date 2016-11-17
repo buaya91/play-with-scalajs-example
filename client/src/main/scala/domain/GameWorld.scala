@@ -1,5 +1,7 @@
 package domain
 
+import shared.model.Position
+
 import scala.util.Random
 
 case class GameWorld(size: (Int, Int), snakes: Seq[Snake], snacks: Seq[Snacks]) {

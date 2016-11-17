@@ -1,5 +1,8 @@
 package domain
 
+import shared.model
+import shared.model.{Direction, Down, Position, Up}
+
 case class Snake(id: String, body: Seq[Position], direction: Direction) {
 
   private def positiveModulo(a: Int, n: Int): Int = {
@@ -16,8 +19,8 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
     val newHead = direction match {
       case Up => oldHead.copy(y = positiveModulo(oldHead.y - 1, boundary._2))
       case Down => oldHead.copy(y = positiveModulo(oldHead.y + 1, boundary._2))
-      case Right => oldHead.copy(x = positiveModulo(oldHead.x + 1, boundary._1))
-      case Left => oldHead.copy(x = positiveModulo(oldHead.x - 1, boundary._1))
+      case model.Right => oldHead.copy(x = positiveModulo(oldHead.x + 1, boundary._1))
+      case model.Left => oldHead.copy(x = positiveModulo(oldHead.x - 1, boundary._1))
     }
 
     copy(body = newHead +: newTail)
@@ -27,8 +30,8 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
     (direction, newDir) match {
       case (Up, Down) => this
       case (Down, Up) => this
-      case (Left, Right) => this
-      case (Right, Left) => this
+      case (model.Left, model.Right) => this
+      case (model.Right, model.Left) => this
       case _ => copy(direction = newDir)
     }
   }
@@ -38,8 +41,8 @@ case class Snake(id: String, body: Seq[Position], direction: Direction) {
     val newLast = direction match {
       case Up => last.copy(y = last.y + 1)
       case Down => last.copy(y = last.y - 1)
-      case Right => last.copy(x = last.x - 1)
-      case Left => last.copy(x = last.x + 1)
+      case model.Right => last.copy(x = last.x - 1)
+      case model.Left => last.copy(x = last.x + 1)
     }
     copy(body = body :+ newLast)
   }
@@ -58,8 +61,8 @@ object Snake {
     def incrementFunc(n: Int): Position = direction match {
       case Up => head.copy(y = head.y + n)
       case Down => head.copy(y = head.y - n)
-      case Right => head.copy(x = head.x - n)
-      case Left => head.copy(x = head.x + n)
+      case model.Right => head.copy(x = head.x - n)
+      case model.Left => head.copy(x = head.x + n)
     }
 
     val pt = for {

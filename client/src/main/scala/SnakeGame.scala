@@ -6,6 +6,7 @@ import scala.scalajs.js
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, MouseEvent}
 import org.scalajs.dom.raw.HTMLCanvasElement
+import shared.model.{Down, Left, Right, Up}
 
 import scala.scalajs.js.annotation.JSExport
 import scala.concurrent.duration._
@@ -61,10 +62,10 @@ object SnakeGame extends js.JSApp {
 
     inputStream.foreach(kv => {
       kv.keyCode match {
-        case 37 => module.changeDir(id, domain.Left)
-        case 38 => module.changeDir(id, domain.Up)
-        case 39 => module.changeDir(id, domain.Right)
-        case 40 => module.changeDir(id, domain.Down)
+        case 37 => module.changeDir(id, Left)
+        case 38 => module.changeDir(id, Up)
+        case 39 => module.changeDir(id, Right)
+        case 40 => module.changeDir(id, Down)
         case _  => // ignore others
       }
     })

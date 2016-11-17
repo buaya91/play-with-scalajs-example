@@ -2,6 +2,7 @@ package infrastructure
 
 import domain._
 import org.scalajs.dom
+import shared.model.Position
 
 trait Renderer[Context] {
   def render(ctx: Context, world: GameWorld)

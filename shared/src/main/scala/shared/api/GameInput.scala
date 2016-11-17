@@ -1,5 +1,8 @@
 package shared.api
 
-trait GameInput {
+import shared.model.Direction
 
-}
+sealed trait GameInput
+
+case class ChangeDirection(newDir: Direction)
+

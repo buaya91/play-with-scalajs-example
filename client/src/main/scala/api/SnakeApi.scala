@@ -1,6 +1,7 @@
 package api
 
 import domain._
+import shared.model.{Direction, Position, Right}
 
 trait SnakeApi {
   def changeDir (id: String, dir: Direction): Unit
