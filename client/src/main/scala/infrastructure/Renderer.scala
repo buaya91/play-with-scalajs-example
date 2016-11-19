@@ -2,7 +2,6 @@ package infrastructure
 
 import domain._
 import org.scalajs.dom
-import shared.model.Position
 
 trait Renderer[Context] {
   def render(ctx: Context, world: GameWorld)
@@ -41,7 +40,7 @@ object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     }
   }
 
-  def drawPoint(ctx: canvasCtx, position: Position, scalingFactor: Int = 10): Unit = {
+  def drawPoint(ctx: canvasCtx, position: Square, scalingFactor: Int = 10): Unit = {
     ctx.fillRect(position.x * scalingFactor, position.y * scalingFactor,scalingFactor, scalingFactor)
   }
 

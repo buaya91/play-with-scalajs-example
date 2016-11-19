@@ -1,6 +1,7 @@
 package shared.model.core
 
 import shared.model.Position
+import scala.languageFeature.implicitConversions
 
 case class Vec2(x: Double, y: Double) {
 
@@ -10,6 +11,8 @@ case class Vec2(x: Double, y: Double) {
   def -(vec2: Vec2) = {
     this + (vec2 * -1)
   }
+
+  def magnitude = Math.sqrt((x * x) + (y * y))
 }
 
 object Vec2 {
