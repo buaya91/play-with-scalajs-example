@@ -1,21 +1,27 @@
-package shared.model.core
+package shared.physics
 
-import shared.model.Position
-import scala.languageFeature.implicitConversions
+case class Vec2(x: Double, y: Double) extends Ordered[Vec2] {
 
-case class Vec2(x: Double, y: Double) {
+  def unary_- = Vec2(-x, -y)
+  def +(vec2: Vec2): Vec2 = Vec2(x + vec2.x, y + vec2.y)
+  def -(vec2: Vec2): Vec2 = Vec2(x - vec2.x, y - vec2.y)
+  def *(multiplier: Double): Vec2 = Vec2(x * multiplier, y * multiplier)
 
-  def +(vec2: Vec2): Vec2 = Vec2(this.x + vec2.x, this.y + vec2.y)
-  def *(x: Double) = Vec2(this.x * x, this.y * y)
+  def magnitude: Double = Math.sqrt((x * x) + (y * y))
+  def unitVector: Vec2 = Vec2(x / magnitude, y / magnitude)
+  def dot(vec2: Vec2): Double = x * vec2.x + y * vec2.y
 
-  def -(vec2: Vec2) = {
-    this + (vec2 * -1)
+  override def compare(that: Vec2): Int = {
+    if (x == that.x)
+      (y - that.y).toInt
+    else
+      (x - that.x).toInt
   }
-
-  def magnitude = Math.sqrt((x * x) + (y * y))
 }
 
 object Vec2 {
-  implicit def posToVec2(position: Position): Vec2 = Vec2(position.x, position.y)
-  implicit def vec2ToPos(vec2: Vec2): Position = Position(vec2.x, vec2.y)
+//  implicit def posToVec2(position: Square): Vec2 = Vec2(position.x, position.y)
+//  implicit def vec2ToPos(vec2: Vec2): Square = Square(vec2.x, vec2.y)
+
+  def zero = Vec2(0, 0)
 }
