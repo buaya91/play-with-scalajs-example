@@ -1,8 +1,9 @@
-package shared.api
+package shared.core
 
 import shared.model._
 import shared._
 import shared.physics.{AABB, Vec2}
+import shared.protocol.ChangeDirection
 
 /**
   * @author limqingwei
@@ -41,10 +42,10 @@ object GameLogic {
     snake.copy(body = movedBody)
   }
 
-  def applyInput(state: GameState, inputs: Set[GameInput]): GameState = {
+  def applyInput(state: GameState, inputs: Set[IdentifiedGameInput]): GameState = {
     val updatedSnakes = inputs.foldLeft(state.snakes) { (s, i) =>
       i match {
-        case ChangeDirection(id, dir) =>
+        case IdentifiedGameInput(id, ChangeDirection(dir)) =>
           s.map {
             case targeted if targeted.id == id =>
               targeted.copy(direction = dir)
@@ -55,7 +56,7 @@ object GameLogic {
     state.copy(snakes = updatedSnakes)
   }
 
-  def step(state: GameState, inputs: Set[GameInput]): GameState = {
+  def step(state: GameState, inputs: Set[IdentifiedGameInput]): GameState = {
 
     /**
       * 1. move snakes
