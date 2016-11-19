@@ -1,4 +1,4 @@
-package infrastructure
+package client.infrastructure
 
 import monix.execution.Cancelable
 import monix.reactive.{Observable, OverflowStrategy}

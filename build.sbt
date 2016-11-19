@@ -5,40 +5,54 @@ name := "Scalajs-snake"
 version := "0.1.0"
 
 lazy val scalaV = "2.11.8"
+lazy val scalatestV = "3.0.0"
+lazy val scalacheckV = "1.13.0"
+lazy val monixV = "2.0-RC8"
+
+def commonSettings = Seq(
+  scalaVersion := scalaV,
+  fork in run := true,
+  testOptions in Test += Tests.Argument("-oD"),
+  scalacOptions ++= Seq("-feature")
+)
 
 lazy val server = (project in file("server"))
+  .settings(commonSettings: _*)
   .settings(
-    scalaVersion := scalaV,
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
     libraryDependencies ++= Seq(
-      "com.vmunier" %% "scalajs-scripts" % "1.0.0",
-      "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+      "com.vmunier"    %% "scalajs-scripts" % "1.0.0",
+      "org.scalacheck" %% "scalacheck"      % scalacheckV % "test",
+      "org.scalatest"  %% "scalatest"       % scalatestV % "test"
     )
   )
   .enablePlugins(PlayScala)
   .dependsOn(sharedJvm)
 
 lazy val client = (project in file("client"))
+  .settings(commonSettings: _*)
   .settings(
-    scalaVersion := scalaV,
     persistLauncher := true,
     persistLauncher in Test := false,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-      "io.monix" %%% "monix" % "2.0-RC8",
-      "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
+      "io.monix" %%% "monix"           % monixV,
+      "org.scalatest" %%% "scalatest"  % scalatestV % "test"
     )
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
   .dependsOn(sharedJs)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
+  .settings(commonSettings: _*)
   .settings(
-    scalaVersion := scalaV
+    libraryDependencies ++= Seq(
+      "org.scalatest" %%% "scalatest" % scalatestV % "test"
+    )
   )
   .jsConfigure(_ enablePlugins ScalaJSWeb)
 
