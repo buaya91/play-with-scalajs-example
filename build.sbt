@@ -8,6 +8,8 @@ lazy val scalaV = "2.11.8"
 lazy val scalatestV = "3.0.0"
 lazy val scalacheckV = "1.13.0"
 lazy val monixV = "2.0-RC8"
+lazy val microPickleV = "0.4.3"
+lazy val prickleV = "1.1.10"
 
 def commonSettings = Seq(
   scalaVersion := scalaV,
@@ -25,7 +27,7 @@ lazy val server = (project in file("server"))
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
     libraryDependencies ++= Seq(
-      "com.vmunier"    %% "scalajs-scripts" % "1.0.0",
+      "com.vmunier"    %% "scalajs-scripts" % "1.1.0",
       "org.scalacheck" %% "scalacheck"      % scalacheckV % "test",
       "org.scalatest"  %% "scalatest"       % scalatestV % "test"
     )
@@ -39,9 +41,9 @@ lazy val client = (project in file("client"))
     persistLauncher := true,
     persistLauncher in Test := false,
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-      "io.monix" %%% "monix"           % monixV,
-      "org.scalatest" %%% "scalatest"  % scalatestV % "test"
+      "org.scala-js"  %%% "scalajs-dom" % "0.9.1",
+      "io.monix"      %%% "monix"       % monixV,
+      "org.scalatest" %%% "scalatest"   % scalatestV % "test"
     )
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
@@ -51,7 +53,8 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % scalatestV % "test"
+      "com.github.benhutchison" %%% "prickle"   % prickleV,
+      "org.scalatest"           %%% "scalatest" % scalatestV % "test"
     )
   )
   .jsConfigure(_ enablePlugins ScalaJSWeb)

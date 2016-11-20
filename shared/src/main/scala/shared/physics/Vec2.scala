@@ -1,6 +1,6 @@
 package shared.physics
 
-case class Vec2(x: Double, y: Double) extends Ordered[Vec2] {
+case class Vec2(x: Double, y: Double) {
 
   def unary_- = Vec2(-x, -y)
   def +(vec2: Vec2): Vec2 = Vec2(x + vec2.x, y + vec2.y)
@@ -11,17 +11,18 @@ case class Vec2(x: Double, y: Double) extends Ordered[Vec2] {
   def unitVector: Vec2 = Vec2(x / magnitude, y / magnitude)
   def dot(vec2: Vec2): Double = x * vec2.x + y * vec2.y
 
-  override def compare(that: Vec2): Int = {
-    if (x == that.x)
-      (y - that.y).toInt
-    else
-      (x - that.x).toInt
-  }
+
 }
 
 object Vec2 {
-//  implicit def posToVec2(position: Square): Vec2 = Vec2(position.x, position.y)
-//  implicit def vec2ToPos(vec2: Vec2): Square = Square(vec2.x, vec2.y)
-
   def zero = Vec2(0, 0)
+
+  implicit class OrderedVec2(vec2: Vec2) extends Ordered[Vec2] {
+    override def compare(y: Vec2): Int = {
+      if (vec2.x == y.x)
+        (vec2.y - y.y).toInt
+      else
+        (vec2.x - y.x).toInt
+    }
+  }
 }

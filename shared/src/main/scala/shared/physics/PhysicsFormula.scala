@@ -1,5 +1,7 @@
 package shared.physics
 
+import Vec2._
+
 object PhysicsFormula {
   def ptNormalIntersectionToLine(pt: Vec2, line: Line): Vec2 = {
     line match {
