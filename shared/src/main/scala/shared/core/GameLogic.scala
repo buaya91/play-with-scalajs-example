@@ -42,7 +42,7 @@ object GameLogic {
     snake.copy(body = movedBody)
   }
 
-  def applyInput(state: GameState, inputs: Set[IdentifiedGameInput]): GameState = {
+  def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
     val updatedSnakes = inputs.foldLeft(state.snakes) { (s, i) =>
       i match {
         case IdentifiedGameInput(id, ChangeDirection(dir)) =>
@@ -56,7 +56,7 @@ object GameLogic {
     state.copy(snakes = updatedSnakes)
   }
 
-  def step(state: GameState, inputs: Set[IdentifiedGameInput]): GameState = {
+  def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
 
     /**
       * 1. move snakes
