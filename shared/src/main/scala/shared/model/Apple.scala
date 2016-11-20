@@ -5,4 +5,4 @@ import shared.physics.AABB
 /**
   * @author limqingwei
   */
-class Apple(position: AABB)
+case class Apple(position: AABB)

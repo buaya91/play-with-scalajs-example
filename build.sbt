@@ -9,7 +9,7 @@ lazy val scalatestV = "3.0.0"
 lazy val scalacheckV = "1.13.0"
 lazy val monixV = "2.0-RC8"
 lazy val microPickleV = "0.4.3"
-lazy val prickleV = "1.1.10"
+lazy val prickleV = "1.1.12"
 
 def commonSettings = Seq(
   scalaVersion := scalaV,

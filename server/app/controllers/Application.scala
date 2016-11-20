@@ -48,7 +48,7 @@ class Application()(implicit environment: Environment, actorSystem: ActorSystem,
     }
 
     val serializeState: Flow[GameState, String, NotUsed] =
-      Flow.fromFunction[GameState, String](st => Pickle.intoString(st))
+      Flow.fromFunction[GameState, String](st => Pickle.intoString[GameState](st))
 
     inputFlow
       .via(GameLoop.start())
