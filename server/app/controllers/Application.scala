@@ -43,16 +43,13 @@ class Application()(implicit environment: Environment, actorSystem: ActorSystem,
       case Failure(e) => log.error(e.getMessage)
     }
 
-    val inputFlow: Flow[String, IdentifiedGameInput, _] = deserializeReq.collect[IdentifiedGameInput] {
+    val inputFlow: Flow[String, IdentifiedGameInput, NotUsed] = deserializeReq.collect[IdentifiedGameInput] {
       case Success(i) => i
     }
 
     val serializeState: Flow[GameState, String, NotUsed] =
       Flow.fromFunction[GameState, String](st => Pickle.intoString[GameState](st))
 
-    inputFlow
-      .via(GameLoop.start())
-      .via[String, NotUsed](serializeState)
-
+    inputFlow.via(GameLoop.start(30)).via(serializeState)
   }
 }
