@@ -7,11 +7,6 @@
         </encoder>
     </appender>
 
-    <!-- silent error messages on Scala.js full-optimized files -->
-    <Logger name="com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter" level="off">
-      <AppenderRef ref="STDOUT" />
-    </Logger>
-
     <logger name="application" level="DEBUG" />
 
     <root level="INFO">

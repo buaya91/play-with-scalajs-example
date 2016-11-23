@@ -8,7 +8,7 @@ class SnakeGameLoader() extends ApplicationLoader {
 }
 
 class ApplicationComponents(context: Context) extends BuiltInComponentsFromContext(context) {
-  lazy val applicationController = new Application()(environment, actorSystem, materializer)
+  lazy val applicationController = new Application()(actorSystem, materializer)
   lazy val assets = new Assets(httpErrorHandler)
   override lazy val router = new Routes(httpErrorHandler, applicationController, assets)
 }

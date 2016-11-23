@@ -16,7 +16,7 @@ import prickle._
 
 import scala.util.{Failure, Success, Try}
 
-class Application()(implicit environment: Environment, actorSystem: ActorSystem, materializer: Materializer)
+class Application()(actorSystem: ActorSystem, materializer: Materializer)
     extends Controller {
 
   implicit val dirP: PicklerPair[Direction] = CompositePickler[Direction]
@@ -27,7 +27,7 @@ class Application()(implicit environment: Environment, actorSystem: ActorSystem,
 
   implicit val cmdP: PicklerPair[GameCommand] = CompositePickler[GameCommand].concreteType[ChangeDirection]
 
-  val log = Logger(getClass)
+//  val log = Logger(getClass)
 
   def index = Action {
     Ok(views.html.index(SharedMessages.itWorks))
@@ -35,12 +35,18 @@ class Application()(implicit environment: Environment, actorSystem: ActorSystem,
 
   // TODO: check id to ensure unique
   def gameChannel(id: String) = WebSocket.accept[String, String] { req =>
+    wsFlow(id)
+  }
+
+  def wsFlow(id: String): Flow[String, String, NotUsed] = {
     val deserializeReq: Flow[String, Try[IdentifiedGameInput], NotUsed] = Flow.fromFunction { rawStr =>
       Unpickle[GameRequest].fromString(rawStr).map(r => IdentifiedGameInput(id, r.cmd))
     }
 
     val deserializeFailure = deserializeReq.collect {
-      case Failure(e) => log.error(e.getMessage)
+      case Failure(e) =>
+//        log.error(e.getMessage)
+          println(e.getMessage)
     }
 
     val inputFlow: Flow[String, IdentifiedGameInput, NotUsed] = deserializeReq.collect[IdentifiedGameInput] {

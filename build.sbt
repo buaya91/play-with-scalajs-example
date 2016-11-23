@@ -5,6 +5,7 @@ name := "Scalajs-snake"
 version := "0.1.0"
 
 lazy val scalaV = "2.11.8"
+lazy val akkaV = "2.4.12"
 lazy val scalatestV = "3.0.0"
 lazy val scalacheckV = "1.13.0"
 lazy val monixV = "2.0-RC8"
@@ -27,9 +28,12 @@ lazy val server = (project in file("server"))
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
     libraryDependencies ++= Seq(
-      "com.vmunier"    %% "scalajs-scripts" % "1.1.0",
-      "org.scalacheck" %% "scalacheck"      % scalacheckV % "test",
-      "org.scalatest"  %% "scalatest"       % scalatestV % "test"
+      "com.vmunier"       %% "scalajs-scripts"     % "1.1.0",
+      "ch.qos.logback"    % "logback-core"         % "1.1.7",
+      "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % "test",
+      "com.typesafe.akka" %% "akka-testkit"        % akkaV % "test",
+      "org.scalacheck"    %% "scalacheck"          % scalacheckV % "test",
+      "org.scalatest"     %% "scalatest"           % scalatestV % "test"
     )
   )
   .enablePlugins(PlayScala)

@@ -24,19 +24,21 @@ object GameLoop {
 
     val gameStateSource: Source[GameState, _] =
       Source
-        .actorRef(100000, OverflowStrategy.dropBuffer)
+        .actorRef(1000000000, OverflowStrategy.dropBuffer)
         .mapMaterializedValue(ref => {
           while (true) {
             val startTime = System.currentTimeMillis()
 
             val updated = GameLogic.step(initState, inputBuffers)
+
             ref ! updated
 
             inputBuffers = Seq.empty
             val endTime = System.currentTimeMillis()
 
             val used = endTime - startTime
-            Thread.sleep(millisNeededPerUpdate - used)
+            println(s"Sleep for: ${millisNeededPerUpdate(updateRate) - used}")
+            Thread.sleep(millisNeededPerUpdate(updateRate) - used)
           }
         })
 
