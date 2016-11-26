@@ -37,6 +37,8 @@ object GameLoop {
             val endTime = System.currentTimeMillis()
 
             val used = endTime - startTime
+
+
             println(s"Sleep for: ${millisNeededPerUpdate(updateRate) - used}")
             Thread.sleep(millisNeededPerUpdate(updateRate) - used)
           }

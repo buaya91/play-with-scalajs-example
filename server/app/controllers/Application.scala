@@ -5,19 +5,19 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.stream.scaladsl._
 import game.GameLoop
+import game.actors.GameLoopActor
+import play.api.libs.streams.ActorFlow
 import play.api.{Environment, Logger}
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.SharedMessages
 import shared.core.IdentifiedGameInput
 import shared.model._
 import shared.protocol.{ChangeDirection, GameCommand, GameRequest}
-
 import prickle._
 
 import scala.util.{Failure, Success, Try}
 
-class Application()(actorSystem: ActorSystem, materializer: Materializer)
-    extends Controller {
+class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   implicit val dirP: PicklerPair[Direction] = CompositePickler[Direction]
     .concreteType[Up.type]
@@ -27,7 +27,7 @@ class Application()(actorSystem: ActorSystem, materializer: Materializer)
 
   implicit val cmdP: PicklerPair[GameCommand] = CompositePickler[GameCommand].concreteType[ChangeDirection]
 
-//  val log = Logger(getClass)
+  val log = Logger(getClass)
 
   def index = Action {
     Ok(views.html.index(SharedMessages.itWorks))
@@ -35,7 +35,7 @@ class Application()(actorSystem: ActorSystem, materializer: Materializer)
 
   // TODO: check id to ensure unique
   def gameChannel(id: String) = WebSocket.accept[String, String] { req =>
-    wsFlow(id)
+    wsFlow("Something")
   }
 
   def wsFlow(id: String): Flow[String, String, NotUsed] = {
@@ -44,9 +44,7 @@ class Application()(actorSystem: ActorSystem, materializer: Materializer)
     }
 
     val deserializeFailure = deserializeReq.collect {
-      case Failure(e) =>
-//        log.error(e.getMessage)
-          println(e.getMessage)
+      case Failure(e) => log.error(e.getMessage)
     }
 
     val inputFlow: Flow[String, IdentifiedGameInput, NotUsed] = deserializeReq.collect[IdentifiedGameInput] {
@@ -56,6 +54,8 @@ class Application()(actorSystem: ActorSystem, materializer: Materializer)
     val serializeState: Flow[GameState, String, NotUsed] =
       Flow.fromFunction[GameState, String](st => Pickle.intoString[GameState](st))
 
-    inputFlow.via(GameLoop.start(30)).via(serializeState)
+    val coreLogicFlow = ActorFlow.actorRef(ref => GameLoopActor.props(shared.updateRate, ref))
+
+    inputFlow.via(coreLogicFlow).via(serializeState)
   }
 }
