@@ -30,12 +30,15 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
       sub.expectNext(2 seconds)
     }
 
-    "receive gameState" in {
+    "receive gameState continuously" in {
       val flowToTest = controller.wsFlow("SSS")
       val (pub, sub) = TestSource.probe[String].via(flowToTest).toMat(TestSink.probe[String])(Keep.both).run()
 
-      sub.request(1)
-      sub.expectNext(Pickle.intoString[GameState](GameState.init))
+      sub.request(2)
+      sub.expectNext(
+        Pickle.intoString[GameState](GameState.init),
+        Pickle.intoString[GameState](GameState.init)
+      )
     }
   }
 }

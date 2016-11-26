@@ -1,7 +1,7 @@
 package controllers
 
 import akka.NotUsed
-import akka.actor.ActorSystem
+import akka.actor.{Actor, ActorSystem, DeadLetter, Props}
 import akka.stream.Materializer
 import akka.stream.scaladsl._
 import game.actors.GameLoopActor

@@ -7,6 +7,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef) extends Actor {
+
   private val gameStateRef = context.actorOf(GameStateActor.props)
   private lazy val millisPerUpdate = 1000 / loopPerSec
 
@@ -15,22 +16,23 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef) extends Actor {
 
   override def receive: Receive = pendingResponse(System.currentTimeMillis())
 
-  def pendingResponse(requestTime: Long): Receive = {
+  def pendingResponse(frameStart: Long): Receive = {
     case s: GameState =>
+
       subscriberRef ! s
 
-      val millisToWait = timeToNextFrame(requestTime)
+      val millisToWait = timeToNextFrame(frameStart)
 
-      assert(millisToWait > 0)
+      assert(millisToWait > 0, s"Millis to wait is $millisToWait")
 
-      println(s"Wait for : $millisToWait ms")
-      context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher)
-      context.become(pendingResponse(System.currentTimeMillis()))
+      context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher, self)
+
+      context.become(pendingResponse(System.currentTimeMillis() + millisToWait))
   }
 
   def timeToNextFrame(lastFrameMillis: Long): Long = {
     val now = System.currentTimeMillis()
-    val millisToWait = millisPerUpdate - (now - lastFrameMillis)
+    val millisToWait = lastFrameMillis + millisPerUpdate - now
     millisToWait
   }
 }
