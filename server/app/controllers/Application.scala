@@ -4,7 +4,6 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.stream.scaladsl._
-import game.GameLoop
 import game.actors.GameLoopActor
 import play.api.libs.streams.ActorFlow
 import play.api.{Environment, Logger}
@@ -12,20 +11,13 @@ import play.api.mvc.{Action, Controller, WebSocket}
 import shared.SharedMessages
 import shared.core.IdentifiedGameInput
 import shared.model._
-import shared.protocol.{ChangeDirection, GameCommand, GameRequest}
+import shared.protocol.GameRequest
+import serializers._
 import prickle._
 
 import scala.util.{Failure, Success, Try}
 
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
-
-  implicit val dirP: PicklerPair[Direction] = CompositePickler[Direction]
-    .concreteType[Up.type]
-    .concreteType[Down.type]
-    .concreteType[Left.type]
-    .concreteType[Right.type]
-
-  implicit val cmdP: PicklerPair[GameCommand] = CompositePickler[GameCommand].concreteType[ChangeDirection]
 
   val log = Logger(getClass)
 

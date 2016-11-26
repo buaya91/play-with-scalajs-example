@@ -7,23 +7,35 @@ import akka.stream.testkit.scaladsl.{TestSink, TestSource}
 import akka.testkit.TestKit
 import controllers.Application
 import org.scalatest._
+import shared.model.GameState
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
+import prickle._
+import serializers._
+
 class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSpecLike with MustMatchers {
-//  "websocket endpoint " should {
-//    "accept ws req" in {
-//      implicit val materializer = ActorMaterializer()(system)
-//      implicit val ec: ExecutionContext = system.dispatcher
-//
-//      val controller = new Application()(system, materializer)
-//      val flowToTest = controller.wsFlow("SSS")
-//
-//      val (pub, sub) = TestSource.probe[String].via(flowToTest).toMat(TestSink.probe[String])(Keep.both).run()
-//
-//      sub.request(1)
-//      sub.expectNext(5 seconds)
-//    }
-//  }
+  implicit val materializer = ActorMaterializer()(system)
+  implicit val ec: ExecutionContext = system.dispatcher
+
+  "websocket endpoint " should {
+    val controller = new Application()(system, materializer)
+
+    "accept ws req" in {
+      val flowToTest = controller.wsFlow("SSS")
+      val (pub, sub) = TestSource.probe[String].via(flowToTest).toMat(TestSink.probe[String])(Keep.both).run()
+
+      sub.request(1)
+      sub.expectNext(2 seconds)
+    }
+
+    "receive gameState" in {
+      val flowToTest = controller.wsFlow("SSS")
+      val (pub, sub) = TestSource.probe[String].via(flowToTest).toMat(TestSink.probe[String])(Keep.both).run()
+
+      sub.request(1)
+      sub.expectNext(Pickle.intoString[GameState](GameState.init))
+    }
+  }
 }

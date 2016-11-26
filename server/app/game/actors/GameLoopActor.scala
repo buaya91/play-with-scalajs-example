@@ -10,6 +10,7 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef) extends Actor {
   private val gameStateRef = context.actorOf(GameStateActor.props)
   private lazy val millisPerUpdate = 1000 / loopPerSec
 
+  gameStateRef ! InitState(GameState(Seq.empty, Set.empty))
   gameStateRef ! NextFrame
 
   override def receive: Receive = pendingResponse(System.currentTimeMillis())
@@ -22,6 +23,7 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef) extends Actor {
 
       assert(millisToWait > 0)
 
+      println(s"Wait for : $millisToWait ms")
       context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher)
       context.become(pendingResponse(System.currentTimeMillis()))
   }
