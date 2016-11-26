@@ -1,6 +1,7 @@
 package game.actors
 
 import akka.actor.{Actor, ActorRef, Props}
+import shared.core.IdentifiedGameInput
 import shared.model.GameState
 
 import scala.concurrent.duration._
@@ -28,6 +29,9 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef) extends Actor {
       context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher, self)
 
       context.become(pendingResponse(System.currentTimeMillis() + millisToWait))
+
+    case input: IdentifiedGameInput =>
+      gameStateRef ! UserInputs(Seq(input))
   }
 
   def timeToNextFrame(lastFrameMillis: Long): Long = {
