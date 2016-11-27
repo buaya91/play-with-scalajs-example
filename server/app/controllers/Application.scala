@@ -12,10 +12,11 @@ import shared.SharedMessages
 import shared.core.IdentifiedGameInput
 import shared.model._
 import shared.protocol.GameRequest
-import serializers._
+import shared.serializers.Serializers._
 import prickle._
+import shared.physics.PhysicsFormula
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Random, Success, Try}
 
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
@@ -28,6 +29,39 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   // TODO: check id to ensure unique
   def gameChannel(id: String) = WebSocket.accept[String, String] { req =>
     wsFlow("Something")
+  }
+
+  def test = WebSocket.accept[String, String] { req =>
+    wsTestFlow
+  }
+
+  def wsTestFlow: Flow[String, String, NotUsed] = {
+    val inputFlow: Flow[String, IdentifiedGameInput, NotUsed] =
+      Flow
+        .fromFunction[String, Try[IdentifiedGameInput]](
+          rawStr =>
+            Unpickle[GameRequest]
+              .fromString(rawStr)
+              .map(r => IdentifiedGameInput("Test", r.cmd)))
+        .collect[IdentifiedGameInput] { case Success(i) => i }
+
+    val serializeState: Flow[GameState, String, NotUsed] =
+      Flow.fromFunction[GameState, String](st => Pickle.intoString[GameState](st))
+
+    val testState = {
+      val snakes = for {
+        i <- 1 to 3
+      } yield {
+        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
+        Snake(Random.nextInt().toString, blocks, Up)
+      }
+      GameState(snakes, Set.empty)
+    }
+
+    val coreLogicFlow =
+      ActorFlow.actorRef(ref => GameLoopActor.props(shared.updateRate, ref, testState))
+
+    inputFlow.via(coreLogicFlow).via(serializeState)
   }
 
   def wsFlow(id: String): Flow[String, String, NotUsed] = {
@@ -46,7 +80,8 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
     val serializeState: Flow[GameState, String, NotUsed] =
       Flow.fromFunction[GameState, String](st => Pickle.intoString[GameState](st))
 
-    val coreLogicFlow = ActorFlow.actorRef(ref => GameLoopActor.props(shared.updateRate, ref))
+    val coreLogicFlow =
+      ActorFlow.actorRef(ref => GameLoopActor.props(shared.updateRate, ref, GameState(Seq.empty, Set.empty)))
 
     inputFlow.via(coreLogicFlow).via(serializeState)
   }

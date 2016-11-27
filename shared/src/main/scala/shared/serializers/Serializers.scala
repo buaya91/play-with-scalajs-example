@@ -1,8 +1,10 @@
+package shared.serializers
+
 import prickle.{CompositePickler, PicklerPair}
 import shared.model.{Direction, Down, Left, Right, Up}
 import shared.protocol.{ChangeDirection, GameCommand}
 
-package object serializers {
+object Serializers {
   implicit val dirP: PicklerPair[Direction] = CompositePickler[Direction]
     .concreteType[Up.type]
     .concreteType[Down.type]

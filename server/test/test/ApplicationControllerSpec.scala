@@ -13,7 +13,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 import prickle._
-import serializers._
+import shared.serializers.Serializers._
+import scala.language.postfixOps
 
 class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSpecLike with MustMatchers {
   implicit val materializer = ActorMaterializer()(system)

@@ -20,7 +20,7 @@ object GameLogic {
   def move(snake: Snake): Snake = {
     val diffBetweenElements =
       for {
-        i <- 1 to snake.body.size
+        i <- 1 until snake.body.size
       } yield {
         val front: Vec2 = snake.body(i - 1).center
         val back: Vec2 = snake.body(i).center
