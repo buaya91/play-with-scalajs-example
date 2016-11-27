@@ -1,5 +1,7 @@
 package test
 
+import java.nio.ByteBuffer
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Keep
@@ -11,9 +13,9 @@ import shared.model.GameState
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-
-import prickle._
+import boopickle.Default._
 import shared.serializers.Serializers._
+
 import scala.language.postfixOps
 
 class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSpecLike with MustMatchers {
@@ -25,7 +27,7 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
 
     "accept ws req" in {
       val flowToTest = controller.wsFlow("SSS")
-      val (pub, sub) = TestSource.probe[String].via(flowToTest).toMat(TestSink.probe[String])(Keep.both).run()
+      val (pub, sub) = TestSource.probe[Array[Byte]].via(flowToTest).toMat(TestSink.probe[Array[Byte]])(Keep.both).run()
 
       sub.request(1)
       sub.expectNext(2 seconds)
@@ -33,12 +35,17 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
 
     "receive gameState continuously" in {
       val flowToTest = controller.wsFlow("SSS")
-      val (pub, sub) = TestSource.probe[String].via(flowToTest).toMat(TestSink.probe[String])(Keep.both).run()
+      val (pub, sub) = TestSource.probe[Array[Byte]].via(flowToTest.map(bytes => {
+        val bb = ByteBuffer.wrap(bytes)
+        Unpickle[GameState].fromBytes(bb)
+      })).toMat(TestSink.probe[GameState])(Keep.both).run()
+
+      val expected = GameState.init
 
       sub.request(2)
       sub.expectNext(
-        Pickle.intoString[GameState](GameState.init),
-        Pickle.intoString[GameState](GameState.init)
+        expected,
+        expected
       )
     }
   }

@@ -3,28 +3,26 @@ package client.infrastructure
 import monix.execution.Cancelable
 import monix.reactive._
 import org.scalajs.dom._
-import prickle._
+import boopickle.Default._
 import shared.model.GameState
 import shared.serializers.Serializers._
-
-import scala.util.{Failure, Success, Try}
+import scala.scalajs.js.typedarray._
 
 trait GameStateSource {
-  def subscribe(): Observable[GameState]
+  def src(): Observable[GameState]
 }
 
 object SourceForTest extends GameStateSource {
   val wsConn = new WebSocket("ws://localhost:9000/wstest")
 
-  override def subscribe() = {
+  wsConn.binaryType = "arraybuffer"
+
+  override def src() = {
     Observable.create[GameState](OverflowStrategy.Unbounded) { sync =>
       wsConn.onmessage = (ev: MessageEvent) => {
-        val rawString = ev.data.toString
-        val deserializedGameState: Try[GameState] = Unpickle[GameState].fromString(rawString)
-        deserializedGameState match {
-          case Success(s) => sync.onNext(s)
-          case Failure(e) => println(s"Failed to deserialized: $e")
-        }
+        val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
+        val deserializedGameState: GameState = Unpickle[GameState].fromBytes(rawBytes)
+        sync.onNext(deserializedGameState)
       }
 
       Cancelable(() => {

@@ -23,7 +23,7 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, initState: GameSta
 
       val millisToWait = timeToNextFrame(frameStart)
 
-      assert(millisToWait > 0, s"Millis to wait is $millisToWait")
+      assert(millisToWait >= 0, s"Millis to wait is $millisToWait")
 
       context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher, self)
 

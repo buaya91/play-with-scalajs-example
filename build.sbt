@@ -9,8 +9,7 @@ lazy val akkaV = "2.4.12"
 lazy val scalatestV = "3.0.0"
 lazy val scalacheckV = "1.13.0"
 lazy val monixV = "2.0-RC8"
-lazy val microPickleV = "0.4.3"
-lazy val prickleV = "1.1.12"
+lazy val boopickleV = "1.2.4"
 
 def commonSettings = Seq(
   scalaVersion := scalaV,
@@ -57,7 +56,7 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.github.benhutchison" %%% "prickle"   % prickleV,
+      "me.chrons"               %%% "boopickle" % boopickleV,
       "org.scalatest"           %%% "scalatest" % scalatestV % "test"
     )
   )
