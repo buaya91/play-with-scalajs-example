@@ -2,13 +2,14 @@ package shared.physics
 
 import Vec2._
 
+import scala.util.Random
+
 object PhysicsFormula {
   def ptNormalIntersectionToLine(pt: Vec2, line: Line): Vec2 = {
     line match {
       case XLine(y) => Vec2(pt.x, y)
       case YLine(x) => Vec2(x, pt.y)
       case NonXYLine(m, c) =>
-
         val normalGradient = -1 / m
         val normalC = pt.y - (normalGradient * pt.x)
 
@@ -25,7 +26,7 @@ object PhysicsFormula {
 
     val intersection = ptNormalIntersectionToLine(point, segment.toLine)
     val pointInSegment = (intersection >= from && intersection <= to) ||
-      (intersection >= to && intersection <= from)
+        (intersection >= to && intersection <= from)
 
     if (pointInSegment)
       intersection - point
@@ -54,5 +55,17 @@ object PhysicsFormula {
 
   def minimumDistance(from: Vec2, to: Vec2): Vec2 = {
     from - to
+  }
+
+  def findContiguousBlock(x: Double, y: Double): Seq[AABB] = {
+
+    val randomPt = (Random.nextInt() % (x - 5) + 5, Random.nextInt() % (y - 5) + 5)
+
+    for {
+      i <- 0 to 5
+    } yield {
+      val c = Vec2(randomPt._1 + i, randomPt._2)
+      AABB(c, Vec2(1, 1))
+    }
   }
 }

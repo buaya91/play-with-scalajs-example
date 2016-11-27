@@ -2,8 +2,8 @@ package shared.core
 
 import shared.model._
 import shared._
-import shared.physics.{AABB, Vec2}
-import shared.protocol.ChangeDirection
+import shared.physics.{AABB, PhysicsFormula, Vec2}
+import shared.protocol.{ChangeDirection, JoinGame}
 
 /**
   * @author limqingwei
@@ -43,16 +43,22 @@ object GameLogic {
   }
 
   def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
-    val updatedSnakes = inputs.foldLeft(state.snakes) { (s, i) =>
-      i match {
-        case IdentifiedGameInput(id, ChangeDirection(dir)) =>
-          s.map {
-            case targeted if targeted.id == id =>
-              targeted.copy(direction = dir)
-            case other => other
-          }
-      }
+    val updatedSnakes = inputs.foldLeft(state.snakes) {
+      case (s, IdentifiedGameInput(id, ChangeDirection(dir))) =>
+        s.map {
+          case targeted if targeted.id == id =>
+            targeted.copy(direction = dir)
+          case other => other
+        }
+
+      case (s, IdentifiedGameInput(id, JoinGame)) =>
+        val newSnake = Snake(id,
+          PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX),
+          Up
+        )
+        s :+ newSnake
     }
+
     state.copy(snakes = updatedSnakes)
   }
 

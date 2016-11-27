@@ -18,5 +18,9 @@ class PhysicsFormulaSuites extends WordSpec with Matchers {
       val resultV = PhysicsFormula.shortestFromPointToLineSegment(pt, segment)
       resultV should equal(Vec2(0, 3))
     }
+
+    "compute empty contiguous block in fixed area" in {
+      ???
+    }
   }
 }
