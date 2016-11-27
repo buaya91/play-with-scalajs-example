@@ -59,7 +59,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
     }
 
     val coreLogicFlow =
-      ActorFlow.actorRef(ref => GameLoopActor.props(shared.updateRate, ref, testState))
+      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, testState))
 
     inputFlow.via(coreLogicFlow).via(serializeState)
   }
@@ -81,7 +81,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
       Flow.fromFunction[GameState, String](st => Pickle.intoString[GameState](st))
 
     val coreLogicFlow =
-      ActorFlow.actorRef(ref => GameLoopActor.props(shared.updateRate, ref, GameState(Seq.empty, Set.empty)))
+      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, GameState(Seq.empty, Set.empty)))
 
     inputFlow.via(coreLogicFlow).via(serializeState)
   }

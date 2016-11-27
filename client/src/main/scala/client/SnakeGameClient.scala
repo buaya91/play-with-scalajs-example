@@ -5,6 +5,7 @@ import org.scalajs.dom._
 
 import scala.scalajs.js._
 import monix.execution.Scheduler.Implicits.global
+import scala.concurrent.duration._
 
 object SnakeGameClient extends JSApp {
 
@@ -15,7 +16,7 @@ object SnakeGameClient extends JSApp {
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    stateSrc.foreach(state => CanvasRenderer.render(ctx, state))
+    stateSrc.sample(1 second).foreach(state => CanvasRenderer.render(ctx, state))
 
     stateSrc.subscribe()
   }

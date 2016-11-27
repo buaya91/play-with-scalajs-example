@@ -9,8 +9,9 @@ package object shared {
   
   val areaOccupiedPerPosition = 1 * 1
 
-  val updateRate = 30
-  def millisNeededPerUpdate(rate: Int = updateRate): Int = 1000 / rate
+  val serverUpdateRate = 30
+
+  def millisNeededPerUpdate(rate: Int = serverUpdateRate): Int = 1000 / rate
 
   def unitPerDirection(dir: Direction): Vec2 = dir match {
     case Up =>  Vec2(0, 1)
