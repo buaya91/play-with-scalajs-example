@@ -66,7 +66,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
 
     val coreLogicFlow = {
       val out =
-        Source.actorRef(1000000, OverflowStrategy.dropNew).mapMaterializedValue(ref => playersState ! PlayerJoin(ref))
+        Source.actorRef(1000000, OverflowStrategy.dropNew).mapMaterializedValue(ref => playersState ! PlayerJoin(id, ref))
 
       val in = Sink.actorRef(playersState, s"Player $id left")
 

@@ -3,6 +3,7 @@ package game.actors
 import akka.actor.{Actor, ActorRef, Props}
 import shared.core.IdentifiedGameInput
 import shared.model.GameState
+import shared.protocol.JoinGame
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -21,17 +22,20 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
       val millisToWait = timeToNextFrame(frameStart)
 
-      assert(millisToWait >= 0, s"Millis to wait is $millisToWait")
+      if (millisToWait < 0)
+        println(s"Opps: delayed $millisToWait")
+//      assert(millisToWait >= 0, s"Millis to wait is $millisToWait")
 
-      context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher, self)
+      context.system.scheduler
+        .scheduleOnce(Math.max(0, millisToWait) millis, gameStateRef, NextFrame)(context.dispatcher, self)
 
       context.become(pendingGameState(System.currentTimeMillis() + millisToWait, players))
 
     case input: IdentifiedGameInput =>
       gameStateRef ! UserInputs(Seq(input))
 
-    case PlayerJoin(r) =>
-      println(s"Player $r joined!")
+    case PlayerJoin(id, r) =>
+      gameStateRef ! IdentifiedGameInput(id, JoinGame)
       context.become(pendingGameState(frameStart, players :+ r))
   }
 

@@ -57,9 +57,11 @@ object PhysicsFormula {
     from - to
   }
 
+  def randomPositive(): Int = Math.abs(Random.nextInt())
+
   def findContiguousBlock(x: Double, y: Double): Seq[AABB] = {
 
-    val randomPt = (Random.nextInt() % (x - 5) + 5, Random.nextInt() % (y - 5) + 5)
+    val randomPt = (randomPositive() % (x - 5) + 5, randomPositive() % (y - 5) + 5)
 
     for {
       i <- 0 to 5

@@ -27,9 +27,9 @@ object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
 
   def drawSnake(ctx: canvasCtx, snake: Snake) = {
     val (w, h) = (ctx.canvas.width, ctx.canvas.height)
+
     val scalingFactor: Vec2 = Vec2(w / shared.terrainX, h / shared.terrainY)
 
-    println(s"Sf: $scalingFactor")
     snake.body.foreach(aabb => drawAABB(ctx, aabb, scalingFactor))
   }
 
