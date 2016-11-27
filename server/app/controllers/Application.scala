@@ -3,12 +3,11 @@ package controllers
 import java.nio.ByteBuffer
 
 import akka.NotUsed
-import akka.actor.{Actor, ActorSystem, DeadLetter, Props}
-import akka.stream.Materializer
+import akka.actor._
+import akka.stream.{Materializer, OverflowStrategy}
 import akka.stream.scaladsl._
-import game.actors.{GameLoopActor, GameStateActor, InitState}
-import play.api.libs.streams.ActorFlow
-import play.api.{Environment, Logger}
+import game.actors.{GameStateActor, InitState, PlayerJoin, PlayersActor}
+import play.api.Logger
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.SharedMessages
 import shared.core.IdentifiedGameInput
@@ -23,7 +22,7 @@ import scala.util.Random
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   val log = Logger(getClass)
-  lazy val gameState = actorSystem.actorOf(GameStateActor.props)
+  val gameState = actorSystem.actorOf(GameStateActor.props)
 
   val testState = {
     val snakes = for {
@@ -34,8 +33,9 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
     }
     GameState(snakes, Set.empty)
   }
-
   gameState ! InitState(testState)
+
+  val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
 
   def index = Action {
     Ok(views.html.index(SharedMessages.itWorks))
@@ -43,32 +43,11 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
 
   // TODO: check id to ensure unique
   def gameChannel(id: String) = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
-//    wsFlow("Something")
-    wsTestFlow
+    wsFlow(id)
   }
 
   def test = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
-    wsTestFlow
-  }
-
-  def wsTestFlow: Flow[Array[Byte], Array[Byte], NotUsed] = {
-    val inputFlow: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
-      Flow
-        .fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
-          val r = Unpickle[GameRequest]
-            .fromBytes(ByteBuffer.wrap(rawBytes))
-          IdentifiedGameInput("Test", r.cmd)
-        }
-
-    val serializeState: Flow[GameState, Array[Byte], NotUsed] =
-      Flow.fromFunction[GameState, Array[Byte]] { st =>
-        bbToArrayBytes(Pickle.intoBytes[GameState](st))
-      }
-
-    val coreLogicFlow =
-      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, gameState))
-
-    inputFlow.via(coreLogicFlow).via(serializeState)
+    wsFlow("Test")
   }
 
   def wsFlow(id: String): Flow[Array[Byte], Array[Byte], NotUsed] = {
@@ -85,8 +64,14 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
         bbToArrayBytes(Pickle.intoBytes[GameState](st))
       }
 
-    val coreLogicFlow =
-      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, gameState))
+    val coreLogicFlow = {
+      val out =
+        Source.actorRef(1000000, OverflowStrategy.dropNew).mapMaterializedValue(ref => playersState ! PlayerJoin(ref))
+
+      val in = Sink.actorRef(playersState, s"Player $id left")
+
+      Flow.fromSinkAndSource(in, out)
+    }
 
     inputFlow.via(coreLogicFlow).via(serializeState)
   }

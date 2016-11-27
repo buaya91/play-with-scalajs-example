@@ -7,17 +7,17 @@ import shared.model.GameState
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, gameStateRef: ActorRef) extends Actor {
+class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
   private lazy val millisPerUpdate = 1000 / loopPerSec
 
   gameStateRef ! NextFrame
 
-  override def receive: Receive = pendingResponse(System.currentTimeMillis())
+  override def receive: Receive = pendingGameState(System.currentTimeMillis(), Seq.empty)
 
-  def pendingResponse(frameStart: Long): Receive = {
+  def pendingGameState(frameStart: Long, players: Seq[ActorRef]): Receive = {
     case s: GameState =>
-      subscriberRef ! s
+      players.foreach(_ ! s)
 
       val millisToWait = timeToNextFrame(frameStart)
 
@@ -25,10 +25,14 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, gameStateRef: Acto
 
       context.system.scheduler.scheduleOnce(millisToWait millis, gameStateRef, NextFrame)(context.dispatcher, self)
 
-      context.become(pendingResponse(System.currentTimeMillis() + millisToWait))
+      context.become(pendingGameState(System.currentTimeMillis() + millisToWait, players))
 
     case input: IdentifiedGameInput =>
       gameStateRef ! UserInputs(Seq(input))
+
+    case PlayerJoin(r) =>
+      println(s"Player $r joined!")
+      context.become(pendingGameState(frameStart, players :+ r))
   }
 
   def timeToNextFrame(lastFrameMillis: Long): Long = {
@@ -38,7 +42,7 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, gameStateRef: Acto
   }
 }
 
-object GameLoopActor {
-  def props(updateRate: Int, subscribeRef: ActorRef, gameStateRef: ActorRef): Props =
-    Props(classOf[GameLoopActor], updateRate, subscribeRef, gameStateRef)
+object PlayersActor {
+  def props(updateRate: Int, gameStateRef: ActorRef): Props =
+    Props(classOf[PlayersActor], updateRate, gameStateRef)
 }
