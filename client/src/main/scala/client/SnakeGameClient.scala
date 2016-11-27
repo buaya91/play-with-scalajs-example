@@ -15,9 +15,7 @@ object SnakeGameClient extends JSApp {
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    stateSrc.foreach(state => {
-      CanvasRenderer.render(ctx, state)
-    })
+    stateSrc.foreach(state => CanvasRenderer.render(ctx, state))
 
     stateSrc.subscribe()
   }

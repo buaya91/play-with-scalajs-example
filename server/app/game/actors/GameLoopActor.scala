@@ -7,12 +7,10 @@ import shared.model.GameState
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, initState: GameState) extends Actor {
+class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, gameStateRef: ActorRef) extends Actor {
 
-  private val gameStateRef = context.actorOf(GameStateActor.props)
   private lazy val millisPerUpdate = 1000 / loopPerSec
 
-  gameStateRef ! InitState(initState)
   gameStateRef ! NextFrame
 
   override def receive: Receive = pendingResponse(System.currentTimeMillis())
@@ -41,6 +39,6 @@ class GameLoopActor(loopPerSec: Int, subscriberRef: ActorRef, initState: GameSta
 }
 
 object GameLoopActor {
-  def props(updateRate: Int, subscribeRef: ActorRef, state: GameState): Props =
-    Props(classOf[GameLoopActor], updateRate, subscribeRef, state)
+  def props(updateRate: Int, subscribeRef: ActorRef, gameStateRef: ActorRef): Props =
+    Props(classOf[GameLoopActor], updateRate, subscribeRef, gameStateRef)
 }

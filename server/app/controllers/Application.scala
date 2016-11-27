@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.actor.{Actor, ActorSystem, DeadLetter, Props}
 import akka.stream.Materializer
 import akka.stream.scaladsl._
-import game.actors.GameLoopActor
+import game.actors.{GameLoopActor, GameStateActor, InitState}
 import play.api.libs.streams.ActorFlow
 import play.api.{Environment, Logger}
 import play.api.mvc.{Action, Controller, WebSocket}
@@ -15,15 +15,27 @@ import shared.core.IdentifiedGameInput
 import shared.model._
 import shared.protocol.GameRequest
 import shared.serializers.Serializers._
-//import prickle._
 import boopickle.Default._
 import shared.physics.PhysicsFormula
 
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.Random
 
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   val log = Logger(getClass)
+  lazy val gameState = actorSystem.actorOf(GameStateActor.props)
+
+  val testState = {
+    val snakes = for {
+      i <- 1 to 3
+    } yield {
+      val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
+      Snake(Random.nextInt().toString, blocks, Up)
+    }
+    GameState(snakes, Set.empty)
+  }
+
+  gameState ! InitState(testState)
 
   def index = Action {
     Ok(views.html.index(SharedMessages.itWorks))
@@ -53,18 +65,8 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
         bbToArrayBytes(Pickle.intoBytes[GameState](st))
       }
 
-    val testState = {
-      val snakes = for {
-        i <- 1 to 3
-      } yield {
-        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
-        Snake(Random.nextInt().toString, blocks, Up)
-      }
-      GameState(snakes, Set.empty)
-    }
-
     val coreLogicFlow =
-      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, testState))
+      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, gameState))
 
     inputFlow.via(coreLogicFlow).via(serializeState)
   }
@@ -84,7 +86,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
       }
 
     val coreLogicFlow =
-      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, GameState.init))
+      ActorFlow.actorRef(ref => GameLoopActor.props(shared.serverUpdateRate, ref, gameState))
 
     inputFlow.via(coreLogicFlow).via(serializeState)
   }
