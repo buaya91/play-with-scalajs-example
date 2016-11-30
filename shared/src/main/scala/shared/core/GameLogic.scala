@@ -10,6 +10,16 @@ import shared.protocol.{ChangeDirection, JoinGame}
   */
 object GameLogic {
 
+  val mode = NoWall
+
+  //todo: move it somewhere, call it based on mode
+  def roundingBack(position: Vec2, boundary: (Double, Double)): Vec2 = (position, boundary) match {
+    case (Vec2(x, y), (xMax, yMax)) =>
+      val adjustedX = (if (x < 0) x + xMax else x) % xMax
+      val adjustedY = (if (y < 0) y + yMax else y) % yMax
+      Vec2(adjustedX, adjustedY)
+  }
+
   def snakeKilledByOther(snake: Snake, others: Seq[Snake]): Boolean = {
     val targetHead = snake.body.head
 
@@ -37,7 +47,9 @@ object GameLogic {
       case (ele, vec) => ele.copy(ele.center + (vec * snake.distancePerStep))
     }
 
-    val movedBody: Seq[AABB] = movedHead +: movedTail
+    val movedBody: Seq[AABB] = (movedHead +: movedTail) map {
+      case aabb @ AABB(center, hEx) => aabb.copy(center = roundingBack(center, (terrainX, terrainY)))
+    }
 
     snake.copy(body = movedBody)
   }

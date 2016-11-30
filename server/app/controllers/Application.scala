@@ -9,7 +9,6 @@ import akka.stream.scaladsl._
 import game.actors.{GameStateActor, InitState, PlayerJoin, PlayersActor}
 import play.api.Logger
 import play.api.mvc.{Action, Controller, WebSocket}
-import shared.SharedMessages
 import shared.core.IdentifiedGameInput
 import shared.model._
 import shared.protocol.GameRequest
@@ -38,7 +37,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
 
   def index = Action {
-    Ok(views.html.index(SharedMessages.itWorks))
+    Ok(views.html.index("OK"))
   }
 
   // TODO: check id to ensure unique

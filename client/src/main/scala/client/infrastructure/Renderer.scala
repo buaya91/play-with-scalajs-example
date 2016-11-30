@@ -1,6 +1,7 @@
 package client.infrastructure
 
 import org.scalajs.dom
+import org.scalajs.dom.window
 import org.scalajs.dom.CanvasRenderingContext2D
 import shared.model.{GameState, Snake}
 import shared.physics.{AABB, Vec2}
@@ -26,7 +27,8 @@ object CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
   }
 
   def drawSnake(ctx: canvasCtx, snake: Snake) = {
-    val (w, h) = (ctx.canvas.width, ctx.canvas.height)
+    val dpr = window.devicePixelRatio
+    val (w, h) = (ctx.canvas.width / dpr, ctx.canvas.height / dpr)
 
     val scalingFactor: Vec2 = Vec2(w / shared.terrainX, h / shared.terrainY)
 
