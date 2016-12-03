@@ -34,7 +34,19 @@ object GameLogic {
       } yield {
         val front: Vec2 = snake.body(i - 1).center
         val back: Vec2 = snake.body(i).center
-        front - back
+
+        val diff = {
+          (front - back).map(v => Math.abs(v) match {
+            case abs if abs > terrainX / 2 =>
+              abs / -v
+            case x => x
+          })
+        }
+
+        if (Math.abs(diff.magnitude) <= 4) println(s"Too long $diff")
+//        assert(Math.abs(diff.magnitude) <= 4, s"Distance between snake body is too long: $diff")
+
+        diff
       }
 
     val movedHead = {
@@ -48,7 +60,7 @@ object GameLogic {
     }
 
     val movedBody: Seq[AABB] = (movedHead +: movedTail) map {
-      case aabb @ AABB(center, hEx) => aabb.copy(center = roundingBack(center, (terrainX, terrainY)))
+      case aabb @ AABB(center, _) => aabb.copy(center = roundingBack(center, (terrainX, terrainY)))
     }
 
     snake.copy(body = movedBody)
@@ -64,10 +76,7 @@ object GameLogic {
         }
 
       case (s, IdentifiedGameInput(id, JoinGame)) =>
-        val newSnake = Snake(id,
-          PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX),
-          Up
-        )
+        val newSnake = Snake(id, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX), Up)
         s :+ newSnake
     }
 

@@ -7,6 +7,8 @@ case class Vec2(x: Double, y: Double) {
   def -(vec2: Vec2): Vec2 = Vec2(x - vec2.x, y - vec2.y)
   def *(multiplier: Double): Vec2 = Vec2(x * multiplier, y * multiplier)
 
+  def map(fn: Double => Double): Vec2 = Vec2(fn(x), fn(y))
+
   def magnitude: Double = Math.sqrt((x * x) + (y * y))
   def unitVector: Vec2 = Vec2(x / magnitude, y / magnitude)
   def dot(vec2: Vec2): Double = x * vec2.x + y * vec2.y

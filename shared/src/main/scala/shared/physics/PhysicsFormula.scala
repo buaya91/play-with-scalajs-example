@@ -1,7 +1,7 @@
 package shared.physics
 
 import Vec2._
-
+import shared._
 import scala.util.Random
 
 object PhysicsFormula {
@@ -67,7 +67,7 @@ object PhysicsFormula {
       i <- 0 to 5
     } yield {
       val c = Vec2(randomPt._1 + i, randomPt._2)
-      AABB(c, Vec2(1, 1))
+      AABB(c, snakeBodyUnitSize)
     }
   }
 }

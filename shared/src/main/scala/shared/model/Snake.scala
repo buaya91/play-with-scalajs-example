@@ -1,7 +1,7 @@
 package shared.model
 
 import shared.defaultSpeed
-import shared.physics.AABB
+import shared.physics._
 /**
   * @author limqingwei
   */
