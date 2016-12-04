@@ -35,7 +35,6 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   gameState ! InitState(testState)
 
   lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
-  val debugState = actorSystem.actorOf(DebugPlayersActor.props(gameState))
 
   def index = Action {
     Ok(views.html.index("OK"))
@@ -78,6 +77,20 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   }
 
   def debug = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
+    val debugGameState = actorSystem.actorOf(GameStateActor.props)
+
+    val testState = {
+      val snakes = for {
+        i <- 1 to 3
+      } yield {
+        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
+        Snake(Random.nextInt().toString, blocks, Up)
+      }
+      GameState(snakes, Set.empty)
+    }
+    debugGameState ! InitState(testState)
+    val debugState = actorSystem.actorOf(DebugPlayersActor.props(debugGameState))
+
     val deserializeState: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
       Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
         val r = Unpickle[GameRequest]

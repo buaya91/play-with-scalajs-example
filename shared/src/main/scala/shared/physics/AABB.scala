@@ -20,7 +20,7 @@ case class AABB(center: Vec2, halfExtents: Vec2) {
   def minkowskiSum(that: AABB): AABB = {
     val h = halfExtents + that.halfExtents
 
-    this.copy(h, that.center)
+    this.copy(that.center, h)
   }
 
   def minkowskiDiff(that: AABB): AABB = {
