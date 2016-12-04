@@ -1,10 +1,9 @@
 package shared.serializers
 
-//import prickle.{CompositePickler, PicklerPair}
 import java.nio.ByteBuffer
 
-import shared.model.{Direction, Down, GameState, Left, Right, Up}
-import shared.protocol.{ChangeDirection, GameCommand}
+import shared.model._
+import shared.protocol._
 import boopickle.Default._
 
 object Serializers {
@@ -14,7 +13,9 @@ object Serializers {
     .addConcreteType[Left.type]
     .addConcreteType[Right.type]
 
-  implicit val cmdP = compositePickler[GameCommand].addConcreteType[ChangeDirection]
+  implicit val cmdP = compositePickler[GameCommand]
+    .addConcreteType[ChangeDirection]
+    .addConcreteType[DebugNextFrame.type]
 
   def bbToArrayBytes(buffer: ByteBuffer): Array[Byte] = {
     val data = Array.ofDim[Byte](buffer.remaining())

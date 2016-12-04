@@ -45,6 +45,7 @@ lazy val client = (project in file("client"))
     persistLauncher in Test := false,
     libraryDependencies ++= Seq(
       "org.scala-js"  %%% "scalajs-dom" % "0.9.1",
+      "com.lihaoyi"   %%% "scalatags"   % "0.6.1",
       "io.monix"      %%% "monix"       % monixV,
       "org.scalatest" %%% "scalatest"   % scalatestV % "test"
     )
@@ -56,8 +57,8 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "me.chrons"               %%% "boopickle" % boopickleV,
-      "org.scalatest"           %%% "scalatest" % scalatestV % "test"
+      "me.chrons"     %%% "boopickle" % boopickleV,
+      "org.scalatest" %%% "scalatest" % scalatestV % "test"
     )
   )
   .jsConfigure(_ enablePlugins ScalaJSWeb)

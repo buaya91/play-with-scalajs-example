@@ -46,7 +46,7 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
   }
 }
 
-object PlayersActor {
+object  PlayersActor {
   def props(updateRate: Int, gameStateRef: ActorRef): Props =
     Props(classOf[PlayersActor], updateRate, gameStateRef)
 }

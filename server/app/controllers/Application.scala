@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.actor._
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.stream.scaladsl._
-import game.actors.{GameStateActor, InitState, PlayerJoin, PlayersActor}
+import game.actors._
 import play.api.Logger
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
@@ -34,7 +34,8 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   }
   gameState ! InitState(testState)
 
-  val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
+  lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
+  val debugState = actorSystem.actorOf(DebugPlayersActor.props(gameState))
 
   def index = Action {
     Ok(views.html.index("OK"))
@@ -50,13 +51,12 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   }
 
   def wsFlow(id: String): Flow[Array[Byte], Array[Byte], NotUsed] = {
-    val inputFlow: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
-      Flow
-        .fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
-          val r = Unpickle[GameRequest]
-            .fromBytes(ByteBuffer.wrap(rawBytes))
-          IdentifiedGameInput(id, r.cmd)
-        }
+    val deserializeState: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
+      Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
+        val r = Unpickle[GameRequest]
+          .fromBytes(ByteBuffer.wrap(rawBytes))
+        IdentifiedGameInput(id, r.cmd)
+      }
 
     val serializeState: Flow[GameState, Array[Byte], NotUsed] =
       Flow.fromFunction[GameState, Array[Byte]] { st =>
@@ -65,13 +65,42 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
 
     val coreLogicFlow = {
       val out =
-        Source.actorRef(1000000, OverflowStrategy.dropNew).mapMaterializedValue(ref => playersState ! PlayerJoin(id, ref))
+        Source
+          .actorRef(1000000, OverflowStrategy.dropNew)
+          .mapMaterializedValue(ref => playersState ! PlayerJoin(id, ref))
 
       val in = Sink.actorRef(playersState, s"Player $id left")
 
       Flow.fromSinkAndSource(in, out)
     }
 
-    inputFlow.via(coreLogicFlow).via(serializeState)
+    deserializeState.via(coreLogicFlow).via(serializeState)
+  }
+
+  def debug = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
+    val deserializeState: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
+      Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
+        val r = Unpickle[GameRequest]
+          .fromBytes(ByteBuffer.wrap(rawBytes))
+        IdentifiedGameInput("Debug", r.cmd)
+      }
+
+    val serializeState: Flow[GameState, Array[Byte], NotUsed] =
+      Flow.fromFunction[GameState, Array[Byte]] { st =>
+        bbToArrayBytes(Pickle.intoBytes[GameState](st))
+      }
+
+    val coreLogicFlow = {
+      val out =
+        Source
+          .actorRef(1000000, OverflowStrategy.dropNew)
+          .mapMaterializedValue(ref => debugState ! PlayerJoin("Debug", ref))
+
+      val in = Sink.actorRef(debugState, s"Debug ended")
+
+      Flow.fromSinkAndSource(in, out)
+    }
+
+    deserializeState.via(coreLogicFlow).via(serializeState)
   }
 }
