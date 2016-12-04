@@ -39,7 +39,7 @@ object GameLogic {
           (front - back).map(v => Math.abs(v) match {
             case abs if abs > terrainX / 2 =>
               abs / -v
-            case x => x
+            case x => v
           })
         }
 

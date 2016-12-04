@@ -16,17 +16,17 @@ class GameStateActor extends Actor {
     case NextFrame =>
       val updated = GameLogic.step(state, inputs)
 
-//      println(
-//        s"""
-//           |Before :
-//           | - ${state.snakes.size}
-//           | - ${state.snakes.head}
-//           |
-//           |After:
-//           | - ${updated.snakes.size}
-//           | - ${updated.snakes.head}
-//           |
-//         """.stripMargin)
+      println(
+        s"""
+           |Before :
+           | - ${state.snakes.size}
+           | - ${state.snakes.head}
+           |
+           |After:
+           | - ${updated.snakes.size}
+           | - ${updated.snakes.head}
+           |
+         """.stripMargin)
 
       context.sender() ! updated
       context.become(active(updated, Seq.empty))

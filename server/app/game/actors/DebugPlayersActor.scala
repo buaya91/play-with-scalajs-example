@@ -7,8 +7,6 @@ import shared.protocol.{DebugNextFrame, JoinGame}
 
 class DebugPlayersActor(gameStateRef: ActorRef) extends Actor {
 
-  gameStateRef ! NextFrame
-
   override def receive: Receive = pendingGameState(Seq.empty)
 
   def pendingGameState(players: Seq[ActorRef]): Receive = {
