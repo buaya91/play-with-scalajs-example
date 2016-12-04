@@ -13,21 +13,21 @@ object GameLogic {
   val mode = NoWall
 
   //todo: move it somewhere, call it based on mode
-  def roundingBack(position: Vec2, boundary: (Double, Double)): Vec2 = (position, boundary) match {
+  private def roundingBack(position: Vec2, boundary: (Double, Double)): Vec2 = (position, boundary) match {
     case (Vec2(x, y), (xMax, yMax)) =>
       val adjustedX = (if (x < 0) x + xMax else x) % xMax
       val adjustedY = (if (y < 0) y + yMax else y) % yMax
       Vec2(adjustedX, adjustedY)
   }
 
-  def snakeKilledByOther(snake: Snake, others: Seq[Snake]): Boolean = {
+  private def snakeKilledByOther(snake: Snake, others: Seq[Snake]): Boolean = {
     val targetHead = snake.body.head
 
     others.exists(s =>
       s != snake && s.body.exists(b => targetHead.collided(b)))
   }
 
-  def move(snake: Snake): Snake = {
+  private def move(snake: Snake): Snake = {
     val diffBetweenElements =
       for {
         i <- 1 until snake.body.size
@@ -43,7 +43,7 @@ object GameLogic {
           })
         }
 
-        if (Math.abs(diff.magnitude) <= 4) println(s"Too long $diff")
+        if (Math.abs(diff.magnitude) > 4) println(s"Too long $front and $back and ${snake.id}")
 //        assert(Math.abs(diff.magnitude) <= 4, s"Distance between snake body is too long: $diff")
 
         diff
@@ -66,7 +66,7 @@ object GameLogic {
     snake.copy(body = movedBody)
   }
 
-  def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
+  private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
     val updatedSnakes = inputs.foldLeft(state.snakes) {
       case (s, IdentifiedGameInput(id, ChangeDirection(dir))) =>
         s.map {

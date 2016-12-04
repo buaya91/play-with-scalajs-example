@@ -15,6 +15,7 @@ class GameStateActor extends Actor {
     case UserInputs(i) => context.become(active(state, inputs ++ i))
     case NextFrame =>
       val updated = GameLogic.step(state, inputs)
+
       context.sender() ! updated
       context.become(active(updated, Seq.empty))
   }

@@ -20,7 +20,7 @@ class PhysicsFormulaSuites extends WordSpec with Matchers {
     }
 
     "compute empty contiguous block in fixed area" in {
-      ???
+      val block = PhysicsFormula.findContiguousBlock(100, 100)
     }
   }
 }
