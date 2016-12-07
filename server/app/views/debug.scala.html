@@ -1,0 +1,26 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+    </head>
+    <body>
+        @content
+        <script src="https://cdn.rawgit.com/jondavidjohn/hidpi-canvas-polyfill/1.0.9/dist/hidpi-canvas.min.js"></script>
+        @scalajs.html.selectScript(
+            "client",
+            routes.Assets.versioned(_).toString,
+            name => getClass.getResource(s"/public/$name") != null)
+        @scalajs.html.jsdeps(
+            "client",
+            routes.Assets.versioned(_).toString,
+            name => getClass.getResource(s"/public/$name") != null)
+        <script>
+                client.SnakeGameClient().debugMain()
+        </script>
+    </body>
+</html>

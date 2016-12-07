@@ -37,7 +37,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
 
   def index = Action {
-    Ok(views.html.index("OK"))
+    Ok(views.html.main("Snake")(views.html.canvas()))
   }
 
   // TODO: check id to ensure unique
@@ -69,47 +69,6 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
           .mapMaterializedValue(ref => playersState ! PlayerJoin(id, ref))
 
       val in = Sink.actorRef(playersState, s"Player $id left")
-
-      Flow.fromSinkAndSource(in, out)
-    }
-
-    deserializeState.via(coreLogicFlow).via(serializeState)
-  }
-
-  def debug = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
-    val debugGameState = actorSystem.actorOf(GameStateActor.props)
-
-    val testState = {
-      val snakes = for {
-        i <- 1 to 3
-      } yield {
-        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
-        Snake(Random.nextInt().toString, blocks, Up)
-      }
-      GameState(snakes, Set.empty)
-    }
-    debugGameState ! InitState(testState)
-    val debugState = actorSystem.actorOf(DebugPlayersActor.props(debugGameState))
-
-    val deserializeState: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
-      Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
-        val r = Unpickle[GameRequest]
-          .fromBytes(ByteBuffer.wrap(rawBytes))
-        IdentifiedGameInput("Debug", r.cmd)
-      }
-
-    val serializeState: Flow[GameState, Array[Byte], NotUsed] =
-      Flow.fromFunction[GameState, Array[Byte]] { st =>
-        bbToArrayBytes(Pickle.intoBytes[GameState](st))
-      }
-
-    val coreLogicFlow = {
-      val out =
-        Source
-          .actorRef(1000000, OverflowStrategy.dropNew)
-          .mapMaterializedValue(ref => debugState ! PlayerJoin("Debug", ref))
-
-      val in = Sink.actorRef(debugState, s"Debug ended")
 
       Flow.fromSinkAndSource(in, out)
     }
