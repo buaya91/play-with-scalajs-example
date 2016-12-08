@@ -11,10 +11,33 @@ import shared.protocol.GameRequest
 import shared.serializers.Serializers._
 
 import scala.scalajs.js.typedarray._
+import scala.util.Random
 
 trait GameStateSource {
-  def src(): Observable[GameState]
-  def send(input: GameRequest): Unit
+  val wsConn: WebSocket
+  wsConn.binaryType = "arraybuffer"
+
+  def src(): Observable[GameState] = {
+    Observable.create[GameState](OverflowStrategy.Unbounded) { sync =>
+      wsConn.onmessage = (ev: MessageEvent) => {
+        val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
+        val deserializedGameState: GameState = Unpickle[GameState].fromBytes(rawBytes)
+        sync.onNext(deserializedGameState)
+      }
+
+      Cancelable(() => {
+        sync.onComplete()
+        wsConn.close()
+      })
+    }
+  }
+
+  def send(input: GameRequest): Unit = {
+    val serialized = Pickle.intoBytes(input)
+    val arrayBuf = bbToArrayBuffer(serialized)
+
+    wsConn.send(arrayBuf)
+  }
 
   protected def bbToArrayBuffer(buffer: ByteBuffer): ArrayBuffer = {
     val arrayBytes = bbToArrayBytes(buffer)
@@ -27,58 +50,15 @@ trait GameStateSource {
   }
 }
 
+object GameStateSource extends GameStateSource {
+  lazy val randomID = Random.nextString(5)
+  lazy val wsConn = new WebSocket(s"ws://localhost:9000/ws/$randomID")
+}
+
 object SourceForTest extends GameStateSource {
-  val wsConn = new WebSocket("ws://localhost:9000/wstest")
-
-  wsConn.binaryType = "arraybuffer"
-
-  override def src() = {
-    Observable.create[GameState](OverflowStrategy.Unbounded) { sync =>
-      wsConn.onmessage = (ev: MessageEvent) => {
-        val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
-        val deserializedGameState: GameState = Unpickle[GameState].fromBytes(rawBytes)
-        sync.onNext(deserializedGameState)
-      }
-
-      Cancelable(() => {
-        sync.onComplete()
-        wsConn.close()
-      })
-    }
-  }
-
-  override def send(input: GameRequest) = {
-    val serialized = Pickle.intoBytes(input)
-    val arrayBuf = bbToArrayBuffer(serialized)
-
-    wsConn.send(arrayBuf)
-  }
+  lazy val wsConn = new WebSocket("ws://localhost:9000/wstest")
 }
 
 object DebugSource extends GameStateSource {
-  val wsConn = new WebSocket("ws://localhost:9000/wsdebug")
-
-  wsConn.binaryType = "arraybuffer"
-
-  override def src() = {
-    Observable.create[GameState](OverflowStrategy.Unbounded) { sync =>
-      wsConn.onmessage = (ev: MessageEvent) => {
-        val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
-        val deserializedGameState: GameState = Unpickle[GameState].fromBytes(rawBytes)
-        sync.onNext(deserializedGameState)
-      }
-
-      Cancelable(() => {
-        sync.onComplete()
-        wsConn.close()
-      })
-    }
-  }
-
-  override def send(input: GameRequest) = {
-    val serialized = Pickle.intoBytes(input)
-    val arrayBuf = bbToArrayBuffer(serialized)
-
-    wsConn.send(arrayBuf)
-  }
+  lazy val wsConn = new WebSocket("ws://localhost:9000/wsdebug")
 }

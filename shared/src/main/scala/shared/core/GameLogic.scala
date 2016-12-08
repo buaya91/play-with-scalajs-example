@@ -76,6 +76,7 @@ object GameLogic {
         }
 
       case (s, IdentifiedGameInput(id, JoinGame)) =>
+        println("Joined !")
         val newSnake = Snake(id, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX), Up)
         s :+ newSnake
     }

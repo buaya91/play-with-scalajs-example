@@ -11,7 +11,7 @@ object SnakeGameClient extends JSApp {
 
   @annotation.JSExport
   override def main(): Unit = {
-    val stateSrc = SourceForTest.src()
+    val stateSrc = GameStateSource.src()
 
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
 

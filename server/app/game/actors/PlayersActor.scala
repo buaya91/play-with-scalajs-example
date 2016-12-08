@@ -12,13 +12,11 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
   private lazy val millisPerUpdate = 1000 / loopPerSec
 
-  gameStateRef ! NextFrame
+  override def receive: Receive = waitingPlayer
 
-  override def receive: Receive = pendingGameState(System.currentTimeMillis(), Seq.empty)
-
-  def pendingGameState(frameStart: Long, players: Seq[ActorRef]): Receive = {
+  def gameActive(frameStart: Long, players: Map[String, ActorRef]): Receive = {
     case s: GameState =>
-      players.foreach(_ ! s)
+      players.values.foreach(_ ! s)
 
       val millisToWait = timeToNextFrame(frameStart)
 
@@ -29,14 +27,24 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
       context.system.scheduler
         .scheduleOnce(Math.max(0, millisToWait) millis, gameStateRef, NextFrame)(context.dispatcher, self)
 
-      context.become(pendingGameState(System.currentTimeMillis() + millisToWait, players))
+      context.become(gameActive(System.currentTimeMillis() + millisToWait, players))
 
     case input: IdentifiedGameInput =>
       gameStateRef ! UserInputs(Seq(input))
 
     case PlayerJoin(id, r) =>
+      gameStateRef ! UserInputs(Seq(IdentifiedGameInput(id, JoinGame)))
+      context.become(gameActive(frameStart, players + ((id, r))))
+
+    case PlayerLeft(id) =>
+      context.become(gameActive(frameStart, players - id))
+  }
+
+  def waitingPlayer: Receive = {
+    case PlayerJoin(id, r) =>
       gameStateRef ! IdentifiedGameInput(id, JoinGame)
-      context.become(pendingGameState(frameStart, players :+ r))
+      context.become(gameActive(System.currentTimeMillis(), Map(id -> r)))
+      gameStateRef ! NextFrame
   }
 
   def timeToNextFrame(lastFrameMillis: Long): Long = {
