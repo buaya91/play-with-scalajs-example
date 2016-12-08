@@ -12,7 +12,7 @@ class GameStateActor extends Actor {
   }
 
   def active(state: GameState, inputs: Seq[IdentifiedGameInput]): Receive = {
-    case UserInputs(i) => context.become(active(state, inputs ++ i))
+    case i: IdentifiedGameInput => context.become(active(state, inputs :+ i))
     case NextFrame =>
       val updated = GameLogic.step(state, inputs)
 

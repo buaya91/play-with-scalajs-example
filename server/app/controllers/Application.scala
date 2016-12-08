@@ -11,7 +11,7 @@ import play.api.Logger
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
 import shared.model._
-import shared.protocol.GameRequest
+import shared.protocol.{GameRequest, JoinGame, LeaveGame}
 import shared.serializers.Serializers._
 import boopickle.Default._
 import shared.physics.PhysicsFormula

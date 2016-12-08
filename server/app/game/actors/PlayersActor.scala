@@ -3,7 +3,7 @@ package game.actors
 import akka.actor.{Actor, ActorRef, Props}
 import shared.core.IdentifiedGameInput
 import shared.model.GameState
-import shared.protocol.JoinGame
+import shared.protocol.{JoinGame, LeaveGame}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -30,14 +30,20 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
       context.become(gameActive(System.currentTimeMillis() + millisToWait, players))
 
     case input: IdentifiedGameInput =>
-      gameStateRef ! UserInputs(Seq(input))
+      gameStateRef ! input
 
     case PlayerJoin(id, r) =>
-      gameStateRef ! UserInputs(Seq(IdentifiedGameInput(id, JoinGame)))
+      gameStateRef ! IdentifiedGameInput(id, JoinGame)
       context.become(gameActive(frameStart, players + ((id, r))))
 
     case PlayerLeft(id) =>
-      context.become(gameActive(frameStart, players - id))
+      gameStateRef ! IdentifiedGameInput(id, LeaveGame)
+      val removed = players - id
+
+      if (removed.isEmpty)
+        context.become(waitingPlayer)
+      else
+        context.become(gameActive(frameStart, removed))
   }
 
   def waitingPlayer: Receive = {

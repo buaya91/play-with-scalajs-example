@@ -3,7 +3,7 @@ package shared.core
 import shared.model._
 import shared._
 import shared.physics.{AABB, PhysicsFormula, Vec2}
-import shared.protocol.{ChangeDirection, JoinGame}
+import shared.protocol.{ChangeDirection, JoinGame, LeaveGame}
 
 /**
   * @author limqingwei
@@ -76,9 +76,11 @@ object GameLogic {
         }
 
       case (s, IdentifiedGameInput(id, JoinGame)) =>
-        println("Joined !")
         val newSnake = Snake(id, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX), Up)
         s :+ newSnake
+
+      case (s, IdentifiedGameInput(id, LeaveGame)) =>
+        s.filter(_.id != id)
     }
 
     state.copy(snakes = updatedSnakes)

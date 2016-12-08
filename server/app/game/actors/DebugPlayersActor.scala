@@ -17,7 +17,7 @@ class DebugPlayersActor(gameStateRef: ActorRef) extends Actor {
       gameStateRef ! NextFrame
 
     case input: IdentifiedGameInput =>
-      gameStateRef ! UserInputs(Seq(input))
+      gameStateRef ! input
 
     case PlayerJoin(id, r) =>
       gameStateRef ! IdentifiedGameInput(id, JoinGame)

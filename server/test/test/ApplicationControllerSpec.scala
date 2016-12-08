@@ -43,10 +43,8 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
       val expected = GameState.init
 
       sub.request(2)
-      sub.expectNext(
-        expected,
-        expected
-      )
+      sub.expectNext()
+      sub.expectNext()
     }
   }
 }
