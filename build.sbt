@@ -5,11 +5,6 @@ name := "Scalajs-snake"
 version := "0.1.0"
 
 lazy val scalaV = "2.11.8"
-lazy val akkaV = "2.4.12"
-lazy val scalatestV = "3.0.0"
-lazy val scalacheckV = "1.13.0"
-lazy val monixV = "2.0-RC8"
-lazy val boopickleV = "1.2.4"
 
 def commonSettings = Seq(
   scalaVersion := scalaV,
@@ -24,16 +19,10 @@ lazy val server = (project in file("server"))
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
+
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
-    libraryDependencies ++= Seq(
-      "com.vmunier"       %% "scalajs-scripts"     % "1.1.0",
-      "ch.qos.logback"    % "logback-core"         % "1.1.7",
-      "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % "test",
-      "com.typesafe.akka" %% "akka-testkit"        % akkaV % "test",
-      "org.scalacheck"    %% "scalacheck"          % scalacheckV % "test",
-      "org.scalatest"     %% "scalatest"           % scalatestV % "test"
-    )
+    libraryDependencies ++= Server.libDeps.value
   )
   .enablePlugins(PlayScala)
   .dependsOn(sharedJvm)
@@ -43,12 +32,8 @@ lazy val client = (project in file("client"))
   .settings(
     persistLauncher := true,
     persistLauncher in Test := false,
-    libraryDependencies ++= Seq(
-      "org.scala-js"  %%% "scalajs-dom" % "0.9.1",
-      "com.lihaoyi"   %%% "scalatags"   % "0.6.1",
-      "io.monix"      %%% "monix"       % monixV,
-      "org.scalatest" %%% "scalatest"   % scalatestV % "test"
-    )
+    libraryDependencies ++= Client.libDeps.value,
+    jsDependencies ++= Client.jsDeps.value
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
   .dependsOn(sharedJs)
@@ -56,10 +41,7 @@ lazy val client = (project in file("client"))
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(
-      "me.chrons"     %%% "boopickle" % boopickleV,
-      "org.scalatest" %%% "scalatest" % scalatestV % "test"
-    )
+    libraryDependencies ++= Shared.libDeps.value
   )
   .jsConfigure(_ enablePlugins ScalaJSWeb)
 
