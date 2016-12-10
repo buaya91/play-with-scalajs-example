@@ -17,8 +17,8 @@ package object shared {
   def millisNeededPerUpdate(rate: Int = serverUpdateRate): Int = 1000 / rate
 
   def unitPerDirection(dir: Direction): Vec2 = dir match {
-    case Up =>  Vec2(0, 1)
-    case Down => Vec2(0, -1)
+    case Up =>  Vec2(0, -1)
+    case Down => Vec2(0, 1)
     case model.Right => Vec2(1, 0)
     case model.Left =>Vec2(-1, 0)
   }

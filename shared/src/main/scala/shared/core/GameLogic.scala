@@ -23,8 +23,7 @@ object GameLogic {
   private def snakeKilledByOther(snake: Snake, others: Seq[Snake]): Boolean = {
     val targetHead = snake.body.head
 
-    others.exists(s =>
-      s != snake && s.body.exists(b => targetHead.collided(b)))
+    others.exists(s => s != snake && s.body.tail.exists(targetHead.collided))
   }
 
   private def move(snake: Snake): Snake = {
@@ -36,15 +35,15 @@ object GameLogic {
         val back: Vec2 = snake.body(i).center
 
         val diff = {
-          (front - back).map(v => Math.abs(v) match {
-            case abs if abs > terrainX / 2 =>
-              abs / -v
-            case x => v
+          (front - back).map(v =>
+            Math.abs(v) match {
+              case abs if abs > terrainX / 2 =>
+                abs / -v
+              case x => v
           })
         }
 
-        if (Math.abs(diff.magnitude) > 4) println(s"Too long $front and $back and ${snake.id}")
-//        assert(Math.abs(diff.magnitude) <= 4, s"Distance between snake body is too long: $diff")
+        assert(Math.abs(diff.magnitude) <= 4, s"Distance between snake body is too long: $diff")
 
         diff
       }
@@ -93,7 +92,6 @@ object GameLogic {
       * 2. clear snakes killed
       * 3. check remained snakes if
       */
-
     val inputApplied = applyInput(state, inputs)
     val movedSnakes = inputApplied.snakes.map(move)
     val survivedSnakes =
