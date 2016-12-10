@@ -2,9 +2,9 @@ package shared.protocol
 
 import shared.model.Direction
 
-case class GameRequest(cmd: GameCommand)
+sealed trait GameRequest
 
-sealed trait GameCommand
+sealed trait GameCommand extends GameRequest
 case object JoinGame extends GameCommand
 case object LeaveGame extends GameCommand
 case class ChangeDirection(direction: Direction) extends GameCommand

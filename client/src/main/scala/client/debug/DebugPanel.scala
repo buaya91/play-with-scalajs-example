@@ -3,9 +3,9 @@ package client.views
 import shared.protocol.{DebugNextFrame, GameRequest}
 
 object DebugPanel {
-  def apply(send: GameRequest => Unit) = {
-    import scalatags.JsDom.all._
+  import scalatags.JsDom.all._
 
+  def apply(send: GameRequest => Unit) = {
     div(
       button("Next frame", onclick := { () =>
         send(GameRequest(DebugNextFrame))
