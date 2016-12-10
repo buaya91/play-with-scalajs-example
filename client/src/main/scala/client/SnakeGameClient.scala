@@ -5,6 +5,7 @@ import org.scalajs.dom._
 
 import scala.scalajs.js._
 import monix.execution.Scheduler.Implicits.global
+import org.scalajs.dom.raw.HTMLElement
 import shared.protocol.{DebugNextFrame, GameRequest}
 
 object SnakeGameClient extends JSApp {
@@ -20,6 +21,9 @@ object SnakeGameClient extends JSApp {
     stateSrc.foreach(state => CanvasRenderer.render(ctx, state))
 
     stateSrc.subscribe()
+
+    InputControl.captureEvents(document.asInstanceOf[HTMLElement])
+      .foreach(GameStateSource.send)
   }
 
   @annotation.JSExport
