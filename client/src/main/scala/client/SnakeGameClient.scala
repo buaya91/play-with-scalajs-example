@@ -1,12 +1,12 @@
 package client
 
 import client.infrastructure._
+import client.views.DebugPanel
 import org.scalajs.dom._
 
 import scala.scalajs.js._
 import monix.execution.Scheduler.Implicits.global
 import org.scalajs.dom.raw.HTMLElement
-import shared.protocol.{DebugNextFrame, GameRequest}
 
 object SnakeGameClient extends JSApp {
 
@@ -22,7 +22,8 @@ object SnakeGameClient extends JSApp {
 
     stateSrc.subscribe()
 
-    InputControl.captureEvents(document.asInstanceOf[HTMLElement])
+    InputControl
+      .captureEvents(document.asInstanceOf[HTMLElement])
       .foreach(GameStateSource.send)
   }
 
@@ -39,13 +40,8 @@ object SnakeGameClient extends JSApp {
     stateSrc.subscribe()
     addDebugPanel()
   }
+
   def addDebugPanel(): Unit = {
-    import scalatags.JsDom.all._
-
-    val debugPanel = div(
-      button("Next frame", onclick := {() => DebugSource.send(GameRequest(DebugNextFrame))})
-    )
-
-    document.body.appendChild(debugPanel.render)
+    document.body.appendChild(DebugPanel(DebugSource.send).render)
   }
 }
