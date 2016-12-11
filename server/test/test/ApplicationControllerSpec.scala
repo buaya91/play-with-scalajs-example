@@ -9,12 +9,11 @@ import akka.stream.testkit.scaladsl.{TestSink, TestSource}
 import akka.testkit.TestKit
 import controllers.Application
 import org.scalatest._
-import shared.model.GameState
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import boopickle.Default._
-import shared.protocol.{GameRequest, JoinGame}
+import shared.protocol.{GameRequest, GameState, JoinGame}
 import shared.serializers.Serializers._
 
 import scala.language.postfixOps

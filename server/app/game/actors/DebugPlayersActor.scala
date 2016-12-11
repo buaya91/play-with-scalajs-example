@@ -2,8 +2,7 @@ package game.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import shared.core.IdentifiedGameInput
-import shared.model.GameState
-import shared.protocol.{DebugNextFrame, JoinGame}
+import shared.protocol.{DebugNextFrame, JoinGame, GameState}
 
 // todo: getting messy, either remove or refactor
 class DebugPlayersActor(gameStateRef: ActorRef) extends Actor {

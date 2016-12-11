@@ -2,8 +2,7 @@ package game.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import shared.core.IdentifiedGameInput
-import shared.model.GameState
-import shared.protocol.{JoinGame, LeaveGame}
+import shared.protocol.{AssignedID, GameState, JoinGame, LeaveGame}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -14,9 +13,9 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
   override def receive: Receive = waitingConnection
 
-  def gameActive(frameStart: Long, players: Map[String, ActorRef]): Receive = {
+  def gameActive(frameStart: Long, connections: Map[String, ActorRef]): Receive = {
     case s: GameState =>
-      players.values.foreach(_ ! s)
+      connections.values.foreach(_ ! s)
 
       val millisToWait = timeToNextFrame(frameStart)
 
@@ -27,17 +26,22 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
       context.system.scheduler
         .scheduleOnce(Math.max(0, millisToWait) millis, gameStateRef, NextFrame)(context.dispatcher, self)
 
-      context.become(gameActive(System.currentTimeMillis() + millisToWait, players))
+      context.become(gameActive(System.currentTimeMillis() + millisToWait, connections))
+
+    case i @ IdentifiedGameInput(id, JoinGame(_)) =>
+      connections(id) ! AssignedID(id)
+      gameStateRef ! i
 
     case input: IdentifiedGameInput =>
       gameStateRef ! input
 
+
     case ConnectionEstablished(id, r) =>
-      context.become(gameActive(frameStart, players + ((id, r))))
+      context.become(gameActive(frameStart, connections + ((id, r))))
 
     case ConnectionClosed(id) =>
       gameStateRef ! IdentifiedGameInput(id, LeaveGame)
-      val removed = players - id
+      val removed = connections - id
 
       if (removed.isEmpty)
         context.become(waitingConnection)
@@ -54,10 +58,11 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
     case ConnectionEstablished(id, r) =>
       context.become(waitingPlayerJoinGame(connections + ((id, r))))
 
-    case i @ IdentifiedGameInput(_, JoinGame(_)) =>
+    case i @ IdentifiedGameInput(id, JoinGame(_)) =>
+      connections(id) ! AssignedID(id)
       gameStateRef ! i
-      context.become(gameActive(System.currentTimeMillis(), connections))
       gameStateRef ! NextFrame
+      context.become(gameActive(System.currentTimeMillis(), connections))
 
     case ConnectionClosed(id) =>
       gameStateRef ! IdentifiedGameInput(id, LeaveGame)

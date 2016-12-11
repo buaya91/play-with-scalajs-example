@@ -2,7 +2,7 @@ package game.actors
 
 import akka.actor.ActorRef
 import shared.core.IdentifiedGameInput
-import shared.model.GameState
+import shared.protocol.GameState
 
 case object NextFrame
 

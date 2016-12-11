@@ -10,9 +10,9 @@ import boopickle.Default._
 import game.actors.{DebugPlayersActor, GameStateActor, InitState, ConnectionEstablished}
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
-import shared.model.{GameState, Snake, Up}
+import shared.model.{Snake, Up}
 import shared.physics.PhysicsFormula
-import shared.protocol.{GameCommand, GameRequest}
+import shared.protocol._
 import shared.serializers.Serializers._
 
 import scala.util.Random

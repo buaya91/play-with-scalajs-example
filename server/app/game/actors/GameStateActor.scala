@@ -2,7 +2,7 @@ package game.actors
 
 import akka.actor.{Actor, Props}
 import shared.core.{GameLogic, IdentifiedGameInput}
-import shared.model.GameState
+import shared.protocol.GameState
 
 class GameStateActor extends Actor {
   override def receive: Receive = unitialized

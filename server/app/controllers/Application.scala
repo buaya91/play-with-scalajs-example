@@ -11,8 +11,7 @@ import game.actors._
 import play.api.Logger
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
-import shared.model.{GameState, Snake, Up}
-import shared.protocol.{GameCommand, GameRequest}
+import shared.protocol._
 import shared.serializers.Serializers._
 import boopickle.Default._
 
@@ -45,18 +44,18 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
         }
       }
 
-    val serializeState: Flow[GameState, Array[Byte], NotUsed] =
-      Flow.fromFunction[GameState, Array[Byte]] { st =>
-        bbToArrayBytes(Pickle.intoBytes[GameState](st))
+    val serializeState: Flow[GameResponse, Array[Byte], NotUsed] =
+      Flow.fromFunction[GameResponse, Array[Byte]] { st =>
+        bbToArrayBytes(Pickle.intoBytes[GameResponse](st))
       }
 
-    val coreLogicFlow = {
+    val coreLogicFlow: Flow[IdentifiedGameInput, GameResponse, NotUsed] = {
       val out =
         Source
-          .actorRef(1000000, OverflowStrategy.dropNew)
+          .actorRef[GameResponse](1000000, OverflowStrategy.dropNew)
           .mapMaterializedValue(ref => playersState ! ConnectionEstablished(id, ref))
 
-      val in = Sink.actorRef(playersState, ConnectionClosed(id))
+      val in: Sink[IdentifiedGameInput, NotUsed] = Sink.actorRef(playersState, ConnectionClosed(id))
 
       Flow.fromSinkAndSource(in, out)
     }
