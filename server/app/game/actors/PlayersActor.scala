@@ -59,8 +59,14 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
       context.become(gameActive(System.currentTimeMillis(), connections))
       gameStateRef ! NextFrame
 
-    case what =>
-      println(s"$what did I rc?")
+    case ConnectionClosed(id) =>
+      gameStateRef ! IdentifiedGameInput(id, LeaveGame)
+      val removed = connections - id
+
+      if (removed.isEmpty)
+        context.become(waitingConnection)
+      else
+        context.become(waitingPlayerJoinGame(removed))
   }
 
   def timeToNextFrame(lastFrameMillis: Long): Long = {

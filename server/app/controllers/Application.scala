@@ -34,10 +34,6 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
     wsFlow(connectionID.toString)
   }
 
-  def test = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
-    wsFlow("Test")
-  }
-
   def wsFlow(id: String): Flow[Array[Byte], Array[Byte], NotUsed] = {
 
     val deserializeState: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
