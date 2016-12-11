@@ -12,7 +12,7 @@ import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
 import shared.model.{GameState, Snake, Up}
 import shared.physics.PhysicsFormula
-import shared.protocol.GameRequest
+import shared.protocol.{GameCommand, GameRequest}
 import shared.serializers.Serializers._
 
 import scala.util.Random
@@ -41,7 +41,10 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
       Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
         val r = Unpickle[GameRequest]
           .fromBytes(ByteBuffer.wrap(rawBytes))
-        IdentifiedGameInput("Debug", r.cmd)
+
+        r match {
+          case x: GameCommand => IdentifiedGameInput("Debug", x)
+        }
       }
 
     val serializeState: Flow[GameState, Array[Byte], NotUsed] =

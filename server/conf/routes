@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /ws/:id                     controllers.Application.gameChannel(id)
+GET     /ws                         controllers.Application.gameChannel
 GET     /wstest                     controllers.Application.test
 GET     /debug                      controllers.DebugApp.debug
 GET     /wsdebug                    controllers.DebugApp.debugWs

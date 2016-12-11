@@ -5,12 +5,25 @@
 <html>
   <head>
     <title>@title</title>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css">
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
   </head>
   <body>
-   @content
-   <script src="https://cdn.rawgit.com/jondavidjohn/hidpi-canvas-polyfill/1.0.9/dist/hidpi-canvas.min.js"></script>
-   @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
+      @content
+      <div class="ui modal" id="username-modal">
+          <div class="header center">Please enter your username</div>
+          <div class="ui input center">
+              <input type="text" id="username-input">
+              <div class="ui left pointing red basic label" id="error-msg" style="display: none">
+                  That name is taken!
+              </div>
+          </div>
+          <div class="actions">
+              <div class="ui button green" id="submit-username">OK</div>
+          </div>
+      </div>
+      <script src="https://cdn.rawgit.com/jondavidjohn/hidpi-canvas-polyfill/1.0.9/dist/hidpi-canvas.min.js"></script>
+      @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
   </body>
 </html>
