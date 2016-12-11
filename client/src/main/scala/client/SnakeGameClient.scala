@@ -32,12 +32,18 @@ object SnakeGameClient extends JSApp {
 
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+
+    val dpr = window.devicePixelRatio
+    canvas.width  = (window.innerWidth).toInt
+    canvas.height = (window.innerHeight).toInt
+    canvas.style.height = s"${window.innerHeight}px"
+    canvas.style.width = s"${window.innerWidth}px"
+
     val rendererConsumer = Consumer.foreach[(String, GameState)] {
       case (id, state) =>
         CanvasRenderer.render(ctx, state, id)
     }
 
-    // todo: might not be true later
     serverSrc
       .collect { case a: AssignedID => a }
       .firstL

@@ -27,7 +27,6 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
     Ok(views.html.main("Snake")(views.html.canvas()))
   }
 
-  // TODO: check id to ensure unique
   def gameChannel = WebSocket.accept[Array[Byte], Array[Byte]] { req =>
     val connectionID = UUID.randomUUID()
     wsFlow(connectionID.toString)
