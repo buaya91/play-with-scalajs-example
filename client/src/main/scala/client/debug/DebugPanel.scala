@@ -1,4 +1,4 @@
-package client.views
+package client.debug
 
 import shared.protocol.{DebugNextFrame, GameRequest}
 
@@ -8,7 +8,7 @@ object DebugPanel {
   def apply(send: GameRequest => Unit) = {
     div(
       button("Next frame", onclick := { () =>
-        send(GameRequest(DebugNextFrame))
+        send(DebugNextFrame)
       })
     )
   }

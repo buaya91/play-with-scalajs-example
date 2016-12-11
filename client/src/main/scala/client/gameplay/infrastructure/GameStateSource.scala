@@ -1,4 +1,4 @@
-package client.infrastructure
+package client.gameplay.infrastructure
 
 import java.nio.ByteBuffer
 
@@ -11,7 +11,6 @@ import shared.protocol.GameRequest
 import shared.serializers.Serializers._
 
 import scala.scalajs.js.typedarray._
-import scala.util.Random
 
 trait GameStateSource {
   val wsConn: WebSocket
@@ -25,6 +24,10 @@ trait GameStateSource {
         sync.onNext(deserializedGameState)
       }
 
+      wsConn.onerror = (ev: ErrorEvent) => {
+        sync.onError(new Exception(ev.message))
+      }
+
       Cancelable(() => {
         sync.onComplete()
         wsConn.close()
@@ -33,7 +36,7 @@ trait GameStateSource {
   }
 
   def send(input: GameRequest): Unit = {
-    val serialized = Pickle.intoBytes(input)
+    val serialized = Pickle.intoBytes[GameRequest](input)
     val arrayBuf = bbToArrayBuffer(serialized)
 
     wsConn.send(arrayBuf)
@@ -51,14 +54,9 @@ trait GameStateSource {
 }
 
 object GameStateSource extends GameStateSource {
-  lazy val randomID = Random.nextString(5)
-  lazy val wsConn = new WebSocket(s"ws://localhost:9000/ws/$randomID")
-}
-
-object SourceForTest extends GameStateSource {
-  lazy val wsConn = new WebSocket("ws://localhost:9000/wstest")
+  override lazy val wsConn = new WebSocket("ws://localhost:9000/ws")
 }
 
 object DebugSource extends GameStateSource {
-  lazy val wsConn = new WebSocket("ws://localhost:9000/wsdebug")
+  override lazy val wsConn = new WebSocket("ws://localhost:9000/wsdebug")
 }

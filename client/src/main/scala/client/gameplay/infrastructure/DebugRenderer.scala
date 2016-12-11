@@ -1,4 +1,4 @@
-package client.infrastructure
+package client.gameplay.infrastructure
 
 import shared.physics.{AABB, Vec2}
 

@@ -1,4 +1,4 @@
-package client.infrastructure
+package client.gameplay.infrastructure
 
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, window}
@@ -21,6 +21,7 @@ trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     }
   }
 
+  // todo: print name also
   def drawSnake(ctx: canvasCtx, snake: Snake) = {
     val dpr = window.devicePixelRatio
     val (w, h) = (ctx.canvas.width / dpr, ctx.canvas.height / dpr)

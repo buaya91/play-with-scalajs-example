@@ -1,4 +1,4 @@
-package client.infrastructure
+package client.gameplay.infrastructure
 
 import org.scalajs.dom
 import org.scalajs.dom.window

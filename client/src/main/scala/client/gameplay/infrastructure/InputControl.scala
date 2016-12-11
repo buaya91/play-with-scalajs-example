@@ -1,4 +1,4 @@
-package client.infrastructure
+package client.gameplay.infrastructure
 
 import monix.execution.Cancelable
 import monix.reactive.{Observable, OverflowStrategy}
@@ -18,7 +18,7 @@ object InputControl {
         }
 
         if (keyToCmd.isDefinedAt(ev.keyCode))
-          sync.onNext(GameRequest(keyToCmd(ev.keyCode)))
+          sync.onNext(keyToCmd(ev.keyCode))
 
       }, true)
 
