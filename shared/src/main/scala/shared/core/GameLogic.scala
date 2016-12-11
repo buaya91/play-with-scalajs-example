@@ -3,7 +3,7 @@ package shared.core
 import shared.model._
 import shared._
 import shared.physics.{AABB, PhysicsFormula, Vec2}
-import shared.protocol.{ChangeDirection, JoinGame, LeaveGame}
+import shared.protocol.{ChangeDirection, GameState, JoinGame, LeaveGame}
 
 /**
   * @author limqingwei
@@ -86,17 +86,11 @@ object GameLogic {
   }
 
   def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
-
-    /**
-      * 1. move snakes
-      * 2. clear snakes killed
-      * 3. check remained snakes if
-      */
-    val inputApplied = applyInput(state, inputs)
-    val movedSnakes = inputApplied.snakes.map(move)
     val survivedSnakes =
-      movedSnakes.filterNot(s => snakeKilledByOther(s, movedSnakes))
+      state.snakes.filterNot(s => snakeKilledByOther(s, state.snakes))
+    val inputApplied = applyInput(state.copy(survivedSnakes), inputs)
+    val movedSnakes = inputApplied.snakes.map(move)
 
-    inputApplied.copy(snakes = survivedSnakes)
+    inputApplied.copy(snakes = movedSnakes)
   }
 }

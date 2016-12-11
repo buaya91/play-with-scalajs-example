@@ -15,7 +15,15 @@ object Serializers {
 
   implicit val cmdP = compositePickler[GameCommand]
     .addConcreteType[ChangeDirection]
+    .addConcreteType[JoinGame]
+    .addConcreteType[LeaveGame.type]
     .addConcreteType[DebugNextFrame.type]
+
+  implicit val gameRequestP = compositePickler[GameRequest].join(cmdP)
+
+  implicit val gameResponseP = compositePickler[GameResponse]
+    .addConcreteType[GameState]
+    .addConcreteType[AssignedID]
 
   def bbToArrayBytes(buffer: ByteBuffer): Array[Byte] = {
     val data = Array.ofDim[Byte](buffer.remaining())
