@@ -38,7 +38,10 @@ object SnakeGameClient extends JSApp {
     }
 
     // todo: might not be true later
-    serverSrc.firstL.runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
+    serverSrc
+      .collect { case a: AssignedID => a }
+      .firstL
+      .runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
 
     serverSrc
       .scan(("", GameState.init)) {
