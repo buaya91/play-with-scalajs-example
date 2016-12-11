@@ -5,6 +5,7 @@ import shared.core.IdentifiedGameInput
 import shared.model.GameState
 import shared.protocol.{DebugNextFrame, JoinGame}
 
+// todo: getting messy, either remove or refactor
 class DebugPlayersActor(gameStateRef: ActorRef) extends Actor {
 
   override def receive: Receive = pendingGameState(Seq.empty)
@@ -19,8 +20,8 @@ class DebugPlayersActor(gameStateRef: ActorRef) extends Actor {
     case input: IdentifiedGameInput =>
       gameStateRef ! input
 
-    case PlayerJoin(id, r) =>
-      gameStateRef ! IdentifiedGameInput(id, JoinGame)
+    case ConnectionEstablished(id, r) =>
+      gameStateRef ! IdentifiedGameInput(id, JoinGame("debug"))
       context.become(pendingGameState(players :+ r))
   }
 }

@@ -15,30 +15,14 @@ import shared.model.{GameState, Snake, Up}
 import shared.protocol.{GameCommand, GameRequest}
 import shared.serializers.Serializers._
 import boopickle.Default._
-import shared.physics.PhysicsFormula
-
-import scala.concurrent.Future
-import scala.util.Random
 
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   val log = Logger(getClass)
   val gameState = actorSystem.actorOf(GameStateActor.props)
-
-  val testState = {
-    val snakes = for {
-      i <- 1 to 3
-    } yield {
-      val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
-      Snake(Random.nextInt().toString, blocks, Up)
-    }
-    GameState(snakes, Set.empty)
-  }
-  gameState ! InitState(testState)
+  gameState ! InitState(GameState.init)
 
   lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
-
-  private var ids: Set[String] = Set.empty
 
   def index = Action {
     Ok(views.html.main("Snake")(views.html.canvas()))
@@ -74,9 +58,9 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
       val out =
         Source
           .actorRef(1000000, OverflowStrategy.dropNew)
-          .mapMaterializedValue(ref => playersState ! PlayerJoin(id, ref))
+          .mapMaterializedValue(ref => playersState ! ConnectionEstablished(id, ref))
 
-      val in = Sink.actorRef(playersState, PlayerLeft(id))
+      val in = Sink.actorRef(playersState, ConnectionClosed(id))
 
       Flow.fromSinkAndSource(in, out)
     }

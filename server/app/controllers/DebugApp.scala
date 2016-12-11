@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import boopickle.Default._
-import game.actors.{DebugPlayersActor, GameStateActor, InitState, PlayerJoin}
+import game.actors.{DebugPlayersActor, GameStateActor, InitState, ConnectionEstablished}
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
 import shared.model.{GameState, Snake, Up}
@@ -30,7 +30,7 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
         i <- 1 to 3
       } yield {
         val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
-        Snake(Random.nextInt().toString, blocks, Up)
+        Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up)
       }
       GameState(snakes, Set.empty)
     }
@@ -56,7 +56,7 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
       val out =
         Source
           .actorRef(1000000, OverflowStrategy.dropNew)
-          .mapMaterializedValue(ref => debugState ! PlayerJoin("Debug", ref))
+          .mapMaterializedValue(ref => debugState ! ConnectionEstablished("Debug", ref))
 
       val in = Sink.actorRef(debugState, s"Debug ended")
 

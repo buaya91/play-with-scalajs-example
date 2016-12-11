@@ -12,7 +12,7 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
   private lazy val millisPerUpdate = 1000 / loopPerSec
 
-  override def receive: Receive = waitingPlayer
+  override def receive: Receive = waitingConnection
 
   def gameActive(frameStart: Long, players: Map[String, ActorRef]): Receive = {
     case s: GameState =>
@@ -32,25 +32,35 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
     case input: IdentifiedGameInput =>
       gameStateRef ! input
 
-    case PlayerJoin(id, r) =>
-      gameStateRef ! IdentifiedGameInput(id, JoinGame)
+    case ConnectionEstablished(id, r) =>
       context.become(gameActive(frameStart, players + ((id, r))))
 
-    case PlayerLeft(id) =>
+    case ConnectionClosed(id) =>
       gameStateRef ! IdentifiedGameInput(id, LeaveGame)
       val removed = players - id
 
       if (removed.isEmpty)
-        context.become(waitingPlayer)
+        context.become(waitingConnection)
       else
         context.become(gameActive(frameStart, removed))
   }
 
-  def waitingPlayer: Receive = {
-    case PlayerJoin(id, r) =>
-      gameStateRef ! IdentifiedGameInput(id, JoinGame)
-      context.become(gameActive(System.currentTimeMillis(), Map(id -> r)))
+  def waitingConnection: Receive = {
+    case ConnectionEstablished(id, r) =>
+      context.become(waitingPlayerJoinGame(Map(id -> r)))
+  }
+
+  def waitingPlayerJoinGame(connections: Map[String, ActorRef]): Receive = {
+    case ConnectionEstablished(id, r) =>
+      context.become(waitingPlayerJoinGame(connections + ((id, r))))
+
+    case i @ IdentifiedGameInput(_, JoinGame(_)) =>
+      gameStateRef ! i
+      context.become(gameActive(System.currentTimeMillis(), connections))
       gameStateRef ! NextFrame
+
+    case what =>
+      println(s"$what did I rc?")
   }
 
   def timeToNextFrame(lastFrameMillis: Long): Long = {

@@ -74,8 +74,8 @@ object GameLogic {
           case other => other
         }
 
-      case (s, IdentifiedGameInput(id, JoinGame)) =>
-        val newSnake = Snake(id, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX), Up)
+      case (s, IdentifiedGameInput(id, JoinGame(name))) =>
+        val newSnake = Snake(id, name, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX), Up)
         s :+ newSnake
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>

@@ -14,6 +14,7 @@ import shared.model.GameState
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import boopickle.Default._
+import shared.protocol.{GameRequest, JoinGame}
 import shared.serializers.Serializers._
 
 import scala.language.postfixOps
@@ -29,6 +30,10 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
       val flowToTest = controller.wsFlow("SSS")
       val (pub, sub) = TestSource.probe[Array[Byte]].via(flowToTest).toMat(TestSink.probe[Array[Byte]])(Keep.both).run()
 
+      val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("test"))
+
+      pub.sendNext(bbToArrayBytes(joinGameBB))
+
       sub.request(1)
       sub.expectNext(2 seconds)
     }
@@ -41,6 +46,10 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
       })).toMat(TestSink.probe[GameState])(Keep.both).run()
 
       val expected = GameState.init
+
+      val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("test"))
+
+      pub.sendNext(bbToArrayBytes(joinGameBB))
 
       sub.request(2)
       sub.expectNext()
