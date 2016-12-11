@@ -6,22 +6,30 @@ import monix.execution.Cancelable
 import monix.reactive._
 import org.scalajs.dom._
 import boopickle.Default._
-import shared.model.GameState
+import shared.protocol._
 import shared.protocol.GameRequest
 import shared.serializers.Serializers._
 
 import scala.scalajs.js.typedarray._
 
-trait GameStateSource {
+trait ServerSource {
   val wsConn: WebSocket
   wsConn.binaryType = "arraybuffer"
 
-  def src(): Observable[GameState] = {
-    Observable.create[GameState](OverflowStrategy.Unbounded) { sync =>
+  private var debugC = 0
+
+  def src(): Observable[GameResponse] = {
+    Observable.create[GameResponse](OverflowStrategy.Unbounded) { sync =>
       wsConn.onmessage = (ev: MessageEvent) => {
         val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
-        val deserializedGameState: GameState = Unpickle[GameState].fromBytes(rawBytes)
-        sync.onNext(deserializedGameState)
+        val deserializedResponse: GameResponse = Unpickle[GameResponse].fromBytes(rawBytes)
+
+        if (debugC == 0) {
+          println(s"First r: $deserializedResponse")
+          debugC = 1
+        }
+
+        sync.onNext(deserializedResponse)
       }
 
       wsConn.onerror = (ev: ErrorEvent) => {
@@ -53,10 +61,10 @@ trait GameStateSource {
   }
 }
 
-object GameStateSource extends GameStateSource {
+object  ServerSource extends ServerSource {
   override lazy val wsConn = new WebSocket("ws://localhost:9000/ws")
 }
 
-object DebugSource extends GameStateSource {
+object DebugSource extends ServerSource {
   override lazy val wsConn = new WebSocket("ws://localhost:9000/wsdebug")
 }

@@ -13,7 +13,7 @@ object JSFacade {
 
   @js.native
   trait JQuery extends js.Object {
-    def show() = js.native
+    def show(): Unit = js.native
   }
 
   @js.native

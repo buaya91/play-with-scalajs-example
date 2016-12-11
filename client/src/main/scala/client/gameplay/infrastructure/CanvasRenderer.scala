@@ -2,7 +2,8 @@ package client.gameplay.infrastructure
 
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, window}
-import shared.model.{Down, GameState, Snake}
+import shared.model.{Down, Snake}
+import shared.protocol._
 import shared.physics.{AABB, Vec2}
 
 trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
@@ -41,12 +42,15 @@ trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     }
   }
 
-  override def render(ctx: CanvasRenderingContext2D, state: GameState) = {
-    ctx.fillStyle = "black"
+  override def render(ctx: CanvasRenderingContext2D, state: GameState, selfID: String) = {
+    ctx.fillStyle = "#c2d6d6"   // grey for background
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-    ctx.fillStyle = "white"
-    state.snakes.foreach(drawSnake(ctx, _))
+    ctx.fillStyle = "#ff5050"   // slight pink for self
+    state.snakes.find(_.id == selfID).foreach(s => drawSnake(ctx, s))
+
+    ctx.fillStyle = "yellow"   // yellow for enemies
+    state.snakes.filterNot(_.id == selfID).foreach(s => drawSnake(ctx, s))
   }
 }
 

@@ -7,14 +7,15 @@ import org.scalajs.dom._
 
 import scala.scalajs.js._
 import monix.execution.Scheduler.Implicits.global
+import monix.reactive.Consumer
 import org.scalajs.dom.raw._
-import shared.protocol.JoinGame
+import shared.protocol.{AssignedID, GameState, JoinGame}
 
 object SnakeGameClient extends JSApp {
 
   def onSubmitName(): Unit = {
     val name = document.getElementById("username-input").asInstanceOf[HTMLInputElement].value
-    GameStateSource.send(JoinGame(name))
+    ServerSource.send(JoinGame(name))
     true
   }
 
@@ -27,35 +28,58 @@ object SnakeGameClient extends JSApp {
 
   @annotation.JSExport
   override def main(): Unit = {
-    val stateSrc = GameStateSource.src()
+    val serverSrc = ServerSource.src().publish
 
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
-
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+    val rendererConsumer = Consumer.foreach[(String, GameState)] {
+      case (id, state) =>
+        CanvasRenderer.render(ctx, state, id)
+    }
 
     // todo: might not be true later
-    stateSrc.firstL.runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
-    stateSrc.foreach(state => CanvasRenderer.render(ctx, state))
-    stateSrc.subscribe()
+    serverSrc.firstL.runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
+
+    serverSrc
+      .scan(("", GameState.init)) {
+        case (pair, AssignedID(id)) => (id, pair._2)
+        case (pair, x: GameState) => (pair._1, x)
+      }
+      .consumeWith(rendererConsumer)
+      .runAsync
+
+    serverSrc.connect()
 
     InputControl
       .captureEvents(document.asInstanceOf[HTMLElement])
-      .foreach(GameStateSource.send)
+      .foreach(ServerSource.send)
 
     initModal()
   }
 
   @annotation.JSExport
   def debugMain(): Unit = {
-    val stateSrc = DebugSource.src()
+    val serverSrc = DebugSource.src()
 
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    stateSrc.foreach(state => DebugRenderer.render(ctx, state))
+    val gameState = serverSrc.collect {
+      case x: GameState => x
+    }
 
-    stateSrc.subscribe()
+    val assignedID = serverSrc.collect {
+      case x: AssignedID => x
+    }
+
+    gameState
+      .flatMap(state => assignedID.map(a => (a.id, state)))
+      .foreach {
+        case (id, state) => DebugRenderer.render(ctx, state, id)
+      }
+
+    serverSrc.subscribe()
     addDebugPanel()
   }
 
