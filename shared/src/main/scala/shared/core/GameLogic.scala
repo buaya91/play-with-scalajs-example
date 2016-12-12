@@ -3,14 +3,9 @@ package shared.core
 import shared.model._
 import shared._
 import shared.physics.{AABB, PhysicsFormula, Vec2}
-import shared.protocol.{ChangeDirection, GameState, JoinGame, LeaveGame}
+import shared.protocol._
 
-/**
-  * @author limqingwei
-  */
 object GameLogic {
-
-  val mode = NoWall
 
   //todo: move it somewhere, call it based on mode
   private def roundingBack(position: Vec2, boundary: (Double, Double)): Vec2 = (position, boundary) match {
@@ -74,8 +69,11 @@ object GameLogic {
           case other => other
         }
 
+      case (s, IdentifiedGameInput(id, SpeedUp)) =>
+        ???
+
       case (s, IdentifiedGameInput(id, JoinGame(name))) =>
-        val newSnake = Snake(id, name, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX), Up)
+        val newSnake = Snake(id, name, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX, snakeBodyInitLength), Up)
         s :+ newSnake
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>

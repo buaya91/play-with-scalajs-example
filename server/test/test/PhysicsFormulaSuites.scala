@@ -2,6 +2,7 @@ package test
 
 import org.scalatest._
 import shared.physics._
+import shared.snakeBodyInitLength
 
 class PhysicsFormulaSuites extends WordSpec with Matchers {
   "Physic Engine" should {
@@ -20,7 +21,8 @@ class PhysicsFormulaSuites extends WordSpec with Matchers {
     }
 
     "compute empty contiguous block in fixed area" in {
-      val block = PhysicsFormula.findContiguousBlock(100, 100)
+      val block = PhysicsFormula.findContiguousBlock(100, 100, snakeBodyInitLength)
+      ???
     }
   }
 }

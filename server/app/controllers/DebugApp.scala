@@ -7,13 +7,14 @@ import akka.actor.ActorSystem
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import boopickle.Default._
-import game.actors.{DebugPlayersActor, GameStateActor, InitState, ConnectionEstablished}
+import game.actors.{ConnectionEstablished, DebugPlayersActor, GameStateActor, InitState}
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput
 import shared.model.{Snake, Up}
 import shared.physics.PhysicsFormula
 import shared.protocol._
 import shared.serializers.Serializers._
+import shared.snakeBodyInitLength
 
 import scala.util.Random
 
@@ -29,7 +30,7 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
       val snakes = for {
         i <- 1 to 3
       } yield {
-        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY)
+        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
         Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up)
       }
       GameState(snakes, Set.empty)

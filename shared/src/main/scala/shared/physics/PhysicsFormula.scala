@@ -59,12 +59,12 @@ object PhysicsFormula {
 
   def randomPositive(): Int = Math.abs(Random.nextInt())
 
-  def findContiguousBlock(x: Double, y: Double): Seq[AABB] = {
+  def findContiguousBlock(x: Double, y: Double, ln: Int): Seq[AABB] = {
 
     val randomPt = (randomPositive() % (x - 5) + 5, randomPositive() % (y - 5) + 5)
 
     for {
-      i <- 0 to 5
+      i <- 0 to ln
     } yield {
       val c = Vec2(randomPt._1 + i, randomPt._2)
       AABB(c, snakeBodyUnitSize)
