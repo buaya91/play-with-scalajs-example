@@ -3,7 +3,7 @@ package client.gameplay.infrastructure
 import shared.physics.{AABB, Vec2}
 
 object DebugRenderer extends CanvasRenderer {
-  override def drawAABB(ctx: canvasCtx, aabb: AABB, scalingFactor: Vec2): Unit = {
+  override def drawAABB(ctx: CanvasCtx, aabb: AABB, scalingFactor: Vec2): Unit = {
     super.drawAABB(ctx, aabb, scalingFactor)
     (aabb, scalingFactor) match {
       case (AABB(ct, half), Vec2(xf, yf)) =>

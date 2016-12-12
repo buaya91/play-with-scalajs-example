@@ -7,6 +7,18 @@ import shared.protocol._
 
 object GameLogic {
 
+  private def replenishApple(state: GameState): GameState = {
+    val diff = state.snakes.size - state.apples.size
+
+    val apples = for {
+      _ <- 0 to diff
+    } yield {
+      Apple(PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, 1).head)
+    }
+
+    state.copy(apples = state.apples ++ apples.toSet)
+  }
+
   //todo: move it somewhere, call it based on mode
   private def roundingBack(position: Vec2, boundary: (Double, Double)): Vec2 = (position, boundary) match {
     case (Vec2(x, y), (xMax, yMax)) =>
@@ -73,7 +85,10 @@ object GameLogic {
         ???
 
       case (s, IdentifiedGameInput(id, JoinGame(name))) =>
-        val newSnake = Snake(id, name, PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainX, snakeBodyInitLength), Up)
+        val newSnake = Snake(id,
+                             name,
+                             PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength),
+                             Up)
         s :+ newSnake
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
@@ -87,8 +102,9 @@ object GameLogic {
     val survivedSnakes =
       state.snakes.filterNot(s => snakeKilledByOther(s, state.snakes))
     val inputApplied = applyInput(state.copy(survivedSnakes), inputs)
-    val movedSnakes = inputApplied.snakes.map(move)
+    val movedSnakes = inputApplied.copy(snakes = inputApplied.snakes.map(move))
+    val addedApple = replenishApple(movedSnakes)
 
-    inputApplied.copy(snakes = movedSnakes)
+    addedApple
   }
 }
