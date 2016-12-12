@@ -15,6 +15,7 @@ import shared.physics.PhysicsFormula
 import shared.protocol._
 import shared.serializers.Serializers._
 import shared.snakeBodyInitLength
+import shared._
 
 import scala.util.Random
 
@@ -31,7 +32,7 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
         i <- 1 to 3
       } yield {
         val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
-        Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up)
+        Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up, defaultSpeed)
       }
       GameState(snakes, Set.empty)
     }

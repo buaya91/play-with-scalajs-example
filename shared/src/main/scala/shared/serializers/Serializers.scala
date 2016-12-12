@@ -16,6 +16,7 @@ object Serializers {
   implicit val cmdP = compositePickler[GameCommand]
     .addConcreteType[ChangeDirection]
     .addConcreteType[JoinGame]
+    .addConcreteType[SpeedUp.type]
     .addConcreteType[LeaveGame.type]
     .addConcreteType[DebugNextFrame.type]
 
