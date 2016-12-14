@@ -6,5 +6,5 @@ case class Snake(id: String,
                  name: String,
                  body: Seq[AABB],
                  direction: Direction,
-                 distancePerStep: Double,
+                 speedBuff: SpeedBuff = SpeedBuff(0),
                  energy: Int = 0)

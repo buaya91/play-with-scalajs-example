@@ -8,6 +8,12 @@ import shared.protocol._
 //TODO: figure out how to compile loop while maintain readability
 object GameLogic {
 
+  private def debuff(state: GameState): GameState = {
+    val debuffed = state.snakes.map(s =>
+      if (s.speedBuff.frameLeft > 0) s.copy(speedBuff = SpeedBuff(s.speedBuff.frameLeft - 1)) else s)
+    state.copy(debuffed)
+  }
+
   private def removeDeadSnakes(state: GameState): GameState = {
     val survivedSnakes = state.snakes.filterNot(snake => {
       val others = state.snakes
@@ -36,7 +42,7 @@ object GameLogic {
         val secondLastCenter = last2(1).center
         val diff = secondLastCenter - last2.head.center
         val appended = s.body :+ AABB(secondLastCenter + diff, last2(1).halfExtents)
-        s.copy(body = appended)
+        s.copy(body = appended, energy = s.energy + 1)
       case x => x
     }
 
@@ -44,21 +50,32 @@ object GameLogic {
     GameState(updatedSnake, appleNotEaten)
   }
 
+  private def updateSnakeByID(snakes: Seq[Snake], id: String)(update: Snake => Snake) = {
+    snakes.map {
+      case targeted if targeted.id == id =>
+        update(targeted)
+      case other => other
+    }
+  }
+
   private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
     val updatedSnakes = inputs.foldLeft(state.snakes) {
       case (s, IdentifiedGameInput(id, ChangeDirection(dir))) =>
-        s.map {
-          case targeted if targeted.id == id =>
-            targeted.copy(direction = dir)
-          case other => other
+        updateSnakeByID(s, id) { target =>
+          target.copy(direction = dir)
         }
 
       case (s, IdentifiedGameInput(id, SpeedUp)) =>
-        ???
+        updateSnakeByID(s, id) { target =>
+          if (target.energy > 0)
+            target.copy(speedBuff = SpeedBuff(fps), energy = target.energy - 1)
+          else
+            target
+        }
 
       case (s, IdentifiedGameInput(id, JoinGame(name))) =>
         val emptyBlock = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
-        val newSnake = Snake(id, name, emptyBlock, Up, defaultSpeed)
+        val newSnake = Snake(id, name, emptyBlock, Up)
         s :+ newSnake
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
@@ -98,14 +115,16 @@ object GameLogic {
           diff
         }
 
+      val speed = if (snake.speedBuff.frameLeft > 0) 1.5 * defaultSpeed else defaultSpeed
+
       val movedHead = {
-        val moveStep = unitPerDirection(snake.direction) * snake.distancePerStep
+        val moveStep = unitPerDirection(snake.direction) * speed
         val h = snake.body.head
         h.copy(center = h.center + moveStep)
       }
 
       val movedTail = snake.body.tail.zip(diffBetweenElements).map {
-        case (ele, vec) => ele.copy(ele.center + (vec * snake.distancePerStep))
+        case (ele, vec) => ele.copy(ele.center + (vec * speed))
       }
 
       val movedBody: Seq[AABB] = (movedHead +: movedTail) map {
@@ -132,6 +151,7 @@ object GameLogic {
   def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
     val allSteps =
       (removeDeadSnakes _)
+        .andThen(debuff)
         .andThen(removeEatenApple)
         .andThen(s => applyInput(s, inputs))
         .andThen(applyMovement)

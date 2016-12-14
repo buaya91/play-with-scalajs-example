@@ -23,7 +23,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   val gameState = actorSystem.actorOf(GameStateActor.props)
   gameState ! InitState(GameState.init)
 
-  lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.serverUpdateRate, gameState))
+  lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
 
   def index = Action {
     Ok(views.html.main("Snake")(views.html.canvas()))

@@ -32,7 +32,7 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
         i <- 1 to 3
       } yield {
         val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
-        Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up, defaultSpeed)
+        Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up)
       }
       GameState(snakes, Set.empty)
     }

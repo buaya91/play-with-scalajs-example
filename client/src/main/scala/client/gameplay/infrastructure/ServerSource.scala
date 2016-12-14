@@ -16,18 +16,11 @@ trait ServerSource {
   val wsConn: WebSocket
   wsConn.binaryType = "arraybuffer"
 
-  private var debugC = 0
-
   def src(): Observable[GameResponse] = {
     Observable.create[GameResponse](OverflowStrategy.Unbounded) { sync =>
       wsConn.onmessage = (ev: MessageEvent) => {
         val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
         val deserializedResponse: GameResponse = Unpickle[GameResponse].fromBytes(rawBytes)
-
-        if (debugC == 0) {
-          println(s"First r: $deserializedResponse")
-          debugC = 1
-        }
 
         sync.onNext(deserializedResponse)
       }
