@@ -2,8 +2,8 @@ import shared.model._
 import shared.physics.Vec2
 
 package object shared {
-  val terrainX = 100
-  val terrainY = 100
+  val terrainX = 160
+  val terrainY = 120
   lazy val terrainVec = Vec2(terrainX, terrainY)
 
   val snakeBodyUnitSize = Vec2(1, 1)

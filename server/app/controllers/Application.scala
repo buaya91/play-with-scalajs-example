@@ -15,8 +15,6 @@ import shared.protocol._
 import shared.serializers.Serializers._
 import boopickle.Default._
 
-import scala.concurrent.duration._
-
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   val log = Logger(getClass)
@@ -40,9 +38,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
       Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
         val req = Unpickle[GameRequest].fromBytes(ByteBuffer.wrap(rawBytes))
 
-        req match {
-          case x: GameCommand => IdentifiedGameInput(id, x)
-        }
+        IdentifiedGameInput(id, req)
       }
 
     val serializeState: Flow[GameResponse, Array[Byte], NotUsed] =

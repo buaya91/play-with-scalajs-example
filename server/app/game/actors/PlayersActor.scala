@@ -21,32 +21,38 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
       if (millisToWait < 0)
         println(s"Opps: delayed $millisToWait")
-//      assert(millisToWait >= 0, s"Millis to wait is $millisToWait")
+
+      val nextTickIn = Math.max(0, millisToWait)
 
       context.system.scheduler
-        .scheduleOnce(Math.max(0, millisToWait) millis, gameStateRef, NextFrame)(context.dispatcher, self)
+        .scheduleOnce(nextTickIn millis, gameStateRef, NextFrame)(context.dispatcher, self)
 
-      context.become(gameActive(System.currentTimeMillis() + millisToWait, connections))
+      context.become(gameActive(System.currentTimeMillis() + nextTickIn, connections))
 
-    case i @ IdentifiedGameInput(id, JoinGame(_)) =>
-      connections(id) ! AssignedID(id)
-      gameStateRef ! i
-
-    case input: IdentifiedGameInput =>
+    case input @ IdentifiedGameInput(id, cmd) =>
       gameStateRef ! input
-
+      cmd match {
+        case x: JoinGame => connections(id) ! AssignedID(id)
+        case _ =>
+      }
 
     case ConnectionEstablished(id, r) =>
-      context.become(gameActive(frameStart, connections + ((id, r))))
+      val updatedConn = connections + (id -> r)
+
+      context.become(gameActive(frameStart, updatedConn))
 
     case ConnectionClosed(id) =>
       gameStateRef ! IdentifiedGameInput(id, LeaveGame)
-      val removed = connections - id
 
-      if (removed.isEmpty)
-        context.become(waitingConnection)
-      else
-        context.become(gameActive(frameStart, removed))
+      val removed = connections - id
+      val nextState = {
+        if (removed.isEmpty)
+          waitingConnection
+        else
+          gameActive(frameStart, removed)
+      }
+
+      context.become(nextState)
   }
 
   def waitingConnection: Receive = {
@@ -68,20 +74,23 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
       gameStateRef ! IdentifiedGameInput(id, LeaveGame)
       val removed = connections - id
 
-      if (removed.isEmpty)
-        context.become(waitingConnection)
-      else
-        context.become(waitingPlayerJoinGame(removed))
+      val nextState = {
+        if (removed.isEmpty)
+          waitingConnection
+        else
+          waitingPlayerJoinGame(removed)
+      }
+      context.become(nextState)
   }
 
-  def timeToNextFrame(lastFrameMillis: Long): Long = {
+  private def timeToNextFrame(lastFrameMillis: Long): Long = {
     val now = System.currentTimeMillis()
     val millisToWait = lastFrameMillis + millisPerUpdate - now
     millisToWait
   }
 }
 
-object  PlayersActor {
+object PlayersActor {
   def props(updateRate: Int, gameStateRef: ActorRef): Props =
     Props(classOf[PlayersActor], updateRate, gameStateRef)
 }

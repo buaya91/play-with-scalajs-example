@@ -13,7 +13,7 @@ import org.scalatest._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import boopickle.Default._
-import shared.protocol.{GameRequest, GameState, JoinGame}
+import shared.protocol.{GameRequest, GameResponse, GameState, JoinGame}
 import shared.serializers.Serializers._
 
 import scala.language.postfixOps
@@ -27,7 +27,8 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
 
     "accept ws req" in {
       val flowToTest = controller.wsFlow("SSS")
-      val (pub, sub) = TestSource.probe[Array[Byte]].via(flowToTest).toMat(TestSink.probe[Array[Byte]])(Keep.both).run()
+      val (pub, sub) =
+        TestSource.probe[Array[Byte]].via(flowToTest).toMat(TestSink.probe[Array[Byte]])(Keep.both).run()
 
       val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("test"))
 
@@ -39,12 +40,15 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
 
     "receive gameState continuously" in {
       val flowToTest = controller.wsFlow("SSS")
-      val (pub, sub) = TestSource.probe[Array[Byte]].via(flowToTest.map(bytes => {
-        val bb = ByteBuffer.wrap(bytes)
-        Unpickle[GameState].fromBytes(bb)
-      })).toMat(TestSink.probe[GameState])(Keep.both).run()
 
-      val expected = GameState.init
+      val (pub, sub) = TestSource
+        .probe[Array[Byte]]
+        .via(flowToTest.map(bytes => {
+          val bb = ByteBuffer.wrap(bytes)
+          Unpickle[GameResponse].fromBytes(bb)
+        }))
+        .toMat(TestSink.probe[GameResponse])(Keep.both)
+        .run()
 
       val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("test"))
 
