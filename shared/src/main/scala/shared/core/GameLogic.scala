@@ -60,12 +60,12 @@ object GameLogic {
 
   private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
     val updatedSnakes = inputs.foldLeft(state.snakes) {
-      case (s, IdentifiedGameInput(id, ChangeDirection(dir))) =>
+      case (s, IdentifiedGameInput(id, ChangeDirection(dir, _))) =>
         updateSnakeByID(s, id) { target =>
           target.copy(direction = dir)
         }
 
-      case (s, IdentifiedGameInput(id, SpeedUp)) =>
+      case (s, IdentifiedGameInput(id, SpeedUp(_))) =>
         updateSnakeByID(s, id) { target =>
           if (target.energy > 0)
             target.copy(speedBuff = SpeedBuff(fps), energy = target.energy - 1)
