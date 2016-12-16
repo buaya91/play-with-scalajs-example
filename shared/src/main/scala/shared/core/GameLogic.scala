@@ -47,7 +47,7 @@ object GameLogic {
     }
 
     val appleNotEaten = state.apples.filterNot(a => appleEaten.contains(a))
-    GameState(updatedSnake, appleNotEaten)
+    state.copy(updatedSnake, appleNotEaten)
   }
 
   private def updateSnakeByID(snakes: Seq[Snake], id: String)(update: Snake => Snake) = {
@@ -157,6 +157,6 @@ object GameLogic {
         .andThen(applyMovement)
         .andThen(replenishApple)
 
-    allSteps(state)
+    allSteps(state).increaseSeqNo
   }
 }

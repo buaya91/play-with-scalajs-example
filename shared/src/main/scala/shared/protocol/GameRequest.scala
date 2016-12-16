@@ -8,7 +8,7 @@ case object LeaveGame extends GameRequest
 case object DebugNextFrame extends GameRequest
 
 sealed trait GameCommand extends GameRequest {
-  val sequenceNo: Int
+  val seqNo: Int      // seqNo of GameState after
 }
-case class ChangeDirection(direction: Direction, sequenceNo: Int = 0) extends GameCommand
-case class SpeedUp(sequenceNo: Int = 0) extends GameCommand
+case class ChangeDirection(direction: Direction, seqNo: Int = 0) extends GameCommand
+case class SpeedUp(seqNo: Int = 0) extends GameCommand
