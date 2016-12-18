@@ -39,7 +39,6 @@ class GameStateActor extends Actor {
         unprocessedInputs.updated(frameNo, updatedByFrameNo)
       }
 
-      println(s"Inpt: $updatedUnprocessedInputs")
       context.become(active(confirmedState, processedInputs, updatedUnprocessedInputs))
 
     case NextFrame =>
@@ -49,9 +48,6 @@ class GameStateActor extends Actor {
         * 3. drop all buffer before that frame, and update confirm state with tat
         * 4. send back new state with latest seqNo of each player
         */
-      if (unprocessedInputs.nonEmpty) {
-        println("try")
-      }
 
       val addedNewFrame: BufferedInputs = {
         val latestFrameNo = processedInputs.lastOption.map(_._1).getOrElse(0) + 1
