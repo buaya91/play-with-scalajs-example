@@ -19,7 +19,7 @@ trait ServerSource {
   def src(): Observable[GameResponse] = {
     Observable.create[GameResponse](OverflowStrategy.Unbounded) { sync =>
       wsConn.onmessage = (ev: MessageEvent) => {
-        val rawBytes = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
+        val rawBytes                           = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
         val deserializedResponse: GameResponse = Unpickle[GameResponse].fromBytes(rawBytes)
 
         sync.onNext(deserializedResponse)
@@ -38,14 +38,14 @@ trait ServerSource {
 
   def send(input: GameRequest): Unit = {
     val serialized = Pickle.intoBytes[GameRequest](input)
-    val arrayBuf = bbToArrayBuffer(serialized)
+    val arrayBuf   = bbToArrayBuffer(serialized)
 
     wsConn.send(arrayBuf)
   }
 
   protected def bbToArrayBuffer(buffer: ByteBuffer): ArrayBuffer = {
     val arrayBytes = bbToArrayBytes(buffer)
-    val arrayBuf = new ArrayBuffer(arrayBytes.length)
+    val arrayBuf   = new ArrayBuffer(arrayBytes.length)
 
     val typedAB = TypedArrayBuffer.wrap(arrayBuf)
     typedAB.put(arrayBytes)
@@ -54,7 +54,7 @@ trait ServerSource {
   }
 }
 
-object  ServerSource extends ServerSource {
+object ServerSource extends ServerSource {
   override lazy val wsConn = new WebSocket("ws://localhost:9000/ws")
 }
 

@@ -19,7 +19,8 @@ import shared._
 
 import scala.util.Random
 
-class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
+class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer)
+    extends Controller {
   def debug = Action {
     Ok(views.html.debug("Debug")(views.html.canvas()))
   }
@@ -31,18 +32,20 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
       val snakes = for {
         i <- 1 to 3
       } yield {
-        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
+        val blocks = PhysicsFormula.findContiguousBlock(shared.terrainX,
+                                                        shared.terrainY,
+                                                        snakeBodyInitLength)
         Snake(Random.nextInt().toString, Random.nextString(3), blocks, Up)
       }
       GameState(snakes, Set.empty, Seq.empty, 0)
     }
     debugGameState ! InitState(testState)
-    val debugState = actorSystem.actorOf(DebugPlayersActor.props(debugGameState))
+    val debugState =
+      actorSystem.actorOf(DebugPlayersActor.props(debugGameState))
 
     val deserializeState: Flow[Array[Byte], IdentifiedGameInput, NotUsed] =
       Flow.fromFunction[Array[Byte], IdentifiedGameInput] { rawBytes =>
-        val r = Unpickle[GameRequest]
-          .fromBytes(ByteBuffer.wrap(rawBytes))
+        val r = Unpickle[GameRequest].fromBytes(ByteBuffer.wrap(rawBytes))
 
         r match {
           case x: SequencedGameRequest => IdentifiedGameInput("Debug", x)
@@ -58,7 +61,8 @@ class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer) 
       val out =
         Source
           .actorRef(1000000, OverflowStrategy.dropNew)
-          .mapMaterializedValue(ref => debugState ! ConnectionEstablished("Debug", ref))
+          .mapMaterializedValue(ref =>
+            debugState ! ConnectionEstablished("Debug", ref))
 
       val in = Sink.actorRef(debugState, s"Debug ended")
 

@@ -15,12 +15,15 @@ import shared.protocol._
 import shared.serializers.Serializers._
 import boopickle.Default._
 
-class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
+class Application()(implicit actorSystem: ActorSystem,
+                    materializer: Materializer)
+    extends Controller {
 
   val log = Logger(getClass)
   val gameState = actorSystem.actorOf(GameStateActor.props)
 
-  lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
+  lazy val playersState =
+    actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
 
   def index = Action {
     Ok(views.html.main("Snake")(views.html.canvas()))
@@ -49,9 +52,11 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
       val out =
         Source
           .actorRef[GameResponse](1000000, OverflowStrategy.dropNew)
-          .mapMaterializedValue(ref => playersState ! ConnectionEstablished(id, ref))
+          .mapMaterializedValue(ref =>
+            playersState ! ConnectionEstablished(id, ref))
 
-      val in: Sink[IdentifiedGameInput, NotUsed] = Sink.actorRef(playersState, ConnectionClosed(id))
+      val in: Sink[IdentifiedGameInput, NotUsed] =
+        Sink.actorRef(playersState, ConnectionClosed(id))
 
       Flow.fromSinkAndSource(in, out)
     }

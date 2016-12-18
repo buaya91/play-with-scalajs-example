@@ -21,7 +21,9 @@ class GameStateActor extends Actor {
       context.become(active(initState, SortedMap.empty, SortedMap.empty))
   }
 
-  def active(confirmedState: GameState, processedInputs: BufferedInputs, unprocessedInputs: BufferedInputs): Receive = {
+  def active(confirmedState: GameState,
+             processedInputs: BufferedInputs,
+             unprocessedInputs: BufferedInputs): Receive = {
 
     case input @ IdentifiedGameInput(uid, req) =>
       // for unsequence request, simply use the latest seq
@@ -39,7 +41,8 @@ class GameStateActor extends Actor {
         unprocessedInputs.updated(frameNo, updatedByFrameNo)
       }
 
-      context.become(active(confirmedState, processedInputs, updatedUnprocessedInputs))
+      context.become(
+        active(confirmedState, processedInputs, updatedUnprocessedInputs))
 
     case NextFrame =>
       /**
@@ -48,9 +51,10 @@ class GameStateActor extends Actor {
         * 3. drop all buffer before that frame, and update confirm state with tat
         * 4. send back new state with latest seqNo of each player
         */
-
       val addedNewFrame: BufferedInputs = {
-        val latestFrameNo = processedInputs.lastOption.map(_._1).getOrElse(0) + 1
+        val latestFrameNo = processedInputs.lastOption
+            .map(_._1)
+            .getOrElse(0) + 1
         unprocessedInputs
           .get(latestFrameNo)
           .map(_ => unprocessedInputs)
@@ -61,7 +65,9 @@ class GameStateActor extends Actor {
 
       val frameNoWithAllUser = {
         val allUser = confirmedState.snakes.map(_.id).toSet
-        processedInputs.collectFirst { case (no, inputs) if inputs.keySet == allUser => no }
+        processedInputs.collectFirst {
+          case (no, inputs) if inputs.keySet == allUser => no
+        }
       }
 
       val (newConfirmedState, inputsToUse) =
@@ -82,22 +88,27 @@ class GameStateActor extends Actor {
       context.become(active(newConfirmedState, inputsToUse, SortedMap.empty))
   }
 
-  def reapplyInputs(lastConfirmedState: GameState, bufferedInputs: BufferedInputs): GameState = {
+  def reapplyInputs(lastConfirmedState: GameState,
+                    bufferedInputs: BufferedInputs): GameState = {
     bufferedInputs.foldLeft(lastConfirmedState) {
-      case (lastState, (_, inputs)) => GameLogic.step(lastState, inputs.values.toSeq)
+      case (lastState, (_, inputs)) =>
+        GameLogic.step(lastState, inputs.values.toSeq)
     }
   }
 
-  def mergeInputs(existed: IndexedInputs, newlyAdded: IndexedInputs): IndexedInputs = {
+  def mergeInputs(existed: IndexedInputs,
+                  newlyAdded: IndexedInputs): IndexedInputs = {
     newlyAdded.headOption match {
       case Some((uid, i)) =>
-        val updated = existed.get(uid).map(_ => existed).getOrElse(existed + (uid -> i))
+        val updated =
+          existed.get(uid).map(_ => existed).getOrElse(existed + (uid -> i))
         mergeInputs(updated, newlyAdded.tail)
       case None => existed
     }
   }
 
-  def mergeFrames(existed: BufferedInputs, newlyAdded: BufferedInputs): BufferedInputs = {
+  def mergeFrames(existed: BufferedInputs,
+                  newlyAdded: BufferedInputs): BufferedInputs = {
     newlyAdded.headOption match {
       case Some(pair @ (fn, inputs)) =>
         val updated: BufferedInputs = existed

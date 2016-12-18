@@ -31,11 +31,10 @@ object SnakeGameClient extends JSApp {
     val serverSrc = ServerSource.src().publish
 
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
-    val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+    val ctx    = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    val dpr = window.devicePixelRatio
-    canvas.width  = (window.innerWidth).toInt
-    canvas.height = (window.innerHeight).toInt
+    canvas.width = window.innerWidth.toInt
+    canvas.height = window.innerHeight.toInt
     canvas.style.height = s"${window.innerHeight}px"
     canvas.style.width = s"${window.innerWidth}px"
 
@@ -44,24 +43,19 @@ object SnakeGameClient extends JSApp {
         CanvasRenderer.render(ctx, state, id)
     }
 
-    serverSrc
-      .collect { case a: AssignedID => a }
-      .firstL
-      .runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
+    serverSrc.collect { case a: AssignedID => a }.firstL.runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
 
     serverSrc
       .scan(("", GameState.init)) {
         case (pair, AssignedID(id)) => (id, pair._2)
-        case (pair, x: GameState) => (pair._1, x)
+        case (pair, x: GameState)   => (pair._1, x)
       }
       .consumeWith(rendererConsumer)
       .runAsync
 
     serverSrc.connect()
 
-    InputControl
-      .captureEvents(document.asInstanceOf[HTMLElement])
-      .foreach(ServerSource.send)
+    InputControl.captureEvents(document.asInstanceOf[HTMLElement]).foreach(ServerSource.send)
 
     initModal()
   }
@@ -82,11 +76,9 @@ object SnakeGameClient extends JSApp {
       case x: AssignedID => x
     }
 
-    gameState
-      .flatMap(state => assignedID.map(a => (a.id, state)))
-      .foreach {
-        case (id, state) => DebugRenderer.render(ctx, state, id)
-      }
+    gameState.flatMap(state => assignedID.map(a => (a.id, state))).foreach {
+      case (id, state) => DebugRenderer.render(ctx, state, id)
+    }
 
     serverSrc.subscribe()
     addDebugPanel()

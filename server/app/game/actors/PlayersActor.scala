@@ -13,7 +13,8 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
   override def receive: Receive = waitingConnection
 
-  def gameActive(frameStart: Long, connections: Map[String, ActorRef]): Receive = {
+  def gameActive(frameStart: Long,
+                 connections: Map[String, ActorRef]): Receive = {
     case s: GameState =>
       connections.values.foreach(_ ! s)
 
@@ -24,10 +25,13 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
       val nextTickIn = Math.max(0, millisToWait)
 
-      context.system.scheduler
-        .scheduleOnce(nextTickIn millis, gameStateRef, NextFrame)(context.dispatcher, self)
+      context.system.scheduler.scheduleOnce(
+        nextTickIn millis,
+        gameStateRef,
+        NextFrame)(context.dispatcher, self)
 
-      context.become(gameActive(System.currentTimeMillis() + nextTickIn, connections))
+      context.become(
+        gameActive(System.currentTimeMillis() + nextTickIn, connections))
 
     case input @ IdentifiedGameInput(id, cmd) =>
       gameStateRef ! input
