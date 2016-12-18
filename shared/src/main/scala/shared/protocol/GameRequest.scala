@@ -10,6 +10,7 @@ sealed trait SequencedGameRequest extends GameRequest {
   val seqNo: Int      // seqNo of GameState after
 }
 
+case class NoOp(seqNo: Int) extends SequencedGameRequest
 case class JoinGame(name: String, seqNo: Int = 0) extends SequencedGameRequest
 case class ChangeDirection(direction: Direction, seqNo: Int = 0) extends SequencedGameRequest
 case class SpeedUp(seqNo: Int = 0) extends SequencedGameRequest

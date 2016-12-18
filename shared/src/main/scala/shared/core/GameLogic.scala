@@ -80,6 +80,9 @@ object GameLogic {
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
         s.filter(_.id != id)
+
+      case (s, IdentifiedGameInput(_, _: NoOp)) =>
+        s
     }
 
     state.copy(snakes = updatedSnakes)

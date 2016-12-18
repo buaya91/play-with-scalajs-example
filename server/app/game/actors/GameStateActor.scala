@@ -27,14 +27,12 @@ class GameStateActor extends Actor {
 
     case input @ IdentifiedGameInput(uid, req) =>
       // for unsequence request, simply use the latest seq
-//      val frameNo = req match {
-//        case s: SequencedGameRequest => s.seqNo
-//        case _ => confirmedState.seqNo
-//      }
+      val frameNo = req match {
+        case s: SequencedGameRequest => s.seqNo
+        case _ => confirmedState.seqNo
+      }
 
-      // todo, pending client changes
-      val frameNo = confirmedState.seqNo + 1
-
+      // add new request to buffer
       val updatedUnprocessedInputs = {
         val existingInput = unprocessedInputs.getOrElse(frameNo, Map.empty)
         val updatedByFrameNo = existingInput + (uid -> input)
@@ -51,10 +49,13 @@ class GameStateActor extends Actor {
         * 3. drop all buffer before that frame, and update confirm state with tat
         * 4. send back new state with latest seqNo of each player
         */
+
+      // ensure every frame have an entry in BufferedInputs, empty
       val addedNewFrame: BufferedInputs = {
         val latestFrameNo = processedInputs.lastOption
             .map(_._1)
-            .getOrElse(0) + 1
+            .getOrElse(confirmedState.seqNo) + 1
+
         unprocessedInputs
           .get(latestFrameNo)
           .map(_ => unprocessedInputs)

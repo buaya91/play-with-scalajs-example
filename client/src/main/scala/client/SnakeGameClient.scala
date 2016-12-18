@@ -7,9 +7,13 @@ import org.scalajs.dom._
 
 import scala.scalajs.js._
 import monix.execution.Scheduler.Implicits.global
-import monix.reactive.Consumer
+import monix.reactive.{Consumer, Observable}
 import org.scalajs.dom.raw._
-import shared.protocol.{AssignedID, GameState, JoinGame}
+import shared.model
+import shared.protocol._
+
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 object SnakeGameClient extends JSApp {
 
@@ -26,6 +30,13 @@ object SnakeGameClient extends JSApp {
       .modal("show")
   }
 
+  def setCanvasFullScreen(canvas: html.Canvas) = {
+    canvas.width = window.innerWidth.toInt
+    canvas.height = window.innerHeight.toInt
+    canvas.style.height = s"${window.innerHeight}px"
+    canvas.style.width = s"${window.innerWidth}px"
+  }
+
   @annotation.JSExport
   override def main(): Unit = {
     val serverSrc = ServerSource.src().publish
@@ -33,10 +44,7 @@ object SnakeGameClient extends JSApp {
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
     val ctx    = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-    canvas.width = window.innerWidth.toInt
-    canvas.height = window.innerHeight.toInt
-    canvas.style.height = s"${window.innerHeight}px"
-    canvas.style.width = s"${window.innerWidth}px"
+    setCanvasFullScreen(canvas)
 
     val rendererConsumer = Consumer.foreach[(String, GameState)] {
       case (id, state) =>
@@ -55,9 +63,29 @@ object SnakeGameClient extends JSApp {
 
     serverSrc.connect()
 
-    InputControl.captureEvents(document.asInstanceOf[HTMLElement]).foreach(ServerSource.send)
+    val keyCodePerFrame: Observable[Int] = InputControl
+      .captureEventsKeyCode(document.asInstanceOf[HTMLElement])
+      .bufferTimedAndCounted(1000 / shared.fps millis, 1)
+      .map(_.headOption.getOrElse(0))
+
+    keyCodePerFrame
+      .withLatestFrom(serverSrc) {
+        case (keyCode, state: GameState) if keyToCmd.isDefinedAt(keyCode) =>
+          Some(keyToCmd(keyCode)(state.seqNo))
+        case _ => None
+      }
+      .collect { case Some(x) => x }
+      .foreach(ServerSource.send)
 
     initModal()
+  }
+
+  val keyToCmd: PartialFunction[Int, Int => SequencedGameRequest] = {
+    case 32 => SpeedUp.apply
+    case 37 => ChangeDirection(model.Left, _)
+    case 38 => ChangeDirection(model.Up, _)
+    case 39 => ChangeDirection(model.Right, _)
+    case 40 => ChangeDirection(model.Down, _)
   }
 
   @annotation.JSExport
