@@ -13,7 +13,9 @@ package object shared {
 
   val areaOccupiedPerPosition = 1 * 1
 
-  val fps = 20
+  val fps = 5
+
+  val serverBufferFrameSize = fps
 
   def millisNeededPerUpdate(rate: Int = fps): Int = 1000 / rate
 

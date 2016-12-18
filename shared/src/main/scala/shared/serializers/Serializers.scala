@@ -13,7 +13,7 @@ object Serializers {
     .addConcreteType[Left.type]
     .addConcreteType[Right.type]
 
-  implicit val cmdP = compositePickler[GameCommand]
+  implicit val cmdP = compositePickler[SequencedGameRequest]
     .addConcreteType[ChangeDirection]
     .addConcreteType[SpeedUp]
 

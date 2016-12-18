@@ -73,7 +73,7 @@ object GameLogic {
             target
         }
 
-      case (s, IdentifiedGameInput(id, JoinGame(name))) =>
+      case (s, IdentifiedGameInput(id, JoinGame(name, _))) =>
         val emptyBlock = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
         val newSnake = Snake(id, name, emptyBlock, Up)
         s :+ newSnake
@@ -137,15 +137,16 @@ object GameLogic {
   }
 
   private def replenishApple(state: GameState): GameState = {
-    val diff = state.snakes.size - state.apples.size
-
-    val apples = for {
-      _ <- 0 to diff
-    } yield {
-      Apple(PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, 1).head)
-    }
-
-    state.copy(apples = state.apples ++ apples.toSet)
+//    val diff = state.snakes.size - state.apples.size
+//
+//    val apples = for {
+//      _ <- 0 to diff
+//    } yield {
+//      Apple(PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, 1).head)
+//    }
+//
+//    state.copy(apples = state.apples ++ apples.toSet)
+    state
   }
 
   def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {

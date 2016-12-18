@@ -64,7 +64,7 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
     case ConnectionEstablished(id, r) =>
       context.become(waitingPlayerJoinGame(connections + ((id, r))))
 
-    case i @ IdentifiedGameInput(id, JoinGame(_)) =>
+    case i @ IdentifiedGameInput(id, j: JoinGame) =>
       connections(id) ! AssignedID(id)
       gameStateRef ! i
       gameStateRef ! NextFrame

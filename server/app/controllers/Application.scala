@@ -19,7 +19,6 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
 
   val log = Logger(getClass)
   val gameState = actorSystem.actorOf(GameStateActor.props)
-  gameState ! InitState(GameState.init)
 
   lazy val playersState = actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
 

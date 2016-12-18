@@ -57,7 +57,7 @@ object PhysicsFormula {
     from - to
   }
 
-  def randomPositive(): Int = Math.abs(Random.nextInt())
+  def randomPositive(): Int = 50
 
   def findContiguousBlock(x: Double, y: Double, ln: Int): Seq[AABB] = {
 

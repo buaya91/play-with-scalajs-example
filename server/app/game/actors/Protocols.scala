@@ -1,15 +1,12 @@
 package game.actors
 
 import akka.actor.ActorRef
-import shared.core.IdentifiedGameInput
 import shared.protocol.GameState
 
 case object NextFrame
 
-case class InitState(gameState: GameState)
-
-case class UserInputs(inputs: Seq[IdentifiedGameInput])
+case class InitState(gameState: GameState) extends AnyVal
 
 case class ConnectionEstablished(connectionID: String, ref: ActorRef)
 
-case class ConnectionClosed(connectionID: String)
+case class ConnectionClosed(connectionID: String) extends AnyVal

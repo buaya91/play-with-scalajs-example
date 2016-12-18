@@ -1,5 +1,5 @@
 package shared.core
 
-import shared.protocol.{GameCommand, GameRequest}
+import shared.protocol.GameRequest
 
-case class IdentifiedGameInput(id: String, cmd: GameRequest)
+case class IdentifiedGameInput(playerID: String, cmd: GameRequest)
