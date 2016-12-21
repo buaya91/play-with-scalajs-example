@@ -1,7 +1,7 @@
 package client
 
 import client.JSFacade.JQueryStatic
-import client.debug.DebugPanel
+import client.debug.{DebugPanel, DebugRenderer, DebugSource}
 import client.gameplay.infrastructure._
 import org.scalajs.dom._
 

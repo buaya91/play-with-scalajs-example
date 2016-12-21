@@ -58,6 +58,4 @@ object ServerSource extends ServerSource {
   override lazy val wsConn = new WebSocket("ws://localhost:9000/ws")
 }
 
-object DebugSource extends ServerSource {
-  override lazy val wsConn = new WebSocket("ws://localhost:9000/wsdebug")
-}
+

@@ -3,7 +3,7 @@
 # TODO
 
 - [x] Add speed up
-- [ ] Server reconcilation
+- [x] Server reconcilation
 - [ ] Client prediction
 - [ ] Add AI
 - [ ] Refactor frontend with react
@@ -20,3 +20,7 @@ check if there is corresponding frameNo in buffer,
 ### Implication
 Every frame will take longer time to process
 Input that is too slow will be dropped
+
+## Client Prediction
+Client should run the game as if it's local, after receiving 1st gamestate from server
+running at the same rate as server side.

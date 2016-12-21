@@ -1,5 +1,6 @@
-package client.gameplay.infrastructure
+package client.debug
 
+import client.gameplay.infrastructure.CanvasRenderer
 import shared.physics.{AABB, Vec2}
 
 object DebugRenderer extends CanvasRenderer {
