@@ -1,6 +1,6 @@
 package client.debug
 
-import client.gameplay.infrastructure.ServerSource
+import client.infrastructure.ServerSource
 import org.scalajs.dom.raw.WebSocket
 
 object DebugSource extends ServerSource {

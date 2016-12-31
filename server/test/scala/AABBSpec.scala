@@ -1,4 +1,4 @@
-package test
+package scala
 
 import org.scalacheck._
 import org.scalatest._

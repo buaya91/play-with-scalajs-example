@@ -1,4 +1,4 @@
-package test
+package scala
 
 import org.scalatest._
 import shared.physics._

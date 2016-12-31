@@ -1,4 +1,4 @@
-package test
+package scala
 
 import java.nio.ByteBuffer
 
@@ -30,7 +30,7 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
       val (pub, sub) =
         TestSource.probe[Array[Byte]].via(flowToTest).toMat(TestSink.probe[Array[Byte]])(Keep.both).run()
 
-      val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("test"))
+      val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("scala"))
 
       pub.sendNext(bbToArrayBytes(joinGameBB))
 
@@ -50,7 +50,7 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
         .toMat(TestSink.probe[GameResponse])(Keep.both)
         .run()
 
-      val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("test"))
+      val joinGameBB = Pickle.intoBytes[GameRequest](JoinGame("scala"))
 
       pub.sendNext(bbToArrayBytes(joinGameBB))
 

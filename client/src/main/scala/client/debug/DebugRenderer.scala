@@ -1,6 +1,6 @@
 package client.debug
 
-import client.gameplay.infrastructure.CanvasRenderer
+import client.infrastructure.CanvasRenderer
 import org.scalajs.dom.CanvasRenderingContext2D
 import shared.physics.{AABB, Vec2}
 

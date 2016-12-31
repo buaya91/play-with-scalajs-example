@@ -1,4 +1,4 @@
-package client.gameplay.infrastructure
+package client.infrastructure
 
 import client.domain.Renderer
 import org.scalajs.dom.{CanvasRenderingContext2D, window}

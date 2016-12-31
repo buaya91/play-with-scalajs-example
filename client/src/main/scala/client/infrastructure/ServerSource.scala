@@ -1,4 +1,4 @@
-package client.gameplay.infrastructure
+package client.infrastructure
 
 import java.nio.ByteBuffer
 
@@ -6,17 +6,18 @@ import monix.execution.Cancelable
 import monix.reactive._
 import org.scalajs.dom._
 import boopickle.Default._
+import client.domain.AuthorityState
 import shared.protocol._
 import shared.protocol.GameRequest
 import shared.serializers.Serializers._
-
+import client.Utils
 import scala.scalajs.js.typedarray._
 
-trait ServerSource {
+trait ServerSource extends AuthorityState {
   val wsConn: WebSocket
   wsConn.binaryType = "arraybuffer"
 
-  def src(): Observable[GameResponse] = {
+  def stream: Observable[GameResponse] = {
     Observable.create[GameResponse](OverflowStrategy.Unbounded) { sync =>
       wsConn.onmessage = (ev: MessageEvent) => {
         val rawBytes                           = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
@@ -36,21 +37,11 @@ trait ServerSource {
     }
   }
 
-  def send(input: GameRequest): Unit = {
+  override def request(input: GameRequest) = {
     val serialized = Pickle.intoBytes[GameRequest](input)
-    val arrayBuf   = bbToArrayBuffer(serialized)
+    val arrayBuf   = Utils.bbToArrayBuffer(serialized)
 
     wsConn.send(arrayBuf)
-  }
-
-  protected def bbToArrayBuffer(buffer: ByteBuffer): ArrayBuffer = {
-    val arrayBytes = bbToArrayBytes(buffer)
-    val arrayBuf   = new ArrayBuffer(arrayBytes.length)
-
-    val typedAB = TypedArrayBuffer.wrap(arrayBuf)
-    typedAB.put(arrayBytes)
-
-    arrayBuf
   }
 }
 
