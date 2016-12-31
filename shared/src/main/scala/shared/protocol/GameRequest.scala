@@ -3,6 +3,8 @@ package shared.protocol
 import shared.model.Direction
 
 sealed trait GameRequest
+
+// special case because we need to force leave when user disconnected
 case object LeaveGame extends GameRequest
 case object DebugNextFrame extends GameRequest
 
