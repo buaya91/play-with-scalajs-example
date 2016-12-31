@@ -1,7 +1,8 @@
-package client.api
+package client.domain
 
-import shared.protocol.GameState
+import monix.reactive.Observable
+import shared.protocol.{GameRequest, GameState}
 
 trait Predictor {
-  def predictions(initState: GameState, selfID: String)
+  def predictions(selfID: String, serverState: Observable[GameState], inputs: Observable[GameRequest]): Observable[GameState]
 }

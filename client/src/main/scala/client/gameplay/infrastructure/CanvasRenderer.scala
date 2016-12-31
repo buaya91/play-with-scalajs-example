@@ -1,16 +1,17 @@
 package client.gameplay.infrastructure
 
-import org.scalajs.dom
+import client.domain.Renderer
 import org.scalajs.dom.{CanvasRenderingContext2D, window}
 import shared.model.{Apple, Down, Snake}
 import shared.protocol._
 import shared.physics.{AABB, Vec2}
 
-trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
-  type CanvasCtx = dom.CanvasRenderingContext2D
+trait CanvasRenderer extends Renderer {
+  type CanvasCtx = CanvasRenderingContext2D
+  val ctx: CanvasCtx
 
   // todo: scaling factor should be in the shared.package object
-  def drawAABB(ctx: CanvasCtx, aabb: AABB, scalingFactor: Vec2): Unit = {
+  def drawAABB(aabb: AABB, scalingFactor: Vec2): Unit = {
     (aabb, scalingFactor) match {
       case (AABB(ct, half), Vec2(xf, yf)) =>
         ctx.fillRect(
@@ -22,8 +23,8 @@ trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     }
   }
 
-  def drawSnake(ctx: CanvasCtx, snake: Snake, scalingFactor: Vec2) = {
-    snake.body.foreach(aabb => drawAABB(ctx, aabb, scalingFactor))
+  def drawSnake(snake: Snake, scalingFactor: Vec2) = {
+    snake.body.foreach(aabb => drawAABB(aabb, scalingFactor))
 
     snake.body.headOption.foreach {
       case AABB(Vec2(x, y), _) =>
@@ -37,11 +38,11 @@ trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     }
   }
 
-  def drawApple(ctx: CanvasCtx, apple: Apple, scalingFactor: Vec2) = {
-    drawAABB(ctx, apple.position, scalingFactor)
+  def drawApple(apple: Apple, scalingFactor: Vec2) = {
+    drawAABB(apple.position, scalingFactor)
   }
 
-  override def render(ctx: CanvasRenderingContext2D, state: GameState, selfID: String) = {
+  override def render(state: GameState, selfID: String) = {
     val dpr                 = window.devicePixelRatio
     val (w, h)              = (ctx.canvas.width / dpr, ctx.canvas.height / dpr)
     val scalingFactor: Vec2 = Vec2(w / shared.terrainX, h / shared.terrainY)
@@ -50,14 +51,12 @@ trait CanvasRenderer extends Renderer[dom.CanvasRenderingContext2D] {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
     ctx.fillStyle = "#ff5050" // slight pink for self
-    state.snakes.find(_.id == selfID).foreach(s => drawSnake(ctx, s, scalingFactor))
+    state.snakes.find(_.id == selfID).foreach(s => drawSnake(s, scalingFactor))
 
     ctx.fillStyle = "yellow" // yellow for enemies
-    state.snakes.filterNot(_.id == selfID).foreach(s => drawSnake(ctx, s, scalingFactor))
+    state.snakes.filterNot(_.id == selfID).foreach(s => drawSnake(s, scalingFactor))
 
     ctx.fillStyle = "#cc0000"
-    state.apples.foreach(drawApple(ctx, _, scalingFactor))
+    state.apples.foreach(drawApple(_, scalingFactor))
   }
 }
-
-object CanvasRenderer extends CanvasRenderer

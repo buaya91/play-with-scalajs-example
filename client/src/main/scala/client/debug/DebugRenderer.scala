@@ -1,11 +1,12 @@
 package client.debug
 
 import client.gameplay.infrastructure.CanvasRenderer
+import org.scalajs.dom.CanvasRenderingContext2D
 import shared.physics.{AABB, Vec2}
 
-object DebugRenderer extends CanvasRenderer {
-  override def drawAABB(ctx: CanvasCtx, aabb: AABB, scalingFactor: Vec2): Unit = {
-    super.drawAABB(ctx, aabb, scalingFactor)
+class DebugRenderer(val ctx: CanvasRenderingContext2D) extends CanvasRenderer {
+  override def drawAABB(aabb: AABB, scalingFactor: Vec2): Unit = {
+    super.drawAABB(aabb, scalingFactor)
     (aabb, scalingFactor) match {
       case (AABB(ct, half), Vec2(xf, yf)) =>
         ctx.fillText(

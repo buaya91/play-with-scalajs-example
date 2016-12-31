@@ -42,13 +42,16 @@ object SnakeGameClient extends JSApp {
     val serverSrc = ServerSource.src().publish
 
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
-    val ctx    = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+    val canvasCtx    = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+    val renderer = new CanvasRenderer {
+      override val ctx = canvasCtx
+    }
 
     setCanvasFullScreen(canvas)
 
     val rendererConsumer = Consumer.foreach[(String, GameState)] {
       case (id, state) =>
-        CanvasRenderer.render(ctx, state, id)
+        renderer.render(state, id)
     }
 
     serverSrc.collect { case a: AssignedID => a }.firstL.runAsync(_ => JQueryStatic("#username-modal").modal("hide"))
@@ -95,6 +98,7 @@ object SnakeGameClient extends JSApp {
     val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
 
     val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+    val debugRenderer = new DebugRenderer(ctx)
 
     val gameState = serverSrc.collect {
       case x: GameState => x
@@ -105,7 +109,7 @@ object SnakeGameClient extends JSApp {
     }
 
     gameState.flatMap(state => assignedID.map(a => (a.id, state))).foreach {
-      case (id, state) => DebugRenderer.render(ctx, state, id)
+      case (id, state) => debugRenderer.render(state, id)
     }
 
     serverSrc.subscribe()
