@@ -16,15 +16,25 @@ object BrowserSnakeGame extends JSApp {
 
   def onSubmitName(): Unit = {
     val name = document.getElementById("username-input").asInstanceOf[HTMLInputElement].value
-    ServerSource.request(JoinGame(name))
+    DefaultWSSource.request(JoinGame(name))
     true
   }
 
-  def initModal() = {
+  def initDom() = {
     JSFacade
       .JQueryStatic("#username-modal")
       .modal(Dynamic.literal(autofocus = true, onApprove = () => onSubmitName()))
       .modal("show")
+
+    val nameInput = document.getElementById("username-input").asInstanceOf[HTMLInputElement]
+    document.addEventListener("keydown", (ev: KeyboardEvent) => {
+      if (ev.keyCode == 13) {
+        onSubmitName()
+        JSFacade
+          .JQueryStatic("#username-modal")
+          .modal("hide")
+      }
+    })
   }
 
   def setCanvasFullScreen(canvas: html.Canvas) = {
@@ -47,12 +57,12 @@ object BrowserSnakeGame extends JSApp {
 
     val input = new KeyboardInput(document.asInstanceOf[HTMLElement])
 
-    val game = new SnakeGame(ServerSource, renderer, ClientPredictor, input)
+    val game = new SnakeGame(DefaultWSSource, renderer, ClientPredictor, input)
 
     setCanvasFullScreen(canvas)
 
     game.startGame((name: String) => onSubmitName())
-    initModal()
+    initDom()
   }
 
 //  @annotation.JSExport

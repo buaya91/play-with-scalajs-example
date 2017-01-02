@@ -4,5 +4,5 @@ import monix.reactive.Observable
 import shared.protocol.SequencedGameRequest
 
 trait InputControl {
-  def captureEventsKeyCode: Observable[Int => SequencedGameRequest]
+  def captureInputs(): Observable[Int => SequencedGameRequest]
 }

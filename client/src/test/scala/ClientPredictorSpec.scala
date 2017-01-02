@@ -12,14 +12,17 @@ class ClientPredictorSpec extends AsyncWordSpec with Matchers {
   "ClientPredictor" should {
     "able to produce predictions" in {
       val id        = "Test"
-      val fakeState = Observable.apply(GameState.init)
-      val fakeInput = Observable.empty[GameRequest]
+      val fakeState = Observable.apply(GameState.init, GameState.init).publish
+      val fakeInput = Observable.empty[GameRequest].publish
 
       val predictions = ClientPredictor.predictions(id, fakeState, fakeInput)
 
-      val f = predictions.take(1).countL.runAsync(global)
+      val f = predictions.take(2).countL.runAsync(global)
 
-      f.map(l => l shouldBe 1)(executionContext)
+      fakeInput.connect()
+      fakeState.connect()
+
+      f.map(l => l shouldBe 2)(executionContext)
     }
   }
 }

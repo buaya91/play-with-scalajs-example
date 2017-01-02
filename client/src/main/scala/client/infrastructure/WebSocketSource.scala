@@ -13,16 +13,16 @@ import shared.serializers.Serializers._
 import client.Utils
 import scala.scalajs.js.typedarray._
 
-trait ServerSource extends AuthorityState {
+trait WebSocketSource extends AuthorityState {
   val wsConn: WebSocket
   wsConn.binaryType = "arraybuffer"
 
-  def stream: Observable[GameResponse] = {
+  def stream(): Observable[GameResponse] = {
     Observable.create[GameResponse](OverflowStrategy.Unbounded) { sync =>
+      println("ws created")
       wsConn.onmessage = (ev: MessageEvent) => {
         val rawBytes                           = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
         val deserializedResponse: GameResponse = Unpickle[GameResponse].fromBytes(rawBytes)
-
         sync.onNext(deserializedResponse)
       }
 
@@ -45,7 +45,7 @@ trait ServerSource extends AuthorityState {
   }
 }
 
-object ServerSource extends ServerSource {
+object DefaultWSSource extends WebSocketSource {
   override lazy val wsConn = new WebSocket("ws://localhost:9000/ws")
 }
 

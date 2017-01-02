@@ -3,7 +3,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object Shared {
   object Versions {
-    lazy val monixV = "2.1.0"
+    lazy val monixV = "2.1.2"
     lazy val boopickleV = "1.2.4"
   }
 

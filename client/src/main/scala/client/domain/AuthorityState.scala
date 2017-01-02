@@ -5,7 +5,7 @@ import shared.protocol.{GameRequest, GameResponse}
 
 trait AuthorityState {
 
-  def stream: Observable[GameResponse]
+  def stream(): Observable[GameResponse]
 
   def request(input: GameRequest): Unit
 }

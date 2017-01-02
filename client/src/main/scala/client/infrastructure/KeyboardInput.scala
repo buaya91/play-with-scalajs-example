@@ -17,13 +17,13 @@ class KeyboardInput(element: HTMLElement) extends InputControl {
     case 40 => ChangeDirection(model.Down, _)
   }
 
-  def captureEventsKeyCode: Observable[Int => SequencedGameRequest] = {
+  def captureInputs(): Observable[Int => SequencedGameRequest] = {
     Observable.create(OverflowStrategy.Unbounded) { sync =>
       element.addEventListener[KeyboardEvent]("keydown", (ev: KeyboardEvent) => {
         if (keyToCmd.isDefinedAt(ev.keyCode)) {
           sync.onNext(keyToCmd(ev.keyCode))
         }
-      }, true)
+      })
 
       Cancelable(() => {
         sync.onComplete()

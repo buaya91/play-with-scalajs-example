@@ -1,13 +1,16 @@
 package client.infrastructure
 
 import client.domain.Predictor
-import monix.execution.{Cancelable, Scheduler}
+import monix.execution.Ack.Continue
+import monix.execution.{Ack, Cancelable, Scheduler}
+import monix.reactive.observables.ConnectableObservable
 import monix.reactive.{Observable, OverflowStrategy}
 import shared._
 import shared.core.{GameLogic, IdentifiedGameInput}
 import shared.protocol.{GameRequest, GameState, NoOp}
 
 import scala.collection.SortedMap
+import scala.concurrent.Future
 import scala.scalajs.js.Date
 import scala.scalajs.js.timers._
 
@@ -41,7 +44,6 @@ object ClientPredictor extends Predictor {
       case (Some(p), _)    => Some(p)
       case (None, Some(s)) => Some(s)
       case _ =>
-        println("nothing to base on")
         None
     }
 
@@ -62,8 +64,17 @@ object ClientPredictor extends Predictor {
   override def predictions(selfID: String,
                            serverState: Observable[GameState],
                            inputs: Observable[GameRequest])(implicit scheduler: Scheduler): Observable[GameState] = {
-    serverState.foreach(st => receivedState = receivedState + (st.seqNo -> st))
-    inputs.foreach(req => lastCmd = req)
+    serverState.subscribe(st => {
+      println("state!")
+      receivedState = receivedState + (st.seqNo -> st)
+      Continue
+    })
+
+    inputs.subscribe(req => {
+      println("input!")
+      lastCmd = req
+      Continue
+    })
 
     Observable.create(OverflowStrategy.Unbounded) { sync =>
       predict(selfID, sync.onNext)

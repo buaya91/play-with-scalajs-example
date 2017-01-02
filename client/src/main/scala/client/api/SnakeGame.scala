@@ -1,42 +1,71 @@
 package client.api
 
 import client.domain.{AuthorityState, InputControl, Predictor, Renderer}
+import monix.execution.Ack.Continue
 import monix.execution.Scheduler
 import monix.reactive.Consumer
 import shared.protocol.{AssignedID, GameState, SequencedGameRequest}
 
 class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: Predictor, inputControl: InputControl) {
 
-  private val rendererConsumer = Consumer.foreach[(String, GameState)] {
-    case (id, state) =>
-      renderer.render(state, id)
-  }
-
-  private val requestConsumer = Consumer.foreach[SequencedGameRequest](r => authorityState.request(r))
-
   def startGame(onAssignedID: String => _)(implicit scheduler: Scheduler): Unit = {
 
-    // stream primitives
-    val responses       = authorityState.stream
-    val gameStateStream = responses.collect { case x: GameState => x }
-    val assignedID      = responses.collect { case a: AssignedID => a }.firstL
-    val inputs = inputControl.captureEventsKeyCode.withLatestFrom(gameStateStream) {
-      case (noToReq, state) => noToReq.apply(state.seqNo)
-    }
+    // multicast streams
+    val responses = authorityState.stream().publish
+
+    val gameStateStream = responses.collect { case x: GameState => x }.publish
+    val sequencedInput = inputControl
+      .captureInputs()
+      .withLatestFrom(gameStateStream) {
+        case (noToReq, state) => noToReq.apply(state.seqNo)
+      }
+      .publish
+
+//    responses.executeWithFork.subscribe(s => {
+//      println(s"state? xxx")
+//      Continue
+//    })
+//
+//    sequencedInput.executeWithFork.subscribe(s => {
+//      println(s"input? $s")
+//      Continue
+//    })
+//    inputControl.captureEventsKeyCode().foreach(r => println(s"Some? $r"))
+
+    // single emission task
+    val assignedID = responses.collect { case a: AssignedID => a.id }.headF.publish
+
     val predictions =
-      responses.collect { case a: AssignedID => a }.flatMap(id =>
-        predictor.predictions(id.id, gameStateStream, inputs))
+      assignedID.flatMap { id =>
+        predictor.predictions(id, gameStateStream, sequencedInput)
+      }
 
     // side-effect tasks
-    val assignedIDCallBackTask = assignedID.map { case AssignedID(id) => onAssignedID(id) }
+    val assignedIDCallBackTask = assignedID.subscribe { id =>
+      onAssignedID(id)
+      Continue
+    }
 
-    val renderTask = predictions
-      .mapAsync(state => assignedID.map { case AssignedID(id) => (id, state) })
-      .consumeWith(rendererConsumer)
-    val sendRequestTask = inputs.consumeWith(requestConsumer)
+    val renderTask =
+      predictions.flatMap { state =>
+        assignedID.map { id =>
+          (id, state)
+        }
+      }.subscribe(pair => {
+        println("Render")
+        renderer.render(pair._2, pair._1)
+        Continue
+      })
+    val sendRequestTask = sequencedInput.subscribe(req => {
+      println("Send!")
+      authorityState.request(req)
+      Continue
+    })
 
-    assignedIDCallBackTask.runAsync
-    renderTask.runAsync
-    sendRequestTask.runAsync
+    responses.connect()
+    assignedID.connect()
+    gameStateStream.connect()
+    sequencedInput.connect()
+//    predictions.connect()
   }
 }
