@@ -3,7 +3,7 @@ package client.api
 import client.domain.{AuthorityState, InputControl, Predictor, Renderer}
 import monix.execution.Ack.{Continue, Stop}
 import monix.execution.Scheduler
-import shared.protocol.{AssignedID, GameState, SequencedGameRequest}
+import shared.protocol.{AssignedID, GameState}
 
 class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: Predictor, inputControl: InputControl) {
 

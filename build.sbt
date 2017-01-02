@@ -10,7 +10,7 @@ def commonSettings = Seq(
   scalaVersion := scalaV,
   fork in run := true,
   testOptions in Test += Tests.Argument("-oD"),
-  scalacOptions ++= Seq("-feature")
+  scalacOptions ++= Seq("-feature", "-Ywarn-unused-import")
 )
 
 lazy val server = (project in file("server"))

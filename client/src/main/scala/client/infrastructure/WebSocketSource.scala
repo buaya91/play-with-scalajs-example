@@ -1,7 +1,5 @@
 package client.infrastructure
 
-import java.nio.ByteBuffer
-
 import monix.execution.Cancelable
 import monix.reactive._
 import org.scalajs.dom._

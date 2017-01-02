@@ -2,15 +2,13 @@ package client.infrastructure
 
 import client.domain.Predictor
 import monix.execution.Ack.Continue
-import monix.execution.{Ack, Cancelable, Scheduler}
-import monix.reactive.observables.ConnectableObservable
+import monix.execution.{Cancelable, Scheduler}
 import monix.reactive.{Observable, OverflowStrategy}
 import shared._
 import shared.core.{GameLogic, IdentifiedGameInput}
 import shared.protocol.{GameRequest, GameState, NoOp}
 
 import scala.collection.SortedMap
-import scala.concurrent.Future
 import scala.scalajs.js.Date
 import scala.scalajs.js.timers._
 
