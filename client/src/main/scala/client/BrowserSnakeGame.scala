@@ -1,7 +1,7 @@
 package client
 
 import client.api.SnakeGame
-import client.debug.{DebugPanel, DebugRenderer, DebugSource}
+//import client.debug.{DebugPanel, DebugRenderer, DebugSource}
 import client.infrastructure._
 import org.scalajs.dom._
 
@@ -10,7 +10,6 @@ import org.scalajs.dom.raw._
 import shared.protocol._
 
 import monix.execution.Scheduler.Implicits.global
-import scala.language.postfixOps
 
 object BrowserSnakeGame extends JSApp {
 

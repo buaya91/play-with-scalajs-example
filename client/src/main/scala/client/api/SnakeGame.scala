@@ -21,17 +21,6 @@ class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: P
       }
       .publish
 
-//    responses.executeWithFork.subscribe(s => {
-//      println(s"state? xxx")
-//      Continue
-//    })
-//
-//    sequencedInput.executeWithFork.subscribe(s => {
-//      println(s"input? $s")
-//      Continue
-//    })
-//    inputControl.captureEventsKeyCode().foreach(r => println(s"Some? $r"))
-
     // single emission task
     val assignedID = responses.collect { case a: AssignedID => a.id }.headF.publish
 
