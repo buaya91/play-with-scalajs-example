@@ -19,7 +19,6 @@ trait WebSocketSource extends AuthorityState {
 
   def stream(): Observable[GameResponse] = {
     Observable.create[GameResponse](OverflowStrategy.Unbounded) { sync =>
-      println("ws created")
       wsConn.onmessage = (ev: MessageEvent) => {
         val rawBytes                           = TypedArrayBuffer.wrap(ev.data.asInstanceOf[ArrayBuffer])
         val deserializedResponse: GameResponse = Unpickle[GameResponse].fromBytes(rawBytes)

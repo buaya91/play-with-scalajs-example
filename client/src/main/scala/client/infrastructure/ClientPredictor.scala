@@ -43,8 +43,7 @@ object ClientPredictor extends Predictor {
     val latestState = (lastPredicted, lastRc) match {
       case (Some(p), _)    => Some(p)
       case (None, Some(s)) => Some(s)
-      case _ =>
-        None
+      case _               => None
     }
 
     latestState.foreach(frame => {
@@ -61,17 +60,16 @@ object ClientPredictor extends Predictor {
     }
   }
 
-  override def predictions(selfID: String,
-                           serverState: Observable[GameState],
-                           inputs: Observable[GameRequest])(implicit scheduler: Scheduler): Observable[GameState] = {
+  override def predictions(selfID: String, serverState: Observable[GameState], inputs: Observable[GameRequest])(
+      implicit scheduler: Scheduler): Observable[GameState] = {
     serverState.subscribe(st => {
-      println("state!")
+//      println("state!")
       receivedState = receivedState + (st.seqNo -> st)
       Continue
     })
 
     inputs.subscribe(req => {
-      println("input!")
+//      println("input!")
       lastCmd = req
       Continue
     })

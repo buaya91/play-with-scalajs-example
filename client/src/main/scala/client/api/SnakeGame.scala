@@ -1,9 +1,8 @@
 package client.api
 
 import client.domain.{AuthorityState, InputControl, Predictor, Renderer}
-import monix.execution.Ack.Continue
+import monix.execution.Ack.{Continue, Stop}
 import monix.execution.Scheduler
-import monix.reactive.Consumer
 import shared.protocol.{AssignedID, GameState, SequencedGameRequest}
 
 class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: Predictor, inputControl: InputControl) {
@@ -14,6 +13,7 @@ class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: P
     val responses = authorityState.stream().publish
 
     val gameStateStream = responses.collect { case x: GameState => x }.publish
+
     val sequencedInput = inputControl
       .captureInputs()
       .withLatestFrom(gameStateStream) {
@@ -35,29 +35,21 @@ class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: P
     // single emission task
     val assignedID = responses.collect { case a: AssignedID => a.id }.headF.publish
 
-    val predictions =
-      assignedID.flatMap { id =>
-        predictor.predictions(id, gameStateStream, sequencedInput)
-      }
-
     // side-effect tasks
     val assignedIDCallBackTask = assignedID.subscribe { id =>
       onAssignedID(id)
-      Continue
+      Stop
     }
 
     val renderTask =
-      predictions.flatMap { state =>
-        assignedID.map { id =>
-          (id, state)
-        }
-      }.subscribe(pair => {
-        println("Render")
+      assignedID.flatMap { id =>
+        predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
+      }.executeWithFork.subscribe(pair => {
         renderer.render(pair._2, pair._1)
         Continue
       })
+
     val sendRequestTask = sequencedInput.subscribe(req => {
-      println("Send!")
       authorityState.request(req)
       Continue
     })
