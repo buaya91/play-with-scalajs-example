@@ -8,7 +8,6 @@ import shared.protocol.{GameState, JoinGame, SequencedGameRequest}
 import scala.collection.SortedMap
 
 class GameStateActor extends Actor {
-  type StateInputPair = (GameState, Set[IdentifiedGameInput])
   type UserID         = String
   type FrameNo        = Int
   type IndexedInputs  = Map[UserID, IdentifiedGameInput]

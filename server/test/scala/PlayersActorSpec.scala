@@ -1,9 +1,14 @@
 package scala
 
-import akka.actor.ActorSystem
-import akka.testkit.TestKit
-import org.scalatest.{MustMatchers, WordSpecLike}
+import org.scalatest.{AsyncWordSpec, MustMatchers, WordSpecLike}
 
-class PlayerActorSpec extends TestKit(ActorSystem("Test")) with WordSpecLike with MustMatchers {
+class PlayersActorSpec extends AsyncWordSpec with MustMatchers {
+  "PlayersActor" when {
+    "init" should {
+      "be waiting for connection" in {
 
+        ???
+      }
+    }
+  }
 }

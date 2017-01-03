@@ -70,6 +70,7 @@ class PlayersActor(loopPerSec: Int, gameStateRef: ActorRef) extends Actor {
 
     case i @ IdentifiedGameInput(id, j: JoinGame) =>
       connections(id) ! AssignedID(id)
+
       gameStateRef ! i
       gameStateRef ! NextFrame
       context.become(gameActive(System.currentTimeMillis(), connections))

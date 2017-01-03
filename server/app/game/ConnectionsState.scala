@@ -1,17 +1,15 @@
 package game
 
-import java.util.UUID
-
 import akka.actor.ActorRef
 import shared.protocol.GameResponse
 
-case class ConnectionsState(pendingConnections: Map[UUID, ActorRef], joinedPlayers: Map[UUID, ActorRef]) {
+case class ConnectionsState(pendingConnections: Map[String, ActorRef], joinedPlayers: Map[String, ActorRef]) {
 
-  def open(id: UUID, connection: ActorRef): ConnectionsState = {
+  def open(id: String, connection: ActorRef): ConnectionsState = {
     copy(pendingConnections + (id -> connection))
   }
 
-  def join(id: UUID): ConnectionsState = {
+  def join(id: String): ConnectionsState = {
     val (pendingUpdated, joinedUpdated) = pendingConnections.get(id) match {
       case Some(c) => (pendingConnections - id, joinedPlayers + (id -> c))
       case None    => (pendingConnections, joinedPlayers)
@@ -19,11 +17,11 @@ case class ConnectionsState(pendingConnections: Map[UUID, ActorRef], joinedPlaye
     copy(pendingUpdated, joinedUpdated)
   }
 
-  def remove(id: UUID): ConnectionsState = {
+  def close(id: String): ConnectionsState = {
     copy(pendingConnections - id)
   }
 
   def broadcast(response: GameResponse): Unit = {
-    pendingConnections.foreach(_._2 ! response)
+    joinedPlayers.foreach(_._2 ! response)
   }
 }

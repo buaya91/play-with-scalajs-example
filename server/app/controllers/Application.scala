@@ -20,10 +20,11 @@ class Application()(implicit actorSystem: ActorSystem,
     extends Controller {
 
   val log = Logger(getClass)
-  val gameState = actorSystem.actorOf(GameStateActor.props)
-
-  lazy val playersState =
-    actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
+//  val gameState = actorSystem.actorOf(GameStateActor.props)
+//
+//  lazy val playersState =
+//    actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
+  val gameProxyActor = actorSystem.actorOf(GameProxyActor.props)
 
   def index = Action {
     Ok(views.html.main("Snake")(views.html.canvas()))
@@ -53,10 +54,10 @@ class Application()(implicit actorSystem: ActorSystem,
         Source
           .actorRef[GameResponse](1000000, OverflowStrategy.dropNew)
           .mapMaterializedValue(ref =>
-            playersState ! ConnectionEstablished(id, ref))
+            gameProxyActor ! ConnectionEstablished(id, ref))
 
       val in: Sink[IdentifiedGameInput, NotUsed] =
-        Sink.actorRef(playersState, ConnectionClosed(id))
+        Sink.actorRef(gameProxyActor, ConnectionClosed(id))
 
       Flow.fromSinkAndSource(in, out)
     }

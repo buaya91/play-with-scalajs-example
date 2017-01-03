@@ -4,7 +4,8 @@
 
 - [x] Add speed up
 - [x] Server reconcilation
-- [ ] Client prediction
+- [x] Client prediction
+- [ ] Refactor server code, use actor only for communication, contain logic into simple/typesafe code
 - [ ] Add AI
 - [ ] Refactor frontend with react
 - [ ] Evaluate webrtc
@@ -52,4 +53,3 @@ One time of each frame =>
 Buffer =>
 - Unacknowledged Predicted frameNo
 - Server state in future (highly unlikely but let's do it for the sake)
-
