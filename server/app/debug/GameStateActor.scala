@@ -1,7 +1,8 @@
-package game.actors
+package debug
 
 import akka.actor.{Actor, Props}
 import game.ServerReconciler
+import game.actors.NextFrame
 import shared.core.{GameLogic, IdentifiedGameInput}
 import shared.protocol.{GameState, JoinGame, SequencedGameRequest}
 

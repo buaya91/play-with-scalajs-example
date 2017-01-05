@@ -1,8 +1,9 @@
-package game.actors
+package debug
 
 import akka.actor.{Actor, ActorRef, Props}
+import game.actors.{ConnectionEstablished, NextFrame}
 import shared.core.IdentifiedGameInput
-import shared.protocol.{DebugNextFrame, JoinGame, GameState}
+import shared.protocol.{DebugNextFrame, GameState, JoinGame}
 
 // todo: getting messy, either remove or refactor
 class DebugPlayersActor(gameStateRef: ActorRef) extends Actor {

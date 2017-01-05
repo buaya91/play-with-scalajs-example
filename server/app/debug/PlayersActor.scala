@@ -1,6 +1,7 @@
-package game.actors
+package debug
 
 import akka.actor.{Actor, ActorRef, Props}
+import game.actors.{ConnectionClosed, ConnectionEstablished, NextFrame}
 import shared.core.IdentifiedGameInput
 import shared.protocol.{AssignedID, GameState, JoinGame, LeaveGame}
 
