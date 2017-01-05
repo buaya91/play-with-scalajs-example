@@ -5,9 +5,10 @@
 - [x] Add speed up
 - [x] Server reconcilation
 - [x] Client prediction
-- [ ] Refactor server code, use actor only for communication, contain logic into simple/typesafe code
-- [ ] Add AI
+- [x] Refactor server code, use actor only for communication, contain logic into simple/typesafe code
+- [ ] Add test
 - [ ] Refactor frontend with react
+- [ ] Add AI
 - [ ] Evaluate webrtc
 
 ## Server Reconcilation

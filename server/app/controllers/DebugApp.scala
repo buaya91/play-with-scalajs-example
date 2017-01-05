@@ -7,6 +7,7 @@ import akka.actor.ActorSystem
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import boopickle.Default._
+import debug.{DebugPlayersActor, GameStateActor}
 import game.actors._
 import play.api.mvc.{Action, Controller, WebSocket}
 import shared.core.IdentifiedGameInput

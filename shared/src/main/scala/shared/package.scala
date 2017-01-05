@@ -13,11 +13,11 @@ package object shared {
 
   val areaOccupiedPerPosition = 1 * 1
 
-  val fps = 5
+  val fps = 30
 
-  val serverBufferFrameSize = fps
+  val serverBufferFrameSize = 2 * fps   // 2 seconds
 
-  def millisNeededPerUpdate(rate: Int = fps): Int = 1000 / rate
+  val millisNeededPerUpdate = 1000 / fps
 
   def unitPerDirection(dir: Direction): Vec2 = dir match {
     case Up => Vec2(0, -1)

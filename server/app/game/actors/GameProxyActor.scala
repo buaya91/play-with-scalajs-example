@@ -12,7 +12,7 @@ import scala.language.postfixOps
 class GameProxyActor extends Actor {
 
   context.system.scheduler
-    .schedule(millisNeededPerUpdate() millis, millisNeededPerUpdate() millis, self, NextFrame)(context.dispatcher)
+    .schedule(millisNeededPerUpdate millis, millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)
 
   private def updateState(connectionsState: ConnectionsState, serverState: ServerGameState) = {
     context.become(running(connectionsState, serverState))
@@ -34,9 +34,8 @@ class GameProxyActor extends Actor {
       updateState(updatedConnections, serverState.queueInput(input))
 
     case NextFrame =>
-      val nextState = serverState.nextState
-      connectionsState.broadcast(nextState.predictedState)
-      updateState(connectionsState, nextState)
+      connectionsState.broadcast(serverState.predictedState)
+      updateState(connectionsState, serverState.nextState)
 
     case ConnectionEstablished(id, ref) =>
       updateState(connectionsState.open(id, ref), serverState)

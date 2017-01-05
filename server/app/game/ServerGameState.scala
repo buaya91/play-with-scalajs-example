@@ -2,6 +2,7 @@ package game
 
 import shared.core.IdentifiedGameInput
 import shared.protocol.{GameState, SequencedGameRequest}
+import shared._
 
 import scala.collection.SortedMap
 
@@ -46,17 +47,26 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
       }
     }
 
-    val newConfirmedState: GameState =
-      frameNoWithAllUser
-        .map(frameNo => {
-          val (prev, _) = allInputs.span { case (fN, _) => fN <= frameNo }
-          val nextState = ServerReconciler.reapplyInputs(lastConfirmedState, prev)
 
-          nextState
-        })
-        .getOrElse(lastConfirmedState)
+    val (toDrop: BufferedInputs, toKeep: BufferedInputs) = {
+      val n = allInputs.size - serverBufferFrameSize
+      if (n > 0)
+        allInputs.splitAt(n)
+      else
+        (SortedMap.empty, allInputs)
+    }
 
-    copy(lastConfirmedState = newConfirmedState)
+    val newConfirmedState: GameState = ServerReconciler.reapplyInputs(lastConfirmedState, toDrop)
+//      frameNoWithAllUser
+//        .map(frameNo => {
+//          val (prev, _) = allInputs.span { case (fN, _) => fN <= frameNo }
+//          val nextState = ServerReconciler.reapplyInputs(lastConfirmedState, prev)
+//
+//          nextState
+//        })
+//        .getOrElse(lastConfirmedState)
+
+    copy(lastConfirmedState = newConfirmedState, processedInputs = toKeep, unprocessedInputs = SortedMap.empty)
   }
 
   lazy val predictedState: GameState = {

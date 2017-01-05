@@ -15,9 +15,7 @@ import shared.protocol._
 import shared.serializers.Serializers._
 import boopickle.Default._
 
-class Application()(implicit actorSystem: ActorSystem,
-                    materializer: Materializer)
-    extends Controller {
+class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   val log = Logger(getClass)
 //  val gameState = actorSystem.actorOf(GameStateActor.props)
@@ -53,8 +51,7 @@ class Application()(implicit actorSystem: ActorSystem,
       val out =
         Source
           .actorRef[GameResponse](1000000, OverflowStrategy.dropNew)
-          .mapMaterializedValue(ref =>
-            gameProxyActor ! ConnectionEstablished(id, ref))
+          .mapMaterializedValue(ref => gameProxyActor ! ConnectionEstablished(id, ref))
 
       val in: Sink[IdentifiedGameInput, NotUsed] =
         Sink.actorRef(gameProxyActor, ConnectionClosed(id))

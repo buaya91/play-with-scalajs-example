@@ -38,8 +38,11 @@ class ApplicationControllerSpec extends TestKit(ActorSystem("Test")) with WordSp
 
     "receive gameState continuously" in {
       sub.request(2)
-      sub.expectNext() mustBe an[AssignedID]
-      sub.expectNext() must not be an[AssignedID]
+      val a = sub.expectNext()
+      val b = sub.expectNext()
+
+      a mustBe an[AssignedID]
+      b must not be an[AssignedID]
     }
   }
 }

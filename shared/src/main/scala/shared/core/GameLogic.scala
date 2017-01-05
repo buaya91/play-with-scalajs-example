@@ -16,7 +16,7 @@ object GameLogic {
 
   private def removeDeadSnakes(state: GameState): GameState = {
     val survivedSnakes = state.snakes.filterNot(snake => {
-      val others = state.snakes
+      val others     = state.snakes
       val targetHead = snake.body.head
 
       others.exists(s => s != snake && s.body.tail.exists(targetHead.collided))
@@ -38,10 +38,10 @@ object GameLogic {
 
     val updatedSnake = state.snakes.map {
       case s if snakesAteApple.exists(_.id == s.id) =>
-        val last2 = s.body.takeRight(2)
+        val last2            = s.body.takeRight(2)
         val secondLastCenter = last2(1).center
-        val diff = secondLastCenter - last2.head.center
-        val appended = s.body :+ AABB(secondLastCenter + diff, last2(1).halfExtents)
+        val diff             = secondLastCenter - last2.head.center
+        val appended         = s.body :+ AABB(secondLastCenter + diff, last2(1).halfExtents)
         s.copy(body = appended, energy = s.energy + 1)
       case x => x
     }
@@ -59,6 +59,10 @@ object GameLogic {
   }
 
   private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
+    inputs.collect { case IdentifiedGameInput(_, s: SequencedGameRequest) => s }.foreach(s => {
+      if (s.seqNo != state.seqNo) println(s"Input $s does not match ${state.seqNo}")
+    })
+
     val updatedSnakes = inputs.foldLeft(state.snakes) {
       case (s, IdentifiedGameInput(id, ChangeDirection(dir, _))) =>
         updateSnakeByID(s, id) { target =>
@@ -73,16 +77,13 @@ object GameLogic {
             target
         }
 
-      case (s, IdentifiedGameInput(id, JoinGame(name, _))) =>
+      case (s, IdentifiedGameInput(id, JoinGame(name))) =>
         val emptyBlock = PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, snakeBodyInitLength)
-        val newSnake = Snake(id, name, emptyBlock, Up)
+        val newSnake   = Snake(id, name, emptyBlock, Up)
         s :+ newSnake
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
         s.filter(_.id != id)
-
-      case (s, IdentifiedGameInput(_, _: NoOp)) =>
-        s
     }
 
     state.copy(snakes = updatedSnakes)
@@ -102,7 +103,7 @@ object GameLogic {
           i <- 1 until snake.body.size
         } yield {
           val front: Vec2 = snake.body(i - 1).center
-          val back: Vec2 = snake.body(i).center
+          val back: Vec2  = snake.body(i).center
 
           val diff = {
             (front - back).map(v =>
@@ -122,7 +123,7 @@ object GameLogic {
 
       val movedHead = {
         val moveStep = unitPerDirection(snake.direction) * speed
-        val h = snake.body.head
+        val h        = snake.body.head
         h.copy(center = h.center + moveStep)
       }
 

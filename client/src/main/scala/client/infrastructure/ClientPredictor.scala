@@ -6,7 +6,7 @@ import monix.execution.{Cancelable, Scheduler}
 import monix.reactive.{Observable, OverflowStrategy}
 import shared._
 import shared.core.{GameLogic, IdentifiedGameInput}
-import shared.protocol.{GameRequest, GameState, NoOp}
+import shared.protocol.{GameRequest, GameState, SequencedGameRequest}
 
 import scala.collection.SortedMap
 import scala.scalajs.js.Date
@@ -16,15 +16,15 @@ object ClientPredictor extends Predictor {
   type FrameNo = Int
 
   // TODO: use map for constant time access by frame no
-  private var predictedState       = SortedMap.empty[FrameNo, GameState]
-  private var receivedState        = SortedMap.empty[FrameNo, GameState]
-  private var lastCmd: GameRequest = NoOp(0)
+  private var predictedState                        = SortedMap.empty[FrameNo, GameState]
+  private var receivedState                         = SortedMap.empty[FrameNo, GameState]
+  private var lastCmd: Option[SequencedGameRequest] = None
   private var timer: SetTimeoutHandle = setTimeout(0) { () =>
     ()
   }
 
   private def step(lastFrame: (Int, GameState), selfID: String): (Int, GameState) = {
-    val latestInput = Seq(IdentifiedGameInput(selfID, lastCmd))
+    val latestInput = lastCmd.map(c => Seq(IdentifiedGameInput(selfID, c))).getOrElse(Seq.empty)
     val newState    = GameLogic.step(lastFrame._2, latestInput).increaseSeqNo
     lastFrame._1 + 1 -> newState
   }
@@ -51,7 +51,7 @@ object ClientPredictor extends Predictor {
     })
 
     val end    = Date.now()
-    val toWait = Math.max(0, millisNeededPerUpdate() - (end - start))
+    val toWait = Math.max(0, millisNeededPerUpdate - (end - start))
 
     timer = setTimeout(toWait) {
       predict(selfID, emitPerLoop)
@@ -68,7 +68,11 @@ object ClientPredictor extends Predictor {
 
     inputs.subscribe(req => {
 //      println("input!")
-      lastCmd = req
+      req match {
+        case r: SequencedGameRequest => lastCmd = Some(r)
+        case _                       =>
+      }
+
       Continue
     })
 
