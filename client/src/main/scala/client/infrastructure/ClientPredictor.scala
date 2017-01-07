@@ -16,16 +16,18 @@ object ClientPredictor extends Predictor {
   type FrameNo = Int
 
   // TODO: use map for constant time access by frame no
-  private var predictedState                        = SortedMap.empty[FrameNo, GameState]
-  private var receivedState                         = SortedMap.empty[FrameNo, GameState]
-  private var lastCmd: Option[SequencedGameRequest] = None
+  private var predictedState = SortedMap.empty[FrameNo, GameState]
+  private var receivedState  = SortedMap.empty[FrameNo, GameState]
+  private var lastCmd        = SortedMap.empty[FrameNo, SequencedGameRequest]
   private var timer: SetTimeoutHandle = setTimeout(0) { () =>
     ()
   }
 
   private def step(lastFrame: (Int, GameState), selfID: String): (Int, GameState) = {
-    val latestInput = lastCmd.map(c => Seq(IdentifiedGameInput(selfID, c))).getOrElse(Seq.empty)
-    val newState    = GameLogic.step(lastFrame._2, latestInput).increaseSeqNo
+    val latestInput = lastCmd.map {
+      case (_, req) => IdentifiedGameInput(selfID, req)
+    }.toSeq
+    val newState = GameLogic.step(lastFrame._2, latestInput).increaseSeqNo
     lastFrame._1 + 1 -> newState
   }
 
@@ -61,15 +63,16 @@ object ClientPredictor extends Predictor {
   override def predictions(selfID: String, serverState: Observable[GameState], inputs: Observable[GameRequest])(
       implicit scheduler: Scheduler): Observable[GameState] = {
     serverState.subscribe(st => {
-//      println("state!")
       receivedState = receivedState + (st.seqNo -> st)
+      lastCmd = lastCmd.dropWhile {
+        case (fn, _) => fn < st.seqNo
+      }
       Continue
     })
 
     inputs.subscribe(req => {
-//      println("input!")
       req match {
-        case r: SequencedGameRequest => lastCmd = Some(r)
+        case r: SequencedGameRequest => lastCmd = lastCmd + (r.seqNo -> r)
         case _                       =>
       }
 

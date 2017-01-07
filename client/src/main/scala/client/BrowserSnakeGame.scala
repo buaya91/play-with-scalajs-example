@@ -13,22 +13,22 @@ import monix.execution.Scheduler.Implicits.global
 
 object BrowserSnakeGame extends JSApp {
 
-  def onSubmitName(): Unit = {
+  def onSubmitName() = {
     val name = document.getElementById("username-input").asInstanceOf[HTMLInputElement].value
     DefaultWSSource.request(JoinGame(name))
+    println("Joined!")
     true
   }
 
   def initDom() = {
     JSFacade
       .JQueryStatic("#username-modal")
-      .modal(Dynamic.literal(autofocus = true, onApprove = () => onSubmitName()))
+      .modal(Dynamic.literal(autofocus = true, onHide = () => onSubmitName()))
       .modal("show")
 
     val nameInput = document.getElementById("username-input").asInstanceOf[HTMLInputElement]
     document.addEventListener("keydown", (ev: KeyboardEvent) => {
       if (ev.keyCode == 13) {
-        onSubmitName()
         JSFacade
           .JQueryStatic("#username-modal")
           .modal("hide")
@@ -60,7 +60,7 @@ object BrowserSnakeGame extends JSApp {
 
     setCanvasFullScreen(canvas)
 
-    game.startGame((name: String) => onSubmitName())
+    game.startGame()
     initDom()
   }
 

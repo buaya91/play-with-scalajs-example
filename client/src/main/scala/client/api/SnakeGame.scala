@@ -1,13 +1,13 @@
 package client.api
 
 import client.domain.{AuthorityState, InputControl, Predictor, Renderer}
-import monix.execution.Ack.{Continue, Stop}
+import monix.execution.Ack.Continue
 import monix.execution.Scheduler
 import shared.protocol.{AssignedID, GameState}
 
 class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: Predictor, inputControl: InputControl) {
 
-  def startGame(onAssignedID: String => _)(implicit scheduler: Scheduler): Unit = {
+  def startGame()(implicit scheduler: Scheduler): Unit = {
 
     // multicast streams
     val responses = authorityState.stream().publish
@@ -23,12 +23,6 @@ class SnakeGame(authorityState: AuthorityState, renderer: Renderer, predictor: P
 
     // single emission task
     val assignedID = responses.collect { case a: AssignedID => a.id }.headF.publish
-
-    // side-effect tasks
-    val assignedIDCallBackTask = assignedID.subscribe { id =>
-      onAssignedID(id)
-      Stop
-    }
 
     val renderTask =
       assignedID.flatMap { id =>
