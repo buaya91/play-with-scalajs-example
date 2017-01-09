@@ -61,18 +61,6 @@ object PhysicsFormula {
 
   def randomPositive(): Int = Math.abs(Random.nextInt())
 
-  private def tryGetBlock(state: GameState, startPoint: AABB): Option[Seq[AABB]] = {
-
-    def loop(blocks: Seq[AABB]): Option[Seq[AABB]] = {
-
-      blocks match {
-        case s if s.size == 5       => Some(s)
-        case Seq(one)               =>
-        case Seq(one, others @ _ *) =>
-      }
-    }
-  }
-
   /**
     * 1. Create a lazy eval layer for each point that's occupied
     * 2. Pick a random starting point
@@ -99,9 +87,12 @@ object PhysicsFormula {
         case s if s.size == ln => Some(s)
 
         case Seq() =>
-          // todo: store startPt tested
-          val startPt = randomPt()
-          backtrackSearchContiguousBlock(Seq(AABB(startPt, snakeBodyUnitSize))) match {
+          var startPt = AABB(randomPt(), snakeBodyUnitSize)
+          while (!state.isEmpty(startPt)) {
+            startPt = AABB(randomPt(), snakeBodyUnitSize)
+          }
+
+          backtrackSearchContiguousBlock(Seq(startPt)) match {
             case x @ Some(_) => x
             case None        => backtrackSearchContiguousBlock(Seq.empty)
           }
@@ -130,11 +121,11 @@ object PhysicsFormula {
 
           // if not proceedable, rerun with empty
           proceedableStep match {
-            case Some(_) => validPath
+            case Some(x) => validPath
             case None    => None
           }
       }
     }
-    ???
+    backtrackSearchContiguousBlock(Seq.empty).get
   }
 }

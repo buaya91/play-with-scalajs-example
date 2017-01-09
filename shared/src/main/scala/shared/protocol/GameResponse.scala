@@ -15,8 +15,8 @@ case class GameState(snakes: Seq[Snake], apples: Set[Apple], seqNo: Int) extends
     emptyTable.getOrElse(point, {
       val notEmpty =
         snakes.exists(snk => snk.body.exists(_.collided(point))) || apples.exists(_.position.collided(point))
-      emptyTable.put(point, notEmpty)
-      notEmpty
+      emptyTable.put(point, !notEmpty)
+      !notEmpty
     })
   }
 }
