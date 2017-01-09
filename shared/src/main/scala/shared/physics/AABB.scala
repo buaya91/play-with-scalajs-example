@@ -29,6 +29,7 @@ case class AABB(center: Vec2, halfExtents: Vec2) {
     this.copy(topL + newExtents, newExtents)
   }
 
+  // todo: chance for caching
   def collided(aABB: AABB): Boolean = {
     val mSum = minkowskiSum(aABB)
 
@@ -43,5 +44,9 @@ case class AABB(center: Vec2, halfExtents: Vec2) {
       .sortWith((a, b) => a.magnitude < b.magnitude)
 
     originToSegments.head
+  }
+
+  def translate(vec2: Vec2): AABB = {
+    copy(center + vec2)
   }
 }
