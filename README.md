@@ -6,6 +6,7 @@
 - [x] Server reconcilation
 - [x] Client prediction
 - [x] Refactor server code, use actor only for communication, contain logic into simple/typesafe code
+- [x] Remove Random in Gamelogic, should be deterministic
 - [ ] Add test
 - [ ] Refactor frontend with react
 - [ ] Add AI

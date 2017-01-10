@@ -141,16 +141,15 @@ object GameLogic {
   }
 
   private def replenishApple(state: GameState): GameState = {
-//    val diff = state.snakes.size - state.apples.size
-//
-//    val apples = for {
-//      _ <- 0 to diff
-//    } yield {
-//      Apple(PhysicsFormula.findContiguousBlock(shared.terrainX, shared.terrainY, 1).head)
-//    }
-//
-//    state.copy(apples = state.apples ++ apples.toSet)
-    state
+    val diff = state.snakes.size - state.apples.size
+
+    val apples = for {
+      _ <- 0 to diff
+    } yield {
+      Apple(PhysicsFormula.findContiguousBlock(state, 1, state.seqNo).head)
+    }
+
+    state.copy(apples = state.apples ++ apples.toSet)
   }
 
   def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {

@@ -59,16 +59,16 @@ object PhysicsFormula {
     from - to
   }
 
-  def randomPositive(): Int = Math.abs(Random.nextInt())
-
   /**
     * 1. Create a lazy eval layer for each point that's occupied
     * 2. Pick a random starting point
     * 3. Start randomly move from starting point, memoize valid step
     * 4.
     */
-  def findContiguousBlock(state: GameState, ln: Int): Seq[AABB] = {
+  def findContiguousBlock(state: GameState, ln: Int, rdSeed: Int = 0): Seq[AABB] = {
+    val rand = new Random(rdSeed)
 
+    def randomPositive(): Int = Math.abs(rand.nextInt())
     def randomPt() = Vec2(
       randomPositive() % (terrainX - ln) + ln,
       randomPositive() % (terrainY - ln) + ln
