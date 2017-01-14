@@ -9,3 +9,7 @@ html, body {
     height: 100%;
     background-color: black;
 }
+
+#username-input {
+    border: 3px solid #52ff93;
+}

@@ -11,13 +11,11 @@
   </head>
   <body>
       @content
-      <div class="ui modal" id="username-modal">
-          <div class="header center">Please enter your username</div>
-          <div class="ui input center">
+      <div class="ui modal small" id="username-modal">
+          <h2 class="header ui center aligned">Welcome to Super Snake</h2>
+          <div class="content">The control is same as classic snake, please enter your nickname to start playing.</div>
+          <div class="content ui input">
               <input type="text" id="username-input">
-              <div class="ui left pointing red basic label" id="error-msg" style="display: none">
-                  That name is taken!
-              </div>
           </div>
           <div class="actions">
               <div class="ui button positive green" id="submit-username">OK</div>
