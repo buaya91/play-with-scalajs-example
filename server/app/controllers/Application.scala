@@ -25,7 +25,7 @@ class Application()(implicit actorSystem: ActorSystem, materializer: Materialize
   val gameProxyActor = actorSystem.actorOf(GameProxyActor.props)
 
   def index = Action {
-    Ok(views.html.main("Snake")(views.html.canvas()))
+    Ok(views.html.main("Snake"))
   }
 
   def gameChannel = WebSocket.accept[Array[Byte], Array[Byte]] { req =>

@@ -23,7 +23,7 @@ import scala.util.Random
 class DebugApp()(implicit actorSystem: ActorSystem, materializer: Materializer)
     extends Controller {
   def debug = Action {
-    Ok(views.html.debug("Debug")(views.html.canvas()))
+    Ok(views.html.debug("Debug"))
   }
 
   def debugWs = WebSocket.accept[Array[Byte], Array[Byte]] { req =>

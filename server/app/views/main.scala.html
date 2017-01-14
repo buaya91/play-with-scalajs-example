@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String)
 
 <!DOCTYPE html>
 
@@ -10,7 +10,12 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
   </head>
   <body>
-      @content
+      <div id="page">
+          <div id="canvas-container">
+              <canvas id="canvas" tabindex="1" style=""></canvas>
+          </div>
+          <div id="scoreboard"></div>
+      </div>
       <div class="ui modal small" id="username-modal">
           <h2 class="header ui center aligned">Welcome to Super Snake</h2>
           <div class="content">The control is same as classic snake, please enter your nickname to start playing.</div>
