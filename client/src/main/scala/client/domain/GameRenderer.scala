@@ -2,6 +2,6 @@ package client.domain
 
 import shared.protocol._
 
-trait Renderer {
+trait GameRenderer {
   def render(state: GameState, selfID: String)
 }

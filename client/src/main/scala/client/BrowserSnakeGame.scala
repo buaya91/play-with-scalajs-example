@@ -1,7 +1,6 @@
 package client
 
 import client.api.SnakeGame
-//import client.debug.{DebugPanel, DebugRenderer, DebugSource}
 import client.infrastructure._
 import org.scalajs.dom._
 
@@ -66,33 +65,4 @@ object BrowserSnakeGame extends JSApp {
     game.startGame()
     initDom()
   }
-
-//  @annotation.JSExport
-//  def debugMain(): Unit = {
-//    val serverSrc = DebugSource.src()
-//
-//    val canvas = document.getElementById("canvas").asInstanceOf[html.Canvas]
-//
-//    val ctx           = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
-//    val debugRenderer = new DebugRenderer(ctx)
-//
-//    val gameState = serverSrc.collect {
-//      case x: GameState => x
-//    }
-//
-//    val assignedID = serverSrc.collect {
-//      case x: AssignedID => x
-//    }
-//
-//    gameState.flatMap(state => assignedID.map(a => (a.id, state))).foreach {
-//      case (id, state) => debugRenderer.render(state, id)
-//    }
-//
-//    serverSrc.subscribe()
-//    addDebugPanel()
-//  }
-//
-//  def addDebugPanel(): Unit = {
-//    document.body.appendChild(DebugPanel(DebugSource.send).render)
-//  }
 }

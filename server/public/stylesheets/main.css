@@ -8,8 +8,19 @@ html, body {
     width: 100%;
     height: 100%;
     background-color: black;
+    flex: 0 4 auto;
 }
 
 #username-input {
     border: 3px solid #52ff93;
+}
+
+#page {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+#scoreboard {
+    flex: 0 1 auto;
 }

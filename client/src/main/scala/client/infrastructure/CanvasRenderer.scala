@@ -1,12 +1,12 @@
 package client.infrastructure
 
-import client.domain.Renderer
+import client.domain.GameRenderer
 import org.scalajs.dom.{CanvasRenderingContext2D, window}
 import shared.model.{Apple, Down, Snake}
 import shared.protocol._
 import shared.physics.{AABB, Vec2}
 
-trait CanvasRenderer extends Renderer {
+trait CanvasRenderer extends GameRenderer {
   type CanvasCtx = CanvasRenderingContext2D
   val ctx: CanvasCtx
 
