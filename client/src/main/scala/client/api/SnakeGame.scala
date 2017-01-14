@@ -1,13 +1,18 @@
 package client.api
 
-import client.domain.{AuthorityState, InputControl, Predictor, GameRenderer}
+import client.domain._
 import monix.execution.Ack.Continue
 import monix.execution.Scheduler
 import shared.protocol.{AssignedID, GameState}
+
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class SnakeGame(authorityState: AuthorityState, renderer: GameRenderer, predictor: Predictor, inputControl: InputControl) {
+class SnakeGame(authorityState: AuthorityState,
+                renderer: GameRenderer,
+                predictor: Predictor,
+                inputControl: InputControl,
+                scoreRenderer: ScoreRenderer) {
 
   def startGame()(implicit scheduler: Scheduler): Unit = {
 
@@ -16,9 +21,12 @@ class SnakeGame(authorityState: AuthorityState, renderer: GameRenderer, predicto
 
     val gameStateStream = responses.collect { case x: GameState => x }.publish
 
-    val scoreStream = gameStateStream.sample(1.5 seconds).map(state => {
-      state.snakes.map(s => (s.name -> s.body.size)).toMap
-    }).distinct
+    val scoreStream = gameStateStream
+      .sample(1.5 seconds)
+      .map(state => {
+        state.snakes.map(s => (s.name -> s.body.size)).toMap
+      })
+      .distinct
 
     val sequencedInput = inputControl
       .captureInputs()
@@ -43,10 +51,14 @@ class SnakeGame(authorityState: AuthorityState, renderer: GameRenderer, predicto
       Continue
     })
 
+    scoreStream.subscribe(score => {
+      scoreRenderer.render(score)
+      Continue
+    })
+
     responses.connect()
     assignedID.connect()
     gameStateStream.connect()
     sequencedInput.connect()
-//    predictions.connect()
   }
 }

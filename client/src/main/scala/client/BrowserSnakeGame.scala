@@ -39,10 +39,10 @@ object BrowserSnakeGame extends JSApp {
   }
 
   def setCanvasFullScreen(canvas: html.Canvas) = {
-    canvas.width = window.innerWidth.toInt
+    canvas.width = (window.innerWidth * 0.8).toInt
     canvas.height = window.innerHeight.toInt
     canvas.style.height = s"${window.innerHeight}px"
-    canvas.style.width = s"${window.innerWidth}px"
+    canvas.style.width = s"${window.innerWidth * 0.8}px"
   }
 
   @annotation.JSExport
@@ -56,9 +56,10 @@ object BrowserSnakeGame extends JSApp {
       override val ctx = canvasCtx
     }
 
-    val input = new KeyboardInput(document.asInstanceOf[HTMLElement])
+    val input        = new KeyboardInput(document.asInstanceOf[HTMLElement])
+    val scoreBoardTB = document.getElementById("scoreboard").firstElementChild.asInstanceOf[HTMLTableElement]
 
-    val game = new SnakeGame(DefaultWSSource, renderer, ClientPredictor, input)
+    val game = new SnakeGame(DefaultWSSource, renderer, ClientPredictor, input, new DomScoreRenderer(scoreBoardTB))
 
     setCanvasFullScreen(canvas)
 
