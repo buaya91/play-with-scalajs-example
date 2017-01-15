@@ -3,7 +3,7 @@ package client.infrastructure
 import client.domain.ScoreRenderer
 import org.scalajs.dom.raw._
 
-class DomScoreRenderer(scoreBoard: HTMLTableElement) extends ScoreRenderer {
+class TableScoreRenderer(scoreBoard: HTMLTableElement) extends ScoreRenderer {
   override def render(scores: Map[String, Int]) = {
     val rowsStr = (1 to 10).map(_ => "<tr><td></td><td></td></tr>").mkString
     scoreBoard.innerHTML = s"""

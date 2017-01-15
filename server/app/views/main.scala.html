@@ -8,33 +8,34 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css">
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+    <script src="https://use.fontawesome.com/aa43e8b2ab.js"></script>
   </head>
   <body>
       <div id="page">
           <div id="canvas-container">
               <canvas id="canvas" tabindex="1" style=""></canvas>
           </div>
-          <div id="scoreboard">
-              <table>
-                  <thead>
-                      <tr>
-                          <th>Name</th>
-                          <th>Score</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                      <tr></tr>
-                  </tbody>
-              </table>
+          <div id="side-panel">
+              <div id="scoreboard">
+              Score-Board (Top 10)
+                  <table>
+                      <thead>
+                          <tr>
+                              <th>Name</th>
+                              <th>Score</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                  </table>
+              </div>
+              <div id="status-board">
+                  <div class="row">
+                      <p id="name"></p>
+                      <p id="score"></p>
+                  </div>
+                  <div class="row" id="energy"></div>
+              </div>
           </div>
       </div>
       <div class="ui modal small" id="username-modal">

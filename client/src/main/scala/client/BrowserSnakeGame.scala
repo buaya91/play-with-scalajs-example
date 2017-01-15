@@ -58,8 +58,11 @@ object BrowserSnakeGame extends JSApp {
 
     val input        = new KeyboardInput(document.asInstanceOf[HTMLElement])
     val scoreBoardTB = document.getElementById("scoreboard").firstElementChild.asInstanceOf[HTMLTableElement]
+    val statusDiv    = document.getElementById("status-board").asInstanceOf[HTMLDivElement]
 
-    val game = new SnakeGame(DefaultWSSource, renderer, ClientPredictor, input, new DomScoreRenderer(scoreBoardTB))
+    val scoreboardRenderer = new TableScoreRenderer(scoreBoardTB)
+    val status             = new DomStatusRenderer(statusDiv)
+    val game               = new SnakeGame(DefaultWSSource, renderer, ClientPredictor, input, scoreboardRenderer, status)
 
     setCanvasFullScreen(canvas)
 

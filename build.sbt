@@ -1,5 +1,7 @@
 import java.nio.file.{FileSystems, Files, StandardCopyOption}
 
+import sbt.addCompilerPlugin
+
 name := "Scalajs-snake"
 
 version := "0.1.0"
@@ -19,7 +21,6 @@ lazy val server = (project in file("server"))
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
-
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
     libraryDependencies ++= Server.libDeps.value
@@ -46,18 +47,17 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .jsConfigure(_ enablePlugins ScalaJSWeb)
 
 lazy val sharedJvm = shared.jvm
-lazy val sharedJs = shared.js
+lazy val sharedJs  = shared.js
 
 // loads the server project at sbt startup
-onLoad in Global := (Command
-  .process("project server", _: State)) compose (onLoad in Global).value
+onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
 
 lazy val updateGh = taskKey[Unit]("Update js and push to github pages")
 
 updateGh in Global := {
   (fullOptJS in Compile in client).value.map(f => {
     val fullOptTarget = f.toPath
-    val distFolder = FileSystems.getDefault.getPath("dist", "client-opt.js")
+    val distFolder    = FileSystems.getDefault.getPath("dist", "client-opt.js")
     Files.copy(fullOptTarget, distFolder, StandardCopyOption.REPLACE_EXISTING)
 
     "git stash" #&&

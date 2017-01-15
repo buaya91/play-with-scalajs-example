@@ -12,7 +12,8 @@ class SnakeGame(authorityState: AuthorityState,
                 renderer: GameRenderer,
                 predictor: Predictor,
                 inputControl: InputControl,
-                scoreRenderer: ScoreRenderer) {
+                scoreRenderer: ScoreRenderer,
+                statusRenderer: StatusRenderer) {
 
   def startGame()(implicit scheduler: Scheduler): Unit = {
 
@@ -38,16 +39,26 @@ class SnakeGame(authorityState: AuthorityState,
     // single emission task
     val assignedID = responses.collect { case a: AssignedID => a.id }.headF.publish
 
-    val renderTask =
-      assignedID.flatMap { id =>
-        predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
-      }.executeWithFork.subscribe(pair => {
-        renderer.render(pair._2, pair._1)
-        Continue
-      })
+    val selfSnakeStream = assignedID.flatMap { id =>
+      gameStateStream.collect {
+        case st: GameState if st.snakes.exists(_.id == id) => st.snakes.find(_.id == id).get
+      }
+    }
 
-    val sendRequestTask = sequencedInput.subscribe(req => {
+    assignedID.flatMap { id =>
+      predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
+    }.executeWithFork.subscribe(pair => {
+      renderer.render(pair._2, pair._1)
+      Continue
+    })
+
+    sequencedInput.subscribe(req => {
       authorityState.request(req)
+      Continue
+    })
+
+    selfSnakeStream.subscribe(snk => {
+      statusRenderer.render(snk)
       Continue
     })
 
