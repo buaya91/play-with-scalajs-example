@@ -22,9 +22,9 @@ class SnakeGame(authorityState: AuthorityState,
     val gameStateStream = responses.collect { case x: GameState => x }.publish
 
     val scoreStream = gameStateStream
-      .sample(1.5 seconds)
+      .sample(1 seconds)
       .map(state => {
-        state.snakes.map(s => (s.name -> s.body.size)).toMap
+        state.snakes.map(s => s.name -> s.body.size).toMap
       })
       .distinct
 
