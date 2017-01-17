@@ -1,15 +1,17 @@
-package client.api
+package client.infrastructure
 
 import client.domain._
+import client.infrastructure.views.{GameCanvas, Scoreboard}
+import japgolly.scalajs.react.ReactDOM
 import monix.execution.Ack.Continue
 import monix.execution.Scheduler
+import org.scalajs.dom.{document, html}
 import shared.protocol.{AssignedID, GameState}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class SnakeGame(authorityState: AuthorityState,
-                renderer: GameRenderer,
                 predictor: Predictor,
                 inputControl: InputControl,
                 scoreRenderer: ScoreRenderer,
@@ -23,7 +25,7 @@ class SnakeGame(authorityState: AuthorityState,
     val gameStateStream = responses.collect { case x: GameState => x }.publish
 
     val scoreStream = gameStateStream
-      .sample(1 seconds)
+      .sample(500 millis)
       .map(state => {
         state.snakes.map(s => s.name -> s.body.size).toMap
       })
@@ -45,10 +47,13 @@ class SnakeGame(authorityState: AuthorityState,
       }
     }
 
+    val canvasNode = document.getElementById("canvas-container").asInstanceOf[html.Div]
+    val scoreboardNode = document.getElementById("scoreboard").asInstanceOf[html.Div]
+
     assignedID.flatMap { id =>
       predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
     }.executeWithFork.subscribe(pair => {
-      renderer.render(pair._2, pair._1)
+      ReactDOM.render(GameCanvas.apply(pair._2, pair._1), canvasNode)
       Continue
     })
 
@@ -63,7 +68,7 @@ class SnakeGame(authorityState: AuthorityState,
     })
 
     scoreStream.subscribe(score => {
-      scoreRenderer.render(score)
+      ReactDOM.render(Scoreboard(score.take(10)), scoreboardNode)
       Continue
     })
 

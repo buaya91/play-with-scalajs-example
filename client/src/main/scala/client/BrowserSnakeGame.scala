@@ -1,13 +1,11 @@
 package client
 
-import client.api.SnakeGame
-import client.infrastructure._
+import client.infrastructure.{SnakeGame, _}
 import org.scalajs.dom._
 
 import scala.scalajs.js._
 import org.scalajs.dom.raw._
 import shared.protocol._
-
 import monix.execution.Scheduler.Implicits.global
 
 object BrowserSnakeGame extends JSApp {
@@ -49,11 +47,11 @@ object BrowserSnakeGame extends JSApp {
   override def main(): Unit = {
     // dom related
     val canvas    = document.getElementById("canvas").asInstanceOf[html.Canvas]
-    val canvasCtx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+//    val canvasCtx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
     // dependency instantiation
     val renderer = new CanvasRenderer {
-      override val ctx = canvasCtx
+      override val ctx = null
     }
 
     val input        = new KeyboardInput(document.asInstanceOf[HTMLElement])
@@ -62,9 +60,9 @@ object BrowserSnakeGame extends JSApp {
 
     val scoreboardRenderer = new TableScoreRenderer(scoreBoardTB)
     val status             = new DomStatusRenderer(statusDiv)
-    val game               = new SnakeGame(DefaultWSSource, renderer, ClientPredictor, input, scoreboardRenderer, status)
+    val game               = new SnakeGame(DefaultWSSource, ClientPredictor, input, scoreboardRenderer, status)
 
-    setCanvasFullScreen(canvas)
+//    setCanvasFullScreen(canvas)
 
     game.startGame()
     initDom()
