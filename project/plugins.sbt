@@ -20,3 +20,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.1")
 
 addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.4.10")
+
+addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.2")

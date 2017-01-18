@@ -4,23 +4,27 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object Scoreboard {
-  private def tableDom(scores: Map[String, Int]) = <.table(
-    <.thead(
-      <.tr(
-        <.th("Name"),
-        <.th("Score")
-      )
-    ),
-    <.tbody(
-      scores.map {
-        case (n, scr) =>
+  private def tableDom(scores: Map[String, Int]) =
+    <.div(
+      <.p("Top 10 !!"),
+      <.table(
+        <.thead(
           <.tr(
-            <.td(n),
-            <.td(scr)
+            <.th("Name"),
+            <.th("Score")
           )
-      }
+        ),
+        <.tbody(
+          scores.map {
+            case (n, scr) =>
+              <.tr(
+                <.td(n),
+                <.td(scr)
+              )
+          }
+        )
+      )
     )
-  )
 
   val component = ReactComponentB[Map[String, Int]]("Scoreboard").render_P(tableDom).build
 

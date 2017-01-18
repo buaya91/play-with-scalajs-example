@@ -1,12 +1,13 @@
 import java.nio.file.{FileSystems, Files, StandardCopyOption}
-
-import sbt.addCompilerPlugin
+import org.irundaia.sbt.sass._
 
 name := "Scalajs-snake"
 
 version := "0.1.0"
 
 lazy val scalaV = "2.11.8"
+
+SassKeys.assetRootURL := "/server/app/assets"
 
 def commonSettings = Seq(
   scalaVersion := scalaV,

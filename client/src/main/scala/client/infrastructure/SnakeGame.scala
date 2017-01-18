@@ -1,7 +1,7 @@
 package client.infrastructure
 
 import client.domain._
-import client.infrastructure.views.{GameCanvas, Scoreboard}
+import client.infrastructure.views.{GameCanvas, PlayerStatus, Scoreboard}
 import japgolly.scalajs.react.ReactDOM
 import monix.execution.Ack.Continue
 import monix.execution.Scheduler
@@ -47,8 +47,9 @@ class SnakeGame(authorityState: AuthorityState,
       }
     }
 
-    val canvasNode = document.getElementById("canvas-container").asInstanceOf[html.Div]
+    val canvasNode     = document.getElementById("canvas-container").asInstanceOf[html.Div]
     val scoreboardNode = document.getElementById("scoreboard").asInstanceOf[html.Div]
+    val statusNode     = document.getElementById("status-board").asInstanceOf[html.Div]
 
     assignedID.flatMap { id =>
       predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
@@ -63,7 +64,8 @@ class SnakeGame(authorityState: AuthorityState,
     })
 
     selfSnakeStream.subscribe(snk => {
-      statusRenderer.render(snk)
+      val status = PlayerStatus(snk.name, snk.body.size, snk.energy)
+      ReactDOM.render(PlayerStatus(status), statusNode)
       Continue
     })
 
