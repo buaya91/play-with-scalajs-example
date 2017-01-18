@@ -47,16 +47,16 @@ trait CanvasRenderer extends GameRenderer {
     val (w, h)              = (ctx.canvas.width / dpr, ctx.canvas.height / dpr)
     val scalingFactor: Vec2 = Vec2(w / shared.terrainX, h / shared.terrainY)
 
-    ctx.fillStyle = "#c2d6d6" // grey for background
+    ctx.fillStyle = "black" // grey for background
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-    ctx.fillStyle = "#ff5050" // slight pink for self
+    ctx.fillStyle = "#ee42f4" // slight pink for self
     state.snakes.find(_.id == selfID).foreach(s => drawSnake(s, scalingFactor))
 
-    ctx.fillStyle = "yellow" // yellow for enemies
+    ctx.fillStyle = "#f4ee42" // yellow for enemies
     state.snakes.filterNot(_.id == selfID).foreach(s => drawSnake(s, scalingFactor))
 
-    ctx.fillStyle = "#cc0000"
+    ctx.fillStyle = "#f71836"
     state.apples.foreach(drawApple(_, scalingFactor))
   }
 }

@@ -6,7 +6,7 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 object Scoreboard {
   private def tableDom(scores: Map[String, Int]) =
     <.div(
-      <.p("Top 10 !!"),
+      <.p(^.className := "title")("Top 10 !!"),
       <.table(
         <.thead(
           <.tr(
