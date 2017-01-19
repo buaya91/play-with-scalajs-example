@@ -22,20 +22,16 @@ object GameCanvas {
   class Backend($ : BackendScope[(GameState, SelfID), Unit]) {
     var renderer: GameRenderer = _
 
-    def reallyBadMutableStateForNoReason(refsObject: RefsObject): GameRenderer = {
-      if (renderer == null) {
-        val canvas = ReactDOM.findDOMNode(refsObject(canvasRef).get).asInstanceOf[html.Canvas]
-        setCanvasFullScreen(canvas)
-        renderer = new CanvasRenderer {
-          override val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
-        }
+    def onMount(refsObject: RefsObject): Callback = Callback {
+      val canvas = ReactDOM.findDOMNode(refsObject(canvasRef).get).asInstanceOf[html.Canvas]
+      setCanvasFullScreen(canvas)
+      renderer = new CanvasRenderer {
+        override val ctx = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
       }
-
-      renderer
     }
 
     def onComponentUpdate(refsObject: RefsObject, state: GameState, selfID: SelfID): Callback = Callback {
-      reallyBadMutableStateForNoReason(refsObject).render(state, selfID)
+      renderer.render(state, selfID)
     }
 
     def render() = {
@@ -49,6 +45,7 @@ object GameCanvas {
 
   val component = ReactComponentB[(GameState, String)]("GameCanvas")
     .renderBackend[Backend]
+    .componentDidMount(scope => scope.backend.onMount(scope.refs))
     .componentWillReceiveProps(scope => {
       val ctx = scope.$
       ctx.backend.onComponentUpdate(ctx.refs, ctx.props._1, ctx.props._2)

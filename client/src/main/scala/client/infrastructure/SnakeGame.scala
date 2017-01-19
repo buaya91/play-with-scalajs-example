@@ -11,11 +11,7 @@ import shared.protocol.{AssignedID, GameState}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class SnakeGame(authorityState: AuthorityState,
-                predictor: Predictor,
-                inputControl: InputControl,
-                scoreRenderer: ScoreRenderer,
-                statusRenderer: StatusRenderer) {
+class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputControl: InputControl) {
 
   def startGame()(implicit scheduler: Scheduler): Unit = {
 
