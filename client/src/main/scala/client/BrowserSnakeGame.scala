@@ -1,6 +1,9 @@
 package client
 
+import client.infrastructure.views.WelcomePrompt
 import client.infrastructure.{SnakeGame, _}
+import japgolly.scalajs.react.ReactDOM
+import japgolly.scalajs.react.vdom.prefix_<^._
 import org.scalajs.dom._
 
 import scala.scalajs.js._
@@ -9,31 +12,22 @@ import shared.protocol._
 import monix.execution.Scheduler.Implicits.global
 
 object BrowserSnakeGame extends JSApp {
+  var showPrompt = true
 
-  private def onSubmitName(): Boolean = {
-    val name = document.getElementById("username-input").asInstanceOf[HTMLInputElement].value
-
-    if (name != null && name != "") {
+  private def onSubmitName(name: String): Unit = {
+    if (name != null && !name.isEmpty) {
       DefaultWSSource.request(JoinGame(name))
-      true
-    } else {
-      false
+      showPrompt = false
+      initDom()
     }
   }
 
   def initDom() = {
-    JSFacade
-      .JQueryStatic("#username-modal")
-      .modal(Dynamic.literal(autofocus = true, onHide = () => onSubmitName()))
-      .modal("setting", "closable", false)
-      .modal("show")
-
-    val nameInput = document.getElementById("username-input").asInstanceOf[HTMLInputElement]
-    document.addEventListener("keydown", (ev: KeyboardEvent) => {
-      if (ev.keyCode == 13) {
-        JSFacade.JQueryStatic("#username-modal").modal("hide")
-      }
-    })
+    val popupNode = document.getElementById("popup").asInstanceOf[html.Div]
+    if (showPrompt)
+      ReactDOM.render(WelcomePrompt(onSubmitName), popupNode)
+    else
+      ReactDOM.render(<.noscript(), popupNode)
   }
 
   @annotation.JSExport

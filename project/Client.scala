@@ -4,8 +4,6 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 object Client {
 
   object Versions {
-    lazy val jQueryV      = "3.0.0"
-    lazy val semanticV    = "2.2.2"
     lazy val reactV       = "15.3.2"
     lazy val scalajsDomV  = "0.9.0"
     lazy val scalaTagV    = "0.6.0"
@@ -25,10 +23,8 @@ object Client {
   lazy val jsDeps = Def.setting(
     Seq(
       RuntimeDOM,
-      "org.webjars"       % "jquery"      % Versions.jQueryV / "jquery.js" minified "jquery.min.js",
-      "org.webjars"       % "Semantic-UI" % Versions.semanticV / "semantic.js" minified "semantic.min.js" dependsOn "jquery.js",
-      "org.webjars.bower" % "react"       % Versions.reactV / "react.js" minified "react.min.js" commonJSName "React",
-      "org.webjars.bower" % "react"       % Versions.reactV / "react-dom.js" minified "react-dom.min.js" dependsOn "react.js" commonJSName "ReactDOM"
+      "org.webjars.bower" % "react" % Versions.reactV / "react.js" minified "react.min.js" commonJSName "React",
+      "org.webjars.bower" % "react" % Versions.reactV / "react-dom.js" minified "react-dom.min.js" dependsOn "react.js" commonJSName "ReactDOM"
     )
   )
 }
