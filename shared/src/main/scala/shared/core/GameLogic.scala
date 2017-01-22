@@ -42,7 +42,7 @@ object GameLogic {
         val secondLastCenter = last2(1).center
         val diff             = secondLastCenter - last2.head.center
         val appended         = s.body :+ AABB(secondLastCenter + diff, last2(1).halfExtents)
-        s.copy(body = appended, energy = Math.max(s.energy + 1, 5))
+        s.copy(body = appended, energy = Math.min(s.energy + 1, 5))
       case x => x
     }
 

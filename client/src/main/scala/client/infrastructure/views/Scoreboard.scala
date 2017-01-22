@@ -17,7 +17,7 @@ object Scoreboard {
         <.tbody(
           scores.map {
             case (n, scr) =>
-              <.tr(
+              <.tr(^.key := n)(
                 <.td(n),
                 <.td(scr)
               )

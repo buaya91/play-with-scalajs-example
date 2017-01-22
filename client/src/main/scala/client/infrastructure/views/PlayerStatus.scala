@@ -8,21 +8,38 @@ case class PlayerStatus(name: String, score: Int, energy: Int)
 object PlayerStatus {
   val ariaHidden = "aria-hidden".reactAttr
   private def divDom(status: PlayerStatus) =
-    <.div(
-      <.div(
-        <.div(status.name),
-        <.div(status.score)
-      ),
-      <.div(
-        for (_ <- 0 to status.energy) yield {
-          <.i(^.className := "fa fa-bolt", ariaHidden := "true")
-        }
+    <.table(
+      <.tbody(
+        <.tr(
+          <.td("Your score"),
+          <.td(status.score)
+        ),
+        <.tr(
+          <.td("Energy"),
+          <.td(
+            for (_ <- 0 to status.energy) yield {
+              <.i(^.className := "fa fa-bolt", ariaHidden := "true")
+            }
+          )
+        )
       )
     )
+//    <.div(
+//      <.div(^.className := "flex-container")(
+//        <.div("Your score"),
+//        <.div(status.score)
+//      ),
+//      <.div(^.className := "flex-container")(
+//        <.div("Energy"),
+//        <.div(
+//          for (_ <- 0 to status.energy) yield {
+//            <.i(^.className := "fa fa-bolt", ariaHidden := "true")
+//          }
+//        )
+//      )
+//    )
 
-  val component = ReactComponentB[PlayerStatus]("StatusBoard")
-    .render_P(s => divDom(s))
-    .build
+  val component = ReactComponentB[PlayerStatus]("StatusBoard").render_P(s => divDom(s)).build
 
   def apply(status: PlayerStatus) = component(status)
 }

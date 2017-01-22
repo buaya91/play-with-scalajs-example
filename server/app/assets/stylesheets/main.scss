@@ -25,6 +25,11 @@ html, body {
   border: 3px solid #52ff93;
 }
 
+.flex-container {
+  display: flex;
+  justify-content: space-around;
+}
+
 #page {
   display: flex;
   flex-direction: row;
@@ -49,6 +54,14 @@ html, body {
           text-align: left;
           padding: 8px;
         }
+      }
+    }
+
+    #status-board {
+      border-top: 1px solid #42f4f1;
+
+      table {
+        width: 100%;
       }
     }
   }
