@@ -47,7 +47,7 @@ trait CanvasRenderer extends GameRenderer {
     val (w, h)              = (ctx.canvas.width / dpr, ctx.canvas.height / dpr)
     val scalingFactor: Vec2 = Vec2(w / shared.terrainX, h / shared.terrainY)
 
-    ctx.fillStyle = "black" // grey for background
+    ctx.fillStyle = "#404040"
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
     ctx.fillStyle = "#ee42f4" // slight pink for self

@@ -16,7 +16,7 @@ object PlayerStatus {
         ),
         <.tr(
           <.td("Energy"),
-          <.td(
+          <.td(^.className := "energy")(
             for (_ <- 0 to status.energy) yield {
               <.i(^.className := "fa fa-bolt", ariaHidden := "true")
             }

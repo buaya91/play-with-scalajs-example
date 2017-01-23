@@ -13,7 +13,7 @@ package object shared {
 
   val areaOccupiedPerPosition = 1 * 1
 
-  val fps = 30
+  val fps = 60
 
   val serverBufferFrameSize = 2 * fps   // 2 seconds
 
