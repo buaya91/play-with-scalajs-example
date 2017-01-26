@@ -42,15 +42,17 @@ object PhysicsFormula {
     }
   }
 
+  val rangeFactor = 1.5 // to control sensitivity of collision
   def isPointInsideAABB(point: Vec2, aABB: AABB): Boolean = {
+
     val pX = point.x
     val pY = point.y
 
-    val maxX = aABB.bottomRight.x
-    val minX = aABB.topLeft.x
+    val maxX = aABB.bottomRight.x - rangeFactor
+    val minX = aABB.topLeft.x + rangeFactor
 
-    val minY = aABB.topLeft.y
-    val maxY = aABB.bottomRight.y
+    val minY = aABB.topLeft.y + rangeFactor
+    val maxY = aABB.bottomRight.y - rangeFactor
 
     (pX > minX && pX < maxX) && (pY > minY && pY < maxY)
   }
@@ -112,7 +114,7 @@ object PhysicsFormula {
           }
 
         case x @ (front :+ last) =>
-          val possibleSteps = stepOut(last)
+          val possibleSteps                = stepOut(last)
           var validPath: Option[Seq[AABB]] = None
           val proceedableStep = possibleSteps.find(next => {
             validPath = backtrackSearchContiguousBlock(x :+ next)

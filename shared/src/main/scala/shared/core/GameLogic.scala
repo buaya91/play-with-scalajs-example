@@ -119,16 +119,16 @@ object GameLogic {
           diff
         }
 
-      val speed = if (snake.speedBuff.frameLeft > 0) 1.5 * defaultSpeed else defaultSpeed
+      val movePerFrame = if (snake.speedBuff.frameLeft > 0) 1.5 * distancePerFrame else distancePerFrame
 
       val movedHead = {
-        val moveStep = unitPerDirection(snake.direction) * speed
+        val moveStep = unitPerDirection(snake.direction) * movePerFrame
         val h        = snake.body.head
         h.copy(center = h.center + moveStep)
       }
 
       val movedTail = snake.body.tail.zip(diffBetweenElements).map {
-        case (ele, vec) => ele.copy(ele.center + (vec * speed))
+        case (ele, vec) => ele.copy(ele.center + (vec * movePerFrame))
       }
 
       val movedBody: Seq[AABB] = (movedHead +: movedTail) map {
