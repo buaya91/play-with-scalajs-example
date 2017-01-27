@@ -21,7 +21,6 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
     val gameStateStream = responses.collect { case x: GameState => x }.publish
 
     val scoreStream = gameStateStream
-      .sample(500 millis)
       .map(state => {
         state.snakes.map(s => s.name -> s.body.size).toMap
       })

@@ -42,7 +42,6 @@ object PhysicsFormula {
     }
   }
 
-  val rangeFactor = 1.5 // to control sensitivity of collision
   def isPointInsideAABB(point: Vec2, aABB: AABB): Boolean = {
 
     val pX = point.x

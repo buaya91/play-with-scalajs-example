@@ -60,7 +60,9 @@ object GameLogic {
 
   private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
     inputs.collect { case IdentifiedGameInput(_, s: SequencedGameRequest) => s }.foreach(s => {
-      if (s.seqNo != state.seqNo) println(s"Input $s does not match ${state.seqNo}")
+      if (s.seqNo != state.seqNo) {
+        println(s"Input $s does not match ${state.seqNo}")
+      }
     })
 
     val updatedSnakes = inputs.foldLeft(state.snakes) {

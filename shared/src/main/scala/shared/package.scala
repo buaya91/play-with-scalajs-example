@@ -10,10 +10,12 @@ package object shared {
   val snakeBodyInitLength      = 5
   val distancePerSec: Double   = 20.0
   val areaOccupiedPerPosition  = 1 * 1
-  val fps                      = 60
+  val fps                      = 50
   val serverBufferFrameSize    = 2 * fps // 2 seconds
   val millisNeededPerUpdate    = 1000 / fps
   val distancePerFrame: Double = distancePerSec / fps
+
+  val rangeFactor = 1.0 // to control sensitivity of collision
 
   def unitPerDirection(dir: Direction): Vec2 = dir match {
     case Up          => Vec2(0, -1)

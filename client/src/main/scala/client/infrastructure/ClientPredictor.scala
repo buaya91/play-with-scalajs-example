@@ -41,9 +41,9 @@ object ClientPredictor extends Predictor {
     val lastPredicted = predictedState.lastOption
 
     val latestState = (lastPredicted, lastRc) match {
-      case (Some(p), _)    => Some(p)
-      case (None, Some(s)) => Some(s)
-      case _               => None
+      case (_, Some(s)) => Some(s)
+      case (Some(p), _) => Some(p)
+      case _            => None
     }
 
     latestState.foreach(frame => {
