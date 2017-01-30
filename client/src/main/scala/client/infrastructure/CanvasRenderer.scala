@@ -25,19 +25,46 @@ trait CanvasRenderer extends GameRenderer {
     }
   }
 
+  def drawAABBRing(aABB: AABB, scalingFactor: Vec2) = {
+    val oriStyle = ctx.fillStyle
+
+    // ring is double the size of body
+    val outerRingExpansion = 2.0
+    val innerRingExpansion = 1.6 // ring is (2.0 - 1.6) / 2 in width
+
+    // shift up/left
+    val shiftForOuter  = (outerRingExpansion - 1) / 2
+    val shiftForInner  = (innerRingExpansion - 1) / 2
+    val centerForOuter = aABB.center - Vec2(shiftForOuter, shiftForOuter)
+    val centerForInner = aABB.center - Vec2(shiftForInner, shiftForInner)
+
+    ctx.fillStyle = "red"
+    drawAABB(aABB.copy(halfExtents = aABB.halfExtents * outerRingExpansion, center = centerForOuter), scalingFactor)
+
+    ctx.fillStyle = "black"
+    drawAABB(aABB.copy(halfExtents = aABB.halfExtents * innerRingExpansion, center = centerForInner), scalingFactor)
+
+    ctx.fillStyle = oriStyle
+    drawAABB(aABB, scalingFactor)
+  }
+
   def drawSnake(snake: Snake, scalingFactor: Vec2) = {
-    snake.body.foreach(aabb => drawAABB(aabb, scalingFactor))
-
-    snake.body.headOption.foreach {
-      case AABB(Vec2(x, y), _) =>
-        val textDisplacement = if (snake.direction == Down) 10 else -5
-
-        ctx.fillText(
-          snake.name,
-          (x * scalingFactor.x) + textDisplacement,
-          (y * scalingFactor.y) + textDisplacement
-        )
+    if (snake.speedBuff.frameLeft > 0) {
+      snake.body.foreach(aabb => drawAABBRing(aabb, scalingFactor))
+    } else {
+      snake.body.foreach(aabb => drawAABB(aabb, scalingFactor))
     }
+
+//    snake.body.headOption.foreach {
+//      case AABB(Vec2(x, y), _) =>
+//        val textDisplacement = if (snake.direction == Down) 10 else -5
+//
+//        ctx.fillText(
+//          snake.name,
+//          (x * scalingFactor.x) + textDisplacement,
+//          (y * scalingFactor.y) + textDisplacement
+//        )
+//    }
   }
 
   val flameImg = dom.document.createElement("img").asInstanceOf[HTMLImageElement]
@@ -71,6 +98,7 @@ trait CanvasRenderer extends GameRenderer {
     ctx.fillStyle = "#f4ee42" // yellow for enemies
     state.snakes.filterNot(_.id == selfID).foreach(s => drawSnake(s, scalingFactor))
 
+    ctx.fillStyle = "blue"
     state.apples.foreach(drawApple(_, scalingFactor))
   }
 }
