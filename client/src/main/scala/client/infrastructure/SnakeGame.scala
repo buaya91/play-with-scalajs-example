@@ -10,6 +10,7 @@ import shared.protocol.{AssignedID, GameState}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 
 class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputControl: InputControl) {
 
@@ -42,9 +43,7 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
       }
     }
 
-    val canvasNode     = document.getElementById("canvas-container").asInstanceOf[html.Div]
-    val scoreboardNode = document.getElementById("scoreboard").asInstanceOf[html.Div]
-    val statusNode     = document.getElementById("status-board").asInstanceOf[html.Div]
+    import SnakeGame._
 
     assignedID.flatMap { id =>
       predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
@@ -74,4 +73,10 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
     gameStateStream.connect()
     sequencedInput.connect()
   }
+}
+
+object SnakeGame {
+  val canvasNode = document.getElementById("canvas-container").asInstanceOf[html.Div]
+  val scoreboardNode = document.getElementById("scoreboard").asInstanceOf[html.Div]
+  val statusNode     = document.getElementById("status-board").asInstanceOf[html.Div]
 }

@@ -68,7 +68,10 @@ object GameLogic {
     val updatedSnakes = inputs.foldLeft(state.snakes) {
       case (s, IdentifiedGameInput(id, ChangeDirection(dir, _))) =>
         updateSnakeByID(s, id) { target =>
-          target.copy(direction = dir)
+          if (target.direction.isOppositeOf(dir))
+            target
+          else
+            target.copy(direction = dir)
         }
 
       case (s, IdentifiedGameInput(id, SpeedUp(_))) =>
