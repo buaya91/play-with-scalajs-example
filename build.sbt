@@ -1,4 +1,5 @@
 import java.nio.file.{FileSystems, Files, StandardCopyOption}
+
 import org.irundaia.sbt.sass._
 
 name := "Scalajs-snake"
@@ -16,6 +17,15 @@ def commonSettings = Seq(
   scalacOptions ++= Seq("-feature", "-Ywarn-unused-import")
 )
 
+def dockerSetting = Seq(
+  packageName in Docker := "qing.orochi",
+  maintainer in Docker := "Qingwei",
+  packageSummary in Docker := "image for snake game",
+  packageDescription := "",
+  dockerBaseImage := "openjdk:8-alpine",
+  dockerUpdateLatest := true
+)
+
 lazy val server = (project in file("server"))
   .settings(commonSettings: _*)
   .settings(
@@ -26,7 +36,8 @@ lazy val server = (project in file("server"))
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
     libraryDependencies ++= Server.libDeps.value
   )
-  .enablePlugins(PlayScala)
+  .settings(dockerSetting: _*)
+  .enablePlugins(PlayScala, DockerPlugin, AshScriptPlugin)
   .dependsOn(sharedJvm)
 
 lazy val client = (project in file("client"))
@@ -52,22 +63,3 @@ lazy val sharedJs  = shared.js
 
 // loads the server project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
-
-lazy val updateGh = taskKey[Unit]("Update js and push to github pages")
-
-updateGh in Global := {
-  (fullOptJS in Compile in client).value.map(f => {
-    val fullOptTarget = f.toPath
-    val distFolder    = FileSystems.getDefault.getPath("dist", "client-opt.js")
-    Files.copy(fullOptTarget, distFolder, StandardCopyOption.REPLACE_EXISTING)
-
-    "git stash" #&&
-      "git checkout gh-pages" #&&
-      "cp dist/* ./" #&&
-      "git add client-launcher.js client-opt.js index.html main.css" #&&
-      "git commit -m 'Update gh'" #&&
-      "git push origin gh-pages" #&&
-      "git checkout master" #&&
-      "git stash pop" !
-  })
-}
