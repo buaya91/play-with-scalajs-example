@@ -8,6 +8,20 @@ html, body {
   font-size: 1em;
 }
 
+.hidden {
+  display: none !important;
+}
+
+#tips-container {
+  #tips {
+    display: block;
+    opacity: 0.3;
+    position: fixed;
+    bottom: 100px;
+    width: 30%;
+  }
+}
+
 .title {
   text-align: center;
   font-size: 2em;

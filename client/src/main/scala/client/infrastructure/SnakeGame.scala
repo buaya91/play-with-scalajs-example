@@ -1,16 +1,12 @@
 package client.infrastructure
 
 import client.domain._
-import client.infrastructure.views.{GameCanvas, PlayerStatus, Scoreboard}
+import client.infrastructure.views.{GameCanvas, Instruction, PlayerStatus, Scoreboard}
 import japgolly.scalajs.react.ReactDOM
-import monix.execution.Ack.Continue
+import monix.execution.Ack.{Continue, Stop}
 import monix.execution.Scheduler
 import org.scalajs.dom.{document, html}
-import shared.protocol.{AssignedID, GameState}
-
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import scala.scalajs.js.annotation.{JSExport, JSExportAll}
+import shared.protocol.{AssignedID, GameState, SpeedUp}
 
 class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputControl: InputControl) {
 
@@ -45,6 +41,16 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
 
     import SnakeGame._
 
+    ReactDOM.render(Instruction(true), hiddenDiv)
+
+    val firstInput = sequencedInput.filter {
+      case x: SpeedUp => true
+      case _          => false
+    }.take(1).subscribe { _ =>
+      ReactDOM.render(Instruction(false), hiddenDiv)
+      Stop
+    }
+
     assignedID.flatMap { id =>
       predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
     }.executeWithFork.subscribe(pair => {
@@ -76,7 +82,8 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
 }
 
 object SnakeGame {
-  val canvasNode = document.getElementById("canvas-container").asInstanceOf[html.Div]
+  val canvasNode     = document.getElementById("canvas-container").asInstanceOf[html.Div]
   val scoreboardNode = document.getElementById("scoreboard").asInstanceOf[html.Div]
   val statusNode     = document.getElementById("status-board").asInstanceOf[html.Div]
+  val hiddenDiv      = document.getElementById("tips-container").asInstanceOf[html.Div]
 }
