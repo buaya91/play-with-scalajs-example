@@ -43,7 +43,5 @@ trait WebSocketSource extends AuthorityState {
 }
 
 object DefaultWSSource extends WebSocketSource {
-  override lazy val wsConn = new WebSocket("ws://localhost:9000/ws")
+  override lazy val wsConn = new WebSocket(s"ws://${window.location.host}/ws")
 }
-
-

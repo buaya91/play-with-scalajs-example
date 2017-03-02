@@ -5,7 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index
 GET     /ws                         controllers.Application.gameChannel
-GET     /paper                      controllers.Paper.paper
+GET     /_ah/health                     controllers.HealthController.health
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

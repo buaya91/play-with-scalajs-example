@@ -1,9 +1,3 @@
-import java.nio.file.{FileSystems, Files, StandardCopyOption}
-
-import org.irundaia.sbt.sass._
-
-name := "Scalajs-snake"
-
 version := "0.1.0"
 
 lazy val scalaV = "2.11.8"
@@ -18,17 +12,19 @@ def commonSettings = Seq(
 )
 
 def dockerSetting = Seq(
-  packageName in Docker := "qing.orochi",
+  packageName in Docker := "scalajs-snake",
   maintainer in Docker := "Qingwei",
   packageSummary in Docker := "image for snake game",
   packageDescription := "",
   dockerBaseImage := "openjdk:8-alpine",
-  dockerUpdateLatest := true
+  dockerUpdateLatest := true,
+  dockerRepository := Some("buaya91")
 )
 
 lazy val server = (project in file("server"))
   .settings(commonSettings: _*)
   .settings(
+    name := "scalajs-snake",
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
