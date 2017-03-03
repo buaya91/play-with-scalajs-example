@@ -3,6 +3,7 @@ package controllers
 import java.nio.ByteBuffer
 import java.util.UUID
 
+import ai.OffensiveAI
 import akka.NotUsed
 import akka.actor._
 import akka.stream.{Materializer, OverflowStrategy}
@@ -17,11 +18,7 @@ import boopickle.Default._
 
 class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
-  val log = Logger(getClass)
-//  val gameState = actorSystem.actorOf(GameStateActor.props)
-//
-//  lazy val playersState =
-//    actorSystem.actorOf(PlayersActor.props(shared.fps, gameState))
+  val log            = Logger(getClass)
   val gameProxyActor = actorSystem.actorOf(GameProxyActor.props)
 
   def index = Action {

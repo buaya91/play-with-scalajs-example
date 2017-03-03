@@ -1,5 +1,8 @@
 package game.actors
 
+import java.util.UUID
+
+import ai.{AIJoinGame, OffensiveAI}
 import akka.actor.{Actor, Props}
 import game.{ConnectionsState, ServerGameState}
 import shared.core.IdentifiedGameInput
@@ -10,6 +13,13 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class GameProxyActor extends Actor {
+
+  List("John", "May").foreach(name => {
+    val connectionID = UUID.randomUUID().toString
+    val aiActor      = context.actorOf(OffensiveAI.props(connectionID, name))
+    self ! ConnectionEstablished(connectionID, aiActor)
+    aiActor ! AIJoinGame
+  })
 
   context.system.scheduler
     .schedule(millisNeededPerUpdate millis, millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)

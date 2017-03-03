@@ -65,33 +65,35 @@ object GameLogic {
       }
     })
 
-    val updatedSnakes = inputs.foldLeft(state.snakes) {
+    val updatedState = inputs.foldLeft(state) {
       case (s, IdentifiedGameInput(id, ChangeDirection(dir, _))) =>
-        updateSnakeByID(s, id) { target =>
+        val updatedSnakes = updateSnakeByID(s.snakes, id) { target =>
           if (target.direction.isOppositeOf(dir))
             target
           else
             target.copy(direction = dir)
         }
+        s.copy(snakes = updatedSnakes)
 
       case (s, IdentifiedGameInput(id, SpeedUp(_))) =>
-        updateSnakeByID(s, id) { target =>
+        val updatedSnakes = updateSnakeByID(s.snakes, id) { target =>
           if (target.energy > 0)
             target.copy(speedBuff = SpeedBuff(fps), energy = target.energy - 1)
           else
             target
         }
+        s.copy(snakes = updatedSnakes)
 
       case (s, IdentifiedGameInput(id, JoinGame(name))) =>
-        val emptyBlock = PhysicsFormula.findContiguousBlock(state, snakeBodyInitLength)
+        val emptyBlock = PhysicsFormula.findContiguousBlock(s, snakeBodyInitLength)
         val newSnake   = Snake(id, name, emptyBlock, Up)
-        s :+ newSnake
+        s.copy(snakes = s.snakes :+ newSnake)
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
-        s.filter(_.id != id)
+        s.copy(snakes = s.snakes.filter(_.id != id))
     }
 
-    state.copy(snakes = updatedSnakes)
+    updatedState
   }
 
   private def roundingBack(position: Vec2, boundary: (Double, Double)): Vec2 = (position, boundary) match {

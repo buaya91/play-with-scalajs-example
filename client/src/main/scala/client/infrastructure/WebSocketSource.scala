@@ -43,5 +43,6 @@ trait WebSocketSource extends AuthorityState {
 }
 
 object DefaultWSSource extends WebSocketSource {
-  override lazy val wsConn = new WebSocket(s"ws://${window.location.host}/ws")
+  lazy val protocol             = if (window.location.protocol == "https:") "wss" else "ws"
+  override lazy val wsConn = new WebSocket(s"$protocol://${window.location.host}/ws")
 }

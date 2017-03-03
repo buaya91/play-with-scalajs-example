@@ -67,9 +67,6 @@ trait CanvasRenderer extends GameRenderer {
 //    }
   }
 
-  val flameImg = dom.document.createElement("img").asInstanceOf[HTMLImageElement]
-  flameImg.src = "/assets/images/flame.png"
-
   def drawApple(apple: Apple, scalingFactor: Vec2) = {
 //    (apple.position, scalingFactor) match {
 //      case (AABB(ct, half), Vec2(xf, yf)) =>
