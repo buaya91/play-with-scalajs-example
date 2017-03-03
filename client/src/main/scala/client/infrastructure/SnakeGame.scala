@@ -1,12 +1,12 @@
 package client.infrastructure
 
 import client.domain._
-import client.infrastructure.views.{GameCanvas, Instruction, PlayerStatus, Scoreboard}
+import client.infrastructure.views._
 import japgolly.scalajs.react.ReactDOM
 import monix.execution.Ack.{Continue, Stop}
 import monix.execution.Scheduler
 import org.scalajs.dom.{document, html}
-import shared.protocol.{AssignedID, GameState, SpeedUp}
+import shared.protocol.{AssignedID, GameState, JoinGame, SpeedUp}
 
 class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputControl: InputControl) {
 
@@ -43,7 +43,7 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
 
     ReactDOM.render(Instruction(true), hiddenDiv)
 
-    val firstInput = sequencedInput.filter {
+    sequencedInput.filter {
       case x: SpeedUp => true
       case _          => false
     }.take(1).subscribe { _ =>
@@ -53,9 +53,12 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
 
     assignedID.flatMap { id =>
       predictor.predictions(id, gameStateStream, sequencedInput).map(s => (id, s))
-    }.executeWithFork.subscribe(pair => {
-      ReactDOM.render(GameCanvas.apply(pair._2, pair._1), canvasNode)
-      Continue
+    }.executeWithFork.subscribe(pair =>
+      pair match {
+        case (id, state) =>
+          ReactDOM.render(GameCanvas.apply(state, id), canvasNode)
+
+          Continue
     })
 
     sequencedInput.subscribe(req => {
@@ -82,6 +85,7 @@ class SnakeGame(authorityState: AuthorityState, predictor: Predictor, inputContr
 }
 
 object SnakeGame {
+  val popupNode      = document.getElementById("popup").asInstanceOf[html.Div]
   val canvasNode     = document.getElementById("canvas-container").asInstanceOf[html.Div]
   val scoreboardNode = document.getElementById("scoreboard").asInstanceOf[html.Div]
   val statusNode     = document.getElementById("status-board").asInstanceOf[html.Div]

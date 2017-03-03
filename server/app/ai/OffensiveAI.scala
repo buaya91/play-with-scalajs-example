@@ -3,7 +3,7 @@ package ai
 import akka.actor.{Actor, Props}
 import shared.core.IdentifiedGameInput
 import shared.model.{Direction, Snake, Up}
-import shared.protocol.{AssignedID, ChangeDirection, GameState, JoinGame}
+import shared.protocol.{ChangeDirection, GameState, JoinGame}
 
 class OffensiveAI(val id: String, name: String) extends SnakeAI with Actor {
   private def closestDir(self: Snake, enemy: Snake): Direction = {
@@ -28,9 +28,6 @@ class OffensiveAI(val id: String, name: String) extends SnakeAI with Actor {
 
     case AIJoinGame =>
       context.parent ! IdentifiedGameInput(id, JoinGame(name))
-
-    case some =>
-      println("Got nothing???")
   }
 }
 
