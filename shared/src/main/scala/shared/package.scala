@@ -2,6 +2,9 @@ import shared.model._
 import shared.physics.Vec2
 
 package object shared {
+  type UserID         = String
+  type FrameNo        = Int
+
   val terrainX        = 100
   val terrainY        = 75
   lazy val terrainVec = Vec2(terrainX, terrainY)
@@ -10,8 +13,8 @@ package object shared {
   val snakeBodyInitLength      = 5
   val distancePerSec: Double   = 20.0
   val areaOccupiedPerPosition  = 1 * 1
-  val fps                      = 50
-  val serverBufferFrameSize    = 2 * fps // 2 seconds
+  val fps                      = 20
+  val serverBufferFrameSize    = (0.5 * fps).toInt // 2 seconds
   val millisNeededPerUpdate    = 1000 / fps
   val distancePerFrame: Double = distancePerSec / fps
 

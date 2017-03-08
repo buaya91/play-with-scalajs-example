@@ -59,11 +59,11 @@ object GameLogic {
   }
 
   private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
-    inputs.collect { case IdentifiedGameInput(_, s: SequencedGameRequest) => s }.foreach(s => {
-      if (s.seqNo != state.seqNo) {
-        println(s"Input $s does not match ${state.seqNo}")
-      }
-    })
+//    inputs.collect { case IdentifiedGameInput(_, s: SequencedGameRequest) => s }.foreach(s => {
+//      if (s.seqNo != state.seqNo) {
+//        println(s"Input $s does not match ${state.seqNo}")
+//      }
+//    })
 
     val updatedState = inputs.foldLeft(state) {
       case (s, IdentifiedGameInput(id, ChangeDirection(dir, _))) =>
@@ -87,6 +87,7 @@ object GameLogic {
       case (s, IdentifiedGameInput(id, JoinGame(name))) =>
         val emptyBlock = PhysicsFormula.findContiguousBlock(s, snakeBodyInitLength)
         val newSnake   = Snake(id, name, emptyBlock, Up)
+
         s.copy(snakes = s.snakes :+ newSnake)
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
@@ -121,7 +122,7 @@ object GameLogic {
             })
           }
 
-          assert(Math.abs(diff.magnitude) <= 4, s"Distance between snake body is too long: $diff")
+//          assert(Math.abs(diff.magnitude) <= 50, s"Distance between snake body is too long: ${snake.name} ${snake.body}")
 
           diff
         }
@@ -160,6 +161,15 @@ object GameLogic {
   }
 
   def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
+    val mismatch = inputs.collectFirst {
+      case IdentifiedGameInput(_, s: SequencedGameRequest) if s.seqNo != state.seqNo + 1 =>
+        s.seqNo
+    }
+    assert(
+      mismatch.isEmpty,
+      s"input seq mismatch: Expect ${state.seqNo + 1} got ${mismatch.get}"
+    )
+
     val allSteps =
       (removeDeadSnakes _)
         .andThen(debuff)

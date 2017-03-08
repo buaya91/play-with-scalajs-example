@@ -9,33 +9,8 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
   </head>
   <body>
-      <div id="tips-container"></div>
+      <div id="root"></div>
       <div id="popup"></div>
-      <div id="page">
-          <div id="canvas-container"></div>
-          <div id="side-panel">
-              <div id="scoreboard">
-              Top 10
-                  <table>
-                      <thead>
-                          <tr>
-                              <th>Name</th>
-                              <th>Score</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                  </table>
-              </div>
-              <div id="status-board">
-                  <div class="row">
-                      <p id="name"></p>
-                      <p id="score"></p>
-                  </div>
-                  <div class="row" id="energy"></div>
-              </div>
-          </div>
-      </div>
       <script src="@routes.Assets.versioned("javascript/hidpi-canvas.min.js")"></script>
       @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
   </body>

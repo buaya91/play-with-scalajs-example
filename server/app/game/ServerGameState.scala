@@ -7,13 +7,14 @@ import shared._
 import scala.collection.SortedMap
 
 case class ServerGameState(private val lastConfirmedState: GameState = GameState.init,
+                           private val lastUnconfirmedFrameNo: Int = GameState.init.seqNo,
                            processedInputs: BufferedInputs = SortedMap.empty,
                            unprocessedInputs: BufferedInputs = SortedMap.empty) {
 
   def queueInput(input: IdentifiedGameInput): ServerGameState = {
     val frameNo = input.cmd match {
       case s: SequencedGameRequest => s.seqNo
-      case _                       => lastConfirmedState.seqNo
+      case _                       => lastConfirmedState.seqNo + 1
     }
 
     // add new request to buffer
@@ -28,49 +29,34 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
 
   def nextState: ServerGameState = {
 
-    // add new frame into input buffer
-    val addedNewFrame: BufferedInputs = {
-      val latestFrameNo = processedInputs.lastOption.map(_._1).getOrElse(lastConfirmedState.seqNo) + 1
+    val allInputs = ServerReconciler.mergeFrames(processedInputs, unprocessedInputs)
 
-      unprocessedInputs
-        .get(latestFrameNo)
-        .map(_ => unprocessedInputs)
-        .getOrElse(unprocessedInputs + (latestFrameNo -> Map.empty))
-    }
-
-    val allInputs = ServerReconciler.mergeFrames(processedInputs, addedNewFrame)
-
-    val frameNoWithAllUser: Option[FrameNo] = {
-      val allUser = lastConfirmedState.snakes.map(_.id).toSet
-      processedInputs.collectFirst {
-        case (no, inputs) if inputs.keySet == allUser => no
+    val (toDrop: BufferedInputs, toKeep: BufferedInputs) = {
+      allInputs.span {
+        case (n, _) => n <= lastUnconfirmedFrameNo - serverBufferFrameSize + 1
       }
     }
 
+    val newConfirmedState: GameState = ServerReconciler.reapplyInputs(lastConfirmedState, toDrop, lastUnconfirmedFrameNo - serverBufferFrameSize)
 
-    val (toDrop: BufferedInputs, toKeep: BufferedInputs) = {
-      val n = allInputs.size - serverBufferFrameSize
-      if (n > 0)
-        allInputs.splitAt(n)
-      else
-        (SortedMap.empty, allInputs)
-    }
+//    if (allInputs.nonEmpty) {
+//      println(s"from: $lastConfirmedState")
+//      println(s"drop: $toDrop")
+//      println(s"kept: $toKeep")
+//      println(s"to: $newConfirmedState")
+//      println()
+//    }
 
-    val newConfirmedState: GameState = ServerReconciler.reapplyInputs(lastConfirmedState, toDrop)
-//      frameNoWithAllUser
-//        .map(frameNo => {
-//          val (prev, _) = allInputs.span { case (fN, _) => fN <= frameNo }
-//          val nextState = ServerReconciler.reapplyInputs(lastConfirmedState, prev)
-//
-//          nextState
-//        })
-//        .getOrElse(lastConfirmedState)
-
-    copy(lastConfirmedState = newConfirmedState, processedInputs = toKeep, unprocessedInputs = SortedMap.empty)
+    copy(lastConfirmedState = newConfirmedState,
+         lastUnconfirmedFrameNo = lastUnconfirmedFrameNo + 1,
+         processedInputs = toKeep,
+         unprocessedInputs = SortedMap.empty)
   }
 
-  lazy val predictedState: GameState = {
-    val allInputs = ServerReconciler.mergeFrames(processedInputs, unprocessedInputs)
-    ServerReconciler.reapplyInputs(lastConfirmedState, allInputs)
+  val predictedState: GameState = {
+    val allInputs =
+      ServerReconciler.mergeFrames(processedInputs, unprocessedInputs).dropWhile(_._1 <= lastConfirmedState.seqNo)
+
+    ServerReconciler.reapplyInputs(lastConfirmedState, allInputs, lastUnconfirmedFrameNo)
   }
 }
