@@ -29,8 +29,8 @@ object GameLoop {
 
     serverStateQueue.lastOption.foreach {
       case (n, _) =>
-        predictedState = predictedState.dropWhile(_._1 <= n)
-        unackInput = unackInput.dropWhile(_._1 <= n)
+        predictedState = predictedState.dropWhile(_._1 < n)
+        unackInput = unackInput.dropWhile(_._1 < n)
         serverStateQueue = SortedMap.empty
     }
 

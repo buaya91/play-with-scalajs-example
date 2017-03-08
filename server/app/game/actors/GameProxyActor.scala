@@ -21,8 +21,7 @@ class GameProxyActor extends Actor {
     aiActor ! AIJoinGame
   })
 
-  context.system.scheduler
-    .schedule(millisNeededPerUpdate millis, millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)
+  context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)
 
   private def updateState(connectionsState: ConnectionsState, serverState: ServerGameState) = {
     context.become(running(connectionsState, serverState))
@@ -44,7 +43,13 @@ class GameProxyActor extends Actor {
       updateState(updatedConnections, serverState.queueInput(input))
 
     case NextFrame =>
+      val startTime = System.currentTimeMillis()
       connectionsState.broadcast(serverState.predictedState)
+      val endTime = System.currentTimeMillis()
+      val toWait  = Math.max(0, millisNeededPerUpdate - (endTime - startTime))
+
+      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
+
       updateState(connectionsState, serverState.nextState)
 
     case ConnectionEstablished(id, ref) =>

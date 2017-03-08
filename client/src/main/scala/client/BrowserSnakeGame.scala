@@ -39,6 +39,11 @@ object BrowserSnakeGame extends JSApp {
     serverData.stream().subscribe { res =>
       res match {
         case x: GameState =>
+          predictedState.lastOption.foreach(p => {
+            if (x.seqNo >= p._1) {
+              println(s"received: ${x.seqNo} predicted: ${p._1}")
+            }
+          })
           serverStateQueue += x.seqNo -> x
         case AssignedID(id) =>
           assignedID = Some(id)
