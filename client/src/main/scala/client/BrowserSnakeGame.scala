@@ -1,9 +1,9 @@
 package client
 
 import client.domain.{AuthorityState, InputControl}
-import client.infrastructure.views.WelcomePrompt
+import client.infrastructure.views.{RetryData, WelcomePrompt}
 import client.infrastructure._
-import client.refactor.{GameLoop, GlobalData, Root, RootData}
+import client.refactor._
 import japgolly.scalajs.react.ReactDOM
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monix.execution.Ack.Continue
@@ -15,21 +15,21 @@ import shared.protocol._
 import monix.execution.Scheduler.Implicits.global
 
 object BrowserSnakeGame extends JSApp {
-  var showPrompt = true
 
   import GlobalData._
   private def onSubmitName(name: String): Unit = {
     if (name != null && !name.isEmpty) {
       userName = Some(name)
+      joinedGame = true
       DefaultWSSource.request(JoinGame(name))
-      showPrompt = false
-      initDom()
+
+      updatePrompt()
     }
   }
 
-  def initDom() = {
+  def updatePrompt() = {
     val popupNode = document.getElementById("popup").asInstanceOf[html.Div]
-    if (showPrompt)
+    if (!joinedGame)
       ReactDOM.render(WelcomePrompt(onSubmitName), popupNode)
     else
       ReactDOM.render(<.noscript(), popupNode)
@@ -38,10 +38,12 @@ object BrowserSnakeGame extends JSApp {
   def updateData(input: InputControl, serverData: AuthorityState) = {
     serverData.stream().subscribe { res =>
       res match {
-        case x: GameState =>
-          serverStateQueue += x.seqNo -> x
+        case st: GameState =>
+          serverStateQueue += st.seqNo -> st
+
         case AssignedID(id) =>
           assignedID = Some(id)
+          showRetry = false
       }
       Continue
     }
@@ -50,7 +52,7 @@ object BrowserSnakeGame extends JSApp {
       predictedState.lastOption.foreach {
         case (key, _) =>
           val nextK = key + 1
-          val i = fn(nextK)
+          val i     = fn(nextK)
           serverData.request(i)
           unackInput = unackInput + (nextK -> i)
       }
@@ -69,15 +71,18 @@ object BrowserSnakeGame extends JSApp {
     val root  = document.getElementById("root").asInstanceOf[html.Div]
 
     state.subscribe(st => {
-      val data = RootData(true, GlobalData.assignedID.getOrElse(""), st)
+      assignedID.foreach(id => {
+        if (!st.snakes.exists(_.id == id))
+          showRetry = true
+      })
+
+      val retry   = RetryData(showRetry, name => onSubmitName(name), userName.getOrElse(""))
+
+      val data    = RootData(assignedID.getOrElse(""), st, false, retry)
       ReactDOM.render(Root(data), root)
       Continue
     })
 
-//    val game = new SnakeGame(DefaultWSSource, ClientPredictor, input)
-//
-//    game.startGame()
-
-    initDom()
+    updatePrompt()
   }
 }

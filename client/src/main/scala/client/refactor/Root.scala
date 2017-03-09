@@ -16,6 +16,7 @@ object Root {
 
     <.div(
       Instruction(rootData.showInstruction),
+      rootData.retry.show ?= TryAgainPrompt(rootData.retry),
       <.div(^.id := "page")(
         GameCanvas(rootData.state, rootData.id),
         <.div(^.id := "side-panel")(
@@ -31,4 +32,7 @@ object Root {
   def apply(data: RootData) = component(data)
 }
 
-case class RootData(showInstruction: Boolean, id: String, state: GameState)
+case class RootData(id: String,
+                    state: GameState,
+                    showInstruction: Boolean,
+                    retry: RetryData)

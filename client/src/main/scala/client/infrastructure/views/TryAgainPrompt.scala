@@ -4,15 +4,15 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object TryAgainPrompt {
-  class Backend($ : BackendScope[() => Unit, Unit]) {
+  class Backend($ : BackendScope[RetryData, Unit]) {
 
-    def render(onSubmit: () => Unit) = {
+    def render(data: RetryData) = {
       <.div(^.className := "modal")(
         <.div(^.className := "modal-content")(
           <.div(^.className := "title")("Oops, you're dead"),
           <.div(^.className := "inline")(
             <.button(
-              ^.onClick --> Callback(onSubmit)
+              ^.onClick --> Callback(data.onRetry(data.name))
             )("Try Again")
           )
         )
@@ -20,7 +20,9 @@ object TryAgainPrompt {
     }
   }
 
-  val component = ReactComponentB[() => Unit]("TryAgainPrompt").renderBackend[Backend].build
+  val component = ReactComponentB[RetryData]("TryAgainPrompt").renderBackend[Backend].build
 
-  def apply(onSubmit: () => Unit) = component(onSubmit)
+  def apply(data: RetryData) = component(data)
 }
+
+case class RetryData(show: Boolean, onRetry: String => Unit, name: String)

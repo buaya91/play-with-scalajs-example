@@ -11,4 +11,7 @@ object GlobalData {
   var userName: Option[String]                        = None
   var predictedState                                  = SortedMap.empty[FrameNo, GameState]
   var unackInput                                      = SortedMap.empty[FrameNo, SequencedGameRequest]
+
+  var joinedGame: Boolean = false
+  var showRetry: Boolean = false
 }
