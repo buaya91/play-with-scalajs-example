@@ -39,6 +39,8 @@ object BrowserSnakeGame extends JSApp {
     serverData.stream().subscribe { res =>
       res match {
         case st: GameState =>
+          predictedState.lastOption.foreach(p => println(s"Delay: ${p._1 - st.seqNo}"))
+
           serverStateQueue += st.seqNo -> st
 
         case AssignedID(id) =>
