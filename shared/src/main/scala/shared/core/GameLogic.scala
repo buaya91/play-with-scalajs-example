@@ -85,10 +85,13 @@ object GameLogic {
         s.copy(snakes = updatedSnakes)
 
       case (s, IdentifiedGameInput(id, JoinGame(name))) =>
-        val emptyBlock = PhysicsFormula.findContiguousBlock(s, snakeBodyInitLength)
-        val newSnake   = Snake(id, name, emptyBlock, Up)
-
-        s.copy(snakes = s.snakes :+ newSnake)
+        if (s.snakes.exists(_.id == id))
+          s
+        else {
+          val emptyBlock = PhysicsFormula.findContiguousBlock(s, snakeBodyInitLength)
+          val newSnake   = Snake(id, name, emptyBlock, Up)
+          s.copy(snakes = s.snakes :+ newSnake)
+        }
 
       case (s, IdentifiedGameInput(id, LeaveGame)) =>
         s.copy(snakes = s.snakes.filter(_.id != id))

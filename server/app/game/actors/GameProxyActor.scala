@@ -35,6 +35,7 @@ class GameProxyActor extends Actor {
         case j: JoinGame =>
           val id = input.playerID
           connectionsState.pendingConnections.get(id).foreach(_ ! AssignedID(id))
+          connectionsState.joinedPlayers.get(id).foreach(_ ! AssignedID(id))
           connectionsState.join(id)
         case _ =>
           connectionsState

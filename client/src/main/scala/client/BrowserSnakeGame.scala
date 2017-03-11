@@ -20,9 +20,9 @@ object BrowserSnakeGame extends JSApp {
   private def onSubmitName(name: String): Unit = {
     if (name != null && !name.isEmpty) {
       userName = Some(name)
+//      metaStatus = metaStatus.copy(joinedGame = true)
       joinedGame = true
       DefaultWSSource.request(JoinGame(name))
-
       updatePrompt()
     }
   }
@@ -43,7 +43,7 @@ object BrowserSnakeGame extends JSApp {
 
         case AssignedID(id) =>
           assignedID = Some(id)
-          showRetry = false
+//          metaStatus = metaStatus.copy(joinedGame = true, dead = false)
       }
       Continue
     }
@@ -71,12 +71,14 @@ object BrowserSnakeGame extends JSApp {
     val root  = document.getElementById("root").asInstanceOf[html.Div]
 
     state.subscribe(st => {
-      assignedID.foreach(id => {
-        if (!st.snakes.exists(_.id == id))
-          showRetry = true
-      })
+//      assignedID.foreach(id => {
+//        if (metaStatus.joinedGame && !st.snakes.exists(_.id == id))
+//          metaStatus = metaStatus.die()
+//      })
 
-      val retry   = RetryData(showRetry, name => onSubmitName(name), userName.getOrElse(""))
+      val showRetry = assignedID.exists(id => !st.snakes.exists(_.id == id))
+
+      val retry   = RetryData(showRetry, onSubmitName, userName.getOrElse(""))
 
       val data    = RootData(assignedID.getOrElse(""), st, false, retry)
       ReactDOM.render(Root(data), root)
