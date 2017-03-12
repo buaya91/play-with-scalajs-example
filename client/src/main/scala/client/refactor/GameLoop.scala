@@ -54,9 +54,9 @@ class GameLoop(data: MutableGameData) {
     val startT = Date.now()
     step()
     (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
-    val used = Date.now() - startT
+    val timeTaken = Date.now() - startT
 
-    val toWait = Math.max(0, millisNeededPerUpdate - used)
+    val toWait = Math.max(0, millisNeededPerUpdate - timeTaken)
 
     setTimeout(toWait) {
       loop(push)

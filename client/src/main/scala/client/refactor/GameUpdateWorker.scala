@@ -44,7 +44,9 @@ object GameUpdateWorker {
     DefaultWSSource.stream().subscribe { res =>
       res match {
         case st: GameState =>
-          println(s"Server say no snake = ${gameData.assignedID.exists(id => !st.hasSnake(id))}")
+
+          gameData.predictedState.lastOption.foreach(p => println(s"Diff ${p._1 - st.seqNo}"))
+
           gameData.serverStateQueue += st.seqNo -> st
         case assigned @ AssignedID(id) =>
           gameData.assignedID = Some(id)
@@ -56,7 +58,10 @@ object GameUpdateWorker {
     gameLoop
       .start()
       .subscribe(st => {
-        println(s"Client say no snake = ${gameData.assignedID.exists(id => !st.hasSnake(id))}")
+//        if (gameData.assignedID.exists(id => !st.hasSnake(id))) {
+//          println("Clinet no snake")
+//        }
+
         forwardGameResponseToMainThread(st)
         Continue
       })
