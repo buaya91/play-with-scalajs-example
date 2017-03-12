@@ -12,6 +12,8 @@
       <div id="root"></div>
       <div id="popup"></div>
       <script src="@routes.Assets.versioned("javascript/hidpi-canvas.min.js")"></script>
-      @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
+      @scalajs.html.jsdeps("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
+      <script src="/scripts"></script>
+      @scalajs.html.launcher("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
   </body>
 </html>

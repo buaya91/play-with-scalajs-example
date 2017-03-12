@@ -45,9 +45,11 @@ class GameProxyActor extends Actor {
 
     case NextFrame =>
       val startTime = System.currentTimeMillis()
-      connectionsState.broadcast(serverState.predictedState)
-      val endTime = System.currentTimeMillis()
-      val toWait  = Math.max(0, millisNeededPerUpdate - (endTime - startTime))
+      val state = serverState.predictedState
+      connectionsState.broadcast(state)
+
+      val timeTaken = System.currentTimeMillis() - startTime
+      val toWait  = Math.max(0, millisNeededPerUpdate - timeTaken - 20)
 
       context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
 
