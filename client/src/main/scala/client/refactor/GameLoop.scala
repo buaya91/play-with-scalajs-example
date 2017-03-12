@@ -11,16 +11,13 @@ import scala.scalajs.js.Date
 import org.scalajs.dom.window
 import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
-object GameLoop {
-  import GlobalData._
-
+class GameLoop(data: MutableGameData) {
+  import data._
   private var timer: Int = 0
-  private var frameEndedAt: Double = 0
 
   private def step() = {
     val nextStep = for {
       id                 <- assignedID
-      _                  <- userName
       (lastN, lastState) <- (predictedState ++ serverStateQueue).lastOption
     } yield {
 
@@ -54,24 +51,14 @@ object GameLoop {
   }
 
   private def loop(push: GameState => Ack): Unit = {
-    timer = window.requestAnimationFrame { (_: Double) =>
-      val now = Date.now()
+    val startT = Date.now()
+    step()
+    (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
+    val used = Date.now() - startT
 
-      if (frameEndedAt == 0) {
-        step()
-        (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
-        frameEndedAt = Date.now()
-      } else {
-        val sinceLastFrame = now - frameEndedAt
-        val framePast      = sinceLastFrame / millisNeededPerUpdate
+    val toWait = Math.max(0, millisNeededPerUpdate - used)
 
-        if (framePast >= 1) {
-          (1 to framePast.toInt).foreach(_ => step())
-          (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
-          frameEndedAt = Date.now()
-        }
-      }
-
+    setTimeout(toWait) {
       loop(push)
     }
   }

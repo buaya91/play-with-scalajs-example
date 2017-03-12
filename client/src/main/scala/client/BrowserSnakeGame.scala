@@ -1,6 +1,7 @@
 package client
 
-import client.domain.{AuthorityState, InputControl}
+import boopickle.Default.Unpickle
+import client.domain.InputControl
 import client.infrastructure.views.{RetryData, WelcomePrompt}
 import client.infrastructure._
 import client.refactor._
@@ -10,24 +11,29 @@ import monix.execution.Ack.Continue
 import org.scalajs.dom._
 
 import scala.scalajs.js._
-import org.scalajs.dom.raw._
 import shared.protocol._
+import shared.serializers.Serializers._
 import monix.execution.Scheduler.Implicits.global
+import org.scalajs.dom.raw.HTMLElement
+import scala.scalajs.js.typedarray._
 
 object BrowserSnakeGame extends JSApp {
 
+  private var latestStateToRender = GameState.init
+  private val worker              = new Worker("/assets/javascript/gameUpdate.js")
+
   import GlobalData._
+
   private def onSubmitName(name: String): Unit = {
     if (name != null && !name.isEmpty) {
       userName = Some(name)
-//      metaStatus = metaStatus.copy(joinedGame = true)
       joinedGame = true
-      DefaultWSSource.request(JoinGame(name))
+      worker.postMessage(name)
       updatePrompt()
     }
   }
 
-  def updatePrompt() = {
+  private def updatePrompt() = {
     val popupNode = document.getElementById("popup").asInstanceOf[html.Div]
     if (!joinedGame)
       ReactDOM.render(WelcomePrompt(onSubmitName), popupNode)
@@ -35,57 +41,47 @@ object BrowserSnakeGame extends JSApp {
       ReactDOM.render(<.noscript(), popupNode)
   }
 
-  def updateData(input: InputControl, serverData: AuthorityState) = {
-    serverData.stream().subscribe { res =>
-      res match {
-        case st: GameState =>
-          predictedState.lastOption.foreach(p => println(s"Delay: ${p._1 - st.seqNo}"))
-
-          serverStateQueue += st.seqNo -> st
-
-        case AssignedID(id) =>
-          assignedID = Some(id)
-//          metaStatus = metaStatus.copy(joinedGame = true, dead = false)
-      }
+  private def updateData(input: InputControl) = {
+    input.captureInputs().subscribe { key =>
+      worker.postMessage(key)
       Continue
     }
+  }
 
-    input.captureInputs().subscribe { fn =>
-      predictedState.lastOption.foreach {
-        case (key, _) =>
-          val nextK = key + 1
-          val i     = fn(nextK)
-          serverData.request(i)
-          unackInput = unackInput + (nextK -> i)
-      }
-      Continue
+  worker.onmessage = (msg: MessageEvent) => {
+    val rawBytes             = TypedArrayBuffer.wrap(msg.data.asInstanceOf[ArrayBuffer])
+    val deserializedResponse = Unpickle[GameResponse].fromBytes(rawBytes)
+
+    deserializedResponse match {
+      case AssignedID(id) =>
+        println("Assigned ID from worker")
+        assignedID = Some(id)
+      case st: GameState =>
+        latestStateToRender = st
     }
+  }
+
+  private def startRenderLoop(root: html.Div): Unit = {
+    window.requestAnimationFrame((_: Double) => {
+      val showRetry = assignedID.exists(id => !latestStateToRender.hasSnake(id))
+
+      val retry = RetryData(showRetry, onSubmitName, userName.getOrElse(""))
+
+      val data = RootData(assignedID.getOrElse(""), latestStateToRender, false, retry)
+      ReactDOM.render(Root(data), root)
+      startRenderLoop(root)
+    })
   }
 
   @annotation.JSExport
   override def main(): Unit = {
 
     val input = new KeyboardInput(document.asInstanceOf[HTMLElement])
+    updateData(input)
 
-    updateData(input, DefaultWSSource)
+    val root = document.getElementById("root").asInstanceOf[html.Div]
 
-    val state = GameLoop.start()
-    val root  = document.getElementById("root").asInstanceOf[html.Div]
-
-    state.subscribe(st => {
-//      assignedID.foreach(id => {
-//        if (metaStatus.joinedGame && !st.snakes.exists(_.id == id))
-//          metaStatus = metaStatus.die()
-//      })
-
-      val showRetry = assignedID.exists(id => !st.snakes.exists(_.id == id))
-
-      val retry   = RetryData(showRetry, onSubmitName, userName.getOrElse(""))
-
-      val data    = RootData(assignedID.getOrElse(""), st, false, retry)
-      ReactDOM.render(Root(data), root)
-      Continue
-    })
+    startRenderLoop(root)
 
     updatePrompt()
   }

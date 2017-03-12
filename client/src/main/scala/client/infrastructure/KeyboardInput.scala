@@ -9,19 +9,13 @@ import shared.protocol.{ChangeDirection, SequencedGameRequest, SpeedUp}
 
 class KeyboardInput(element: HTMLElement) extends InputControl {
 
-  val keyToCmd: PartialFunction[Int, Int => SequencedGameRequest] = {
-    case 32 => SpeedUp.apply
-    case 37 => ChangeDirection(model.Left, _)
-    case 38 => ChangeDirection(model.Up, _)
-    case 39 => ChangeDirection(model.Right, _)
-    case 40 => ChangeDirection(model.Down, _)
-  }
+  private val keyAllowed = Set(32, 37, 38, 39, 40)
 
-  def captureInputs(): Observable[Int => SequencedGameRequest] = {
+  def captureInputs(): Observable[Int] = {
     Observable.create(OverflowStrategy.Unbounded) { sync =>
       element.addEventListener[KeyboardEvent]("keydown", (ev: KeyboardEvent) => {
-        if (keyToCmd.isDefinedAt(ev.keyCode)) {
-          sync.onNext(keyToCmd(ev.keyCode))
+        if (keyAllowed.contains(ev.keyCode)) {
+          sync.onNext(ev.keyCode)
         }
       })
 

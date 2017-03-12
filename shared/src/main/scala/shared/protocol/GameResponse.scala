@@ -19,6 +19,8 @@ case class GameState(snakes: Seq[Snake], apples: Set[Apple], seqNo: Int) extends
       !notEmpty
     })
   }
+
+  def hasSnake(id: String): Boolean = snakes.exists(_.id == id)
 }
 
 case class AssignedID(id: String) extends GameResponse
