@@ -16,6 +16,7 @@ def dockerSetting = Seq(
   maintainer in Docker := "Qingwei",
   packageSummary in Docker := "image for snake game",
   packageDescription := "",
+  dockerExposedPorts := Seq(8080),
   dockerBaseImage := "openjdk:8-alpine",
   dockerUpdateLatest := true,
   dockerRepository := Some("buaya91")
