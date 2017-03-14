@@ -1,27 +1,41 @@
 package game
 
 import akka.actor.ActorRef
-import shared.protocol.GameResponse
+import shared.protocol.{GameResponse, GameState, GameStateDelta}
 
-case class ConnectionsState(pendingConnections: Map[String, ActorRef], joinedPlayers: Map[String, ActorRef]) {
+/**
+  * 1. when connection established, => pendingConn
+  * 2. when player join => pendingState
+  * 3. when player got state => joinedPlayer
+  */
+
+case class ConnectionsState(establishedConn: Map[String, ActorRef],
+                            joinedPlayers: Map[String, ActorRef],
+                            pendingState: Map[String, ActorRef]) {
 
   def open(id: String, connection: ActorRef): ConnectionsState = {
-    copy(pendingConnections + (id -> connection))
+    copy(establishedConn + (id -> connection))
   }
 
   def join(id: String): ConnectionsState = {
-    val (pendingUpdated, joinedUpdated) = pendingConnections.get(id) match {
-      case Some(c) => (pendingConnections - id, joinedPlayers + (id -> c))
-      case None    => (pendingConnections, joinedPlayers)
+    val (pendingUpdated, joinedUpdated) = establishedConn.get(id) match {
+      case Some(c) => (establishedConn - id, joinedPlayers + (id -> c))
+      case None    => (establishedConn, joinedPlayers)
     }
-    copy(pendingUpdated, joinedUpdated)
+    copy(establishedConn = pendingUpdated, pendingState = joinedUpdated)
   }
 
   def close(id: String): ConnectionsState = {
-    copy(pendingConnections - id)
+    copy(establishedConn - id)
   }
 
   def broadcast(response: GameResponse): Unit = {
     joinedPlayers.foreach(_._2 ! response)
   }
+
+  def broadcastState(state: GameState): Unit = {
+    pendingState.foreach(_._2 ! state)
+  }
+
+  def clearPendingState: ConnectionsState = copy(establishedConn, joinedPlayers ++ pendingState, Map.empty)
 }

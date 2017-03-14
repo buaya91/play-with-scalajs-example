@@ -13,7 +13,7 @@ object ServerReconciler {
     val state = (from.seqNo to end).foldLeft(from) {
       case (st, _) =>
         val inputs = bufferedInputs.getOrElse(st.seqNo + 1, Map.empty).values.toSeq
-        val next = GameLogic.step(st, inputs)
+        val next = GameLogic.step(st, inputs)._1
         next
     }
 

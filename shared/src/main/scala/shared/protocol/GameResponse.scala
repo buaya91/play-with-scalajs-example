@@ -1,7 +1,9 @@
 package shared.protocol
 
+import shared.core.IdentifiedGameInput
 import shared.model.{Apple, Snake}
 import shared.physics.AABB
+
 import scala.collection.mutable
 
 sealed trait GameResponse
@@ -24,5 +26,7 @@ case class GameState(snakes: Seq[Snake], apples: Set[Apple], seqNo: Int) extends
 }
 
 case class AssignedID(id: String) extends GameResponse
+
+case class GameStateDelta(inputs: Seq[IdentifiedGameInput], seqNo: Int) extends GameResponse
 
 object GameState { def init = GameState(Seq.empty, Set.empty, 0) }

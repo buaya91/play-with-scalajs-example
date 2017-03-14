@@ -9,7 +9,8 @@ import scala.collection.SortedMap
 case class ServerGameState(private val lastConfirmedState: GameState = GameState.init,
                            private val lastUnconfirmedFrameNo: Int = GameState.init.seqNo,
                            processedInputs: BufferedInputs = SortedMap.empty,
-                           unprocessedInputs: BufferedInputs = SortedMap.empty) {
+                           unprocessedInputs: BufferedInputs = SortedMap.empty,
+                           toSend: BufferedInputs = SortedMap.empty) {
 
   def queueInput(input: IdentifiedGameInput): ServerGameState = {
     val frameNo = input.cmd match {
@@ -37,7 +38,8 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
       }
     }
 
-    val newConfirmedState: GameState = ServerReconciler.reapplyInputs(lastConfirmedState, toDrop, lastUnconfirmedFrameNo - serverBufferFrameSize)
+    val newConfirmedState: GameState =
+      ServerReconciler.reapplyInputs(lastConfirmedState, toDrop, lastUnconfirmedFrameNo - serverBufferFrameSize)
 
 //    if (allInputs.nonEmpty) {
 //      println(s"from: $lastConfirmedState")
@@ -50,7 +52,8 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
     copy(lastConfirmedState = newConfirmedState,
          lastUnconfirmedFrameNo = lastUnconfirmedFrameNo + 1,
          processedInputs = toKeep,
-         unprocessedInputs = SortedMap.empty)
+         unprocessedInputs = SortedMap.empty,
+         toSend = toDrop)
   }
 
   val predictedState: GameState = {

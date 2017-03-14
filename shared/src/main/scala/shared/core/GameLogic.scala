@@ -163,7 +163,8 @@ object GameLogic {
     state.copy(apples = state.apples ++ apples.toSet)
   }
 
-  def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
+  // assuming all is valid
+  def step(state: GameState, inputs: Seq[IdentifiedGameInput]): (GameState, Option[GameStateDelta]) = {
     val mismatch = inputs.collectFirst {
       case IdentifiedGameInput(_, s: SequencedGameRequest) if s.seqNo != state.seqNo + 1 =>
         s.seqNo
@@ -181,6 +182,8 @@ object GameLogic {
         .andThen(applyMovement)
         .andThen(replenishApple)
 
-    allSteps(state).increaseSeqNo
+    val delta = if (inputs.isEmpty) None else Some(GameStateDelta(inputs, state.seqNo + 1))
+
+    (allSteps(state).increaseSeqNo, delta)
   }
 }

@@ -26,6 +26,7 @@ object Serializers {
   implicit val gameResponseP = compositePickler[GameResponse]
     .addConcreteType[GameState]
     .addConcreteType[AssignedID]
+    .addConcreteType[GameStateDelta]
 
   def bbToArrayBytes(buffer: ByteBuffer): Array[Byte] = {
     val data = Array.ofDim[Byte](buffer.remaining())

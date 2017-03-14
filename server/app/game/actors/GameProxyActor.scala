@@ -7,7 +7,7 @@ import akka.actor.{Actor, Props}
 import game.{ConnectionsState, ServerGameState}
 import shared.core.IdentifiedGameInput
 import shared._
-import shared.protocol.{AssignedID, JoinGame, LeaveGame}
+import shared.protocol.{AssignedID, GameStateDelta, JoinGame, LeaveGame}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -27,14 +27,14 @@ class GameProxyActor extends Actor {
     context.become(running(connectionsState, serverState))
   }
 
-  override def receive: Receive = running(ConnectionsState(Map.empty, Map.empty), ServerGameState())
+  override def receive: Receive = running(ConnectionsState(Map.empty, Map.empty, Map.empty), ServerGameState())
 
   def running(connectionsState: ConnectionsState, serverState: ServerGameState): Receive = {
     case input: IdentifiedGameInput =>
       val updatedConnections = input.cmd match {
         case j: JoinGame =>
           val id = input.playerID
-          connectionsState.pendingConnections.get(id).foreach(_ ! AssignedID(id))
+          connectionsState.establishedConn.get(id).foreach(_ ! AssignedID(id))
           connectionsState.joinedPlayers.get(id).foreach(_ ! AssignedID(id))
           connectionsState.join(id)
         case _ =>
@@ -45,15 +45,19 @@ class GameProxyActor extends Actor {
 
     case NextFrame =>
       val startTime = System.currentTimeMillis()
-      val state = serverState.predictedState
-      connectionsState.broadcast(state)
+      val inputs = serverState.toSend.collect {
+        case (frameN, i) if i.nonEmpty => GameStateDelta(i.values.toSeq, frameN)
+      }
+
+      inputs.foreach(connectionsState.broadcast)
+      connectionsState.broadcastState(serverState.predictedState)
 
       val timeTaken = System.currentTimeMillis() - startTime
       val toWait  = Math.max(0, millisNeededPerUpdate - timeTaken - 20)
 
       context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
 
-      updateState(connectionsState, serverState.nextState)
+      updateState(connectionsState.clearPendingState, serverState.nextState)
 
     case ConnectionEstablished(id, ref) =>
       updateState(connectionsState.open(id, ref), serverState)

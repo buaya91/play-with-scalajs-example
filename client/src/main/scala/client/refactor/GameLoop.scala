@@ -13,7 +13,7 @@ import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
 class GameLoop(data: MutableGameData) {
   import data._
-  private var timer: Int = 0
+  private var timer: SetTimeoutHandle = setTimeout(0){}
 
   private def step() = {
     val nextStep = for {
@@ -29,14 +29,14 @@ class GameLoop(data: MutableGameData) {
         (lastServerN to lastN + 1).foldLeft(latestServerState) {
           case (st, _) =>
             val inputs = unackInput.get(st.seqNo + 1).map(IdentifiedGameInput(id, _)).toSeq
-            val next   = GameLogic.step(st, inputs)
+            val next   = GameLogic.step(st, inputs)._1
             next
         }
       }
 
       conflicted.getOrElse {
         val nextInput = unackInput.get(lastN + 1).map(i => Seq(IdentifiedGameInput(id, i))).getOrElse(Seq())
-        GameLogic.step(lastState, nextInput)
+        GameLogic.step(lastState, nextInput)._1
       }
     }
 
@@ -58,7 +58,7 @@ class GameLoop(data: MutableGameData) {
 
     val toWait = Math.max(0, millisNeededPerUpdate - timeTaken)
 
-    setTimeout(toWait) {
+    timer = setTimeout(toWait) {
       loop(push)
     }
   }
@@ -68,7 +68,7 @@ class GameLoop(data: MutableGameData) {
       loop(sync.onNext)
 
       Cancelable(() => {
-        window.cancelAnimationFrame(timer)
+        clearTimeout(timer)
         sync.onComplete()
       })
     }
