@@ -1,7 +1,7 @@
 package client.refactor
 
 import shared._
-import shared.protocol.{GameState, SequencedGameRequest}
+import shared.protocol.{GameState, GameStateDelta, SequencedGameRequest}
 
 import scala.collection.SortedMap
 
@@ -14,4 +14,5 @@ object GlobalData {
 final class MutableGameData(var serverStateQueue: SortedMap[FrameNo, GameState] = SortedMap.empty,
                             var assignedID: Option[String] = None,
                             var predictedState: SortedMap[FrameNo, GameState] = SortedMap.empty,
-                            var unackInput: SortedMap[FrameNo, SequencedGameRequest] = SortedMap.empty)
+                            var unackInput: SortedMap[FrameNo, SequencedGameRequest] = SortedMap.empty,
+                            var unackDelta: SortedMap[FrameNo, GameStateDelta] = SortedMap.empty)

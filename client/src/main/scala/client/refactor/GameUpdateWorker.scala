@@ -7,6 +7,7 @@ import monix.execution.Scheduler.Implicits.global
 import boopickle.Default._
 import client.Utils
 import client.infrastructure.DefaultWSSource
+import shared.core.IdentifiedGameInput
 import shared.model
 import shared.serializers.Serializers._
 
@@ -58,7 +59,12 @@ object GameUpdateWorker {
           gameData.assignedID = Some(id)
           forwardGameResponseToMainThread(assigned)
         case delta: GameStateDelta =>
-          ???
+          delta.inputs.foreach {
+            case IdentifiedGameInput(_, JoinGame(n)) =>
+              println(s"Received Join $n at ${delta.seqNo}")
+            case _ =>
+          }
+          gameData.unackDelta += delta.seqNo -> delta
       }
       Continue
     }
