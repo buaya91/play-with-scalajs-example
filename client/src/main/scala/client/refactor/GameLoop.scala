@@ -34,10 +34,8 @@ class GameLoop(data: MutableGameData) {
       if (unackDelta.nonEmpty) {
         unackDelta.values.foreach { delta =>
           delta.inputs.foreach {
-            case IdentifiedGameInput(_, JoinGame(n)) =>
-              println(s"Got Join ${delta.seqNo}")
-              println(s"Start: ${allStates.head._1}")
-            case _ =>
+            _ =>
+              println(s"Diff: ${delta.seqNo - allStates.keys.head}")
           }
         }
 

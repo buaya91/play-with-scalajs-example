@@ -9,10 +9,11 @@ import shared.core.IdentifiedGameInput
 import shared._
 import shared.protocol.{AssignedID, GameStateDelta, JoinGame, LeaveGame}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class GameProxyActor extends Actor {
+class GameProxyActor(timerEc: ExecutionContext) extends Actor {
 
   List("John", "May").foreach(name => {
     val connectionID = UUID.randomUUID().toString
@@ -20,6 +21,9 @@ class GameProxyActor extends Actor {
     self ! ConnectionEstablished(connectionID, aiActor)
     aiActor ! AIJoinGame
   })
+
+  private var expectedNextFrameTime: Long = System.currentTimeMillis() + millisNeededPerUpdate
+  private var accDelay =
 
   context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)
 
@@ -45,19 +49,22 @@ class GameProxyActor extends Actor {
 
     case NextFrame =>
       val startTime = System.currentTimeMillis()
+      val delay = startTime - expectedNextFrameTime
+
       val inputs = serverState.toSend.collect {
         case (frameN, i) if i.nonEmpty => GameStateDelta(i.values.toSeq, frameN)
       }
 
       inputs.foreach(connectionsState.broadcast)
       connectionsState.broadcastState(serverState.predictedState)
-
-      val timeTaken = System.currentTimeMillis() - startTime
-      val toWait  = Math.max(0, millisNeededPerUpdate - timeTaken - 20)
-
-      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
-
       updateState(connectionsState.clearPendingState, serverState.nextState)
+
+      val endTime   = System.currentTimeMillis()
+      val timeTaken = endTime - startTime
+
+      val toWait = millisNeededPerUpdate - timeTaken - delay
+      expectedNextFrameTime += millisNeededPerUpdate
+      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
 
     case ConnectionEstablished(id, ref) =>
       updateState(connectionsState.open(id, ref), serverState)
@@ -71,6 +78,6 @@ class GameProxyActor extends Actor {
 }
 
 object GameProxyActor {
-  def props: Props =
-    Props(classOf[GameProxyActor])
+  def props(timerEc: ExecutionContext): Props =
+    Props(classOf[GameProxyActor], timerEc)
 }

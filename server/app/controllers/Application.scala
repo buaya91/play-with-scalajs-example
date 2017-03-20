@@ -15,12 +15,14 @@ import shared.protocol._
 import shared.serializers.Serializers._
 import boopickle.Default._
 
+import scala.concurrent.ExecutionContext
+
 //import scala.concurrent.duration._
 
-class Application()(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
+class Application(timerEc: ExecutionContext)(implicit actorSystem: ActorSystem, materializer: Materializer) extends Controller {
 
   val log            = Logger(getClass)
-  val gameProxyActor = actorSystem.actorOf(GameProxyActor.props)
+  val gameProxyActor = actorSystem.actorOf(GameProxyActor.props(timerEc))
 
   def index = Action {
     Ok(views.html.main("Snake"))

@@ -15,8 +15,10 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
   def queueInput(input: IdentifiedGameInput): ServerGameState = {
     val frameNo = input.cmd match {
       case s: SequencedGameRequest => s.seqNo
-      case _                       => lastConfirmedState.seqNo + 1
+      case _                       => lastUnconfirmedFrameNo + 1
     }
+
+    println(s"Client $frameNo - Server: $lastUnconfirmedFrameNo - Diff ${frameNo - lastUnconfirmedFrameNo}")
 
     // add new request to buffer
     val updatedUnprocessedInputs = {
