@@ -59,11 +59,6 @@ object GameUpdateWorker {
           gameData.assignedID = Some(id)
           forwardGameResponseToMainThread(assigned)
         case delta: GameStateDelta =>
-          delta.inputs.foreach {
-            case IdentifiedGameInput(_, JoinGame(n)) =>
-              println(s"Received Join $n at ${delta.seqNo}")
-            case _ =>
-          }
           gameData.unackDelta += delta.seqNo -> delta
       }
       Continue

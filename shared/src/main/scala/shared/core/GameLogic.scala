@@ -165,14 +165,14 @@ object GameLogic {
 
   // assuming all is valid
   def step(state: GameState, inputs: Seq[IdentifiedGameInput]): (GameState, Option[GameStateDelta]) = {
-    val mismatch = inputs.collectFirst {
-      case IdentifiedGameInput(_, s: SequencedGameRequest) if s.seqNo != state.seqNo + 1 =>
-        s.seqNo
-    }
-    assert(
-      mismatch.isEmpty,
-      s"input seq mismatch: Expect ${state.seqNo + 1} got ${mismatch.get}"
-    )
+//    val mismatch = inputs.collectFirst {
+//      case IdentifiedGameInput(_, s: SequencedGameRequest) if s.seqNo != state.seqNo + 1 =>
+//        s.seqNo
+//    }
+//    assert(
+//      mismatch.isEmpty,
+//      s"input seq mismatch: Expect ${state.seqNo + 1} got ${mismatch.get}"
+//    )
 
     val allSteps =
       (removeDeadSnakes _)

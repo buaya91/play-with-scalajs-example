@@ -13,7 +13,8 @@ import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
 class GameLoop(data: MutableGameData) {
   import data._
-  private var timer: SetTimeoutHandle = setTimeout(0) {}
+  private var timer: SetTimeoutHandle   = setTimeout(0) {}
+  private var expectedNextFrame: Double = _
 
   private def stepWithDelta(): Unit = {
 
@@ -32,16 +33,17 @@ class GameLoop(data: MutableGameData) {
       if allStates.nonEmpty
     } yield {
       if (unackDelta.nonEmpty) {
-        unackDelta.values.foreach { delta =>
-          delta.inputs.foreach {
-            _ =>
-              println(s"Diff: ${delta.seqNo - allStates.keys.head}")
+        unackDelta.lastOption.foreach { delta =>
+          delta._2.inputs.foreach { _ =>
+            println(s"Diff: ${delta._2.seqNo - allStates.keys.head}")
+            println(s"${allStates.get(delta._1)}")
           }
         }
 
         val adjustedPredictions = allStates.scanLeft(allStates.head) {
           case ((_, st), _) =>
             val serverInputs = unackDelta.get(st.seqNo + 1).toSeq.flatMap(_.inputs)
+
             val clientInputs = unackInput.get(st.seqNo + 1).map(IdentifiedGameInput(id, _)).toSeq
             val next         = GameLogic.step(st, serverInputs ++ clientInputs)
 
@@ -51,12 +53,13 @@ class GameLoop(data: MutableGameData) {
       }
 
       val (lastN, lastState) = allStates.last
-      val nextInput = unackInput.get(lastN + 1).map(i => Seq(IdentifiedGameInput(id, i))).getOrElse(Seq())
-      val nextState = GameLogic.step(lastState, nextInput)._1
+      val nextInput          = unackInput.get(lastN + 1).map(i => Seq(IdentifiedGameInput(id, i))).getOrElse(Seq())
+      val nextState          = GameLogic.step(lastState, nextInput)._1
 
-      predictedState = (predictedState + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize)
+      predictedState = (predictedState + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize + 5)
       unackInput = unackInput.takeRight(serverBufferFrameSize)
-      unackDelta = SortedMap.empty
+      unackDelta = unackDelta.dropWhile(_._1 < nextState.seqNo - serverBufferFrameSize)
+//      unackDelta = SortedMap.empty
       serverStateQueue = SortedMap.empty
     }
   }
@@ -98,11 +101,14 @@ class GameLoop(data: MutableGameData) {
 
   private def loop(push: GameState => Ack): Unit = {
     val startT = Date.now()
+    val delay  = startT - expectedNextFrame
     stepWithDelta()
     (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
     val timeTaken = Date.now() - startT
 
-    val toWait = Math.max(0, millisNeededPerUpdate - timeTaken)
+    val toWait = millisNeededPerUpdate - timeTaken - delay
+
+    expectedNextFrame += millisNeededPerUpdate
 
     timer = setTimeout(toWait) {
       loop(push)
@@ -111,6 +117,7 @@ class GameLoop(data: MutableGameData) {
 
   def start(): Observable[GameState] = {
     Observable.create(OverflowStrategy.Unbounded) { sync =>
+      expectedNextFrame = Date.now()
       loop(sync.onNext)
 
       Cancelable(() => {
