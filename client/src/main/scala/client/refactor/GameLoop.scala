@@ -32,33 +32,35 @@ class GameLoop(data: MutableGameData) {
       allStates = predictedState ++ serverStateQueue
       if allStates.nonEmpty
     } yield {
-      if (unackDelta.nonEmpty) {
+      val adjustedPredictions = if (unackDelta.nonEmpty) {
         unackDelta.lastOption.foreach { delta =>
           delta._2.inputs.foreach { _ =>
-            println(s"Diff: ${delta._2.seqNo - allStates.keys.head}")
-            println(s"${allStates.get(delta._1)}")
+            println(s"Diff: ${delta._1 - allStates.keys.head}")
           }
         }
 
-        val adjustedPredictions = allStates.scanLeft(allStates.head) {
-          case ((_, st), _) =>
-            val serverInputs = unackDelta.get(st.seqNo + 1).toSeq.flatMap(_.inputs)
+        var newPredictions = SortedMap.empty[FrameNo, GameState]
 
-            val clientInputs = unackInput.get(st.seqNo + 1).map(IdentifiedGameInput(id, _)).toSeq
-            val next         = GameLogic.step(st, serverInputs ++ clientInputs)
-
-            next._1.seqNo -> next._1
+        for {
+          (seqNo, st) <- allStates
+        } yield {
+          val serverInputs = unackDelta.get(seqNo + 1).toSeq.flatMap(_.inputs)
+          val clientInputs = unackInput.get(seqNo + 1).map(IdentifiedGameInput(id, _)).toSeq
+          val (next, _)         = GameLogic.step(st, serverInputs ++ clientInputs)
+          newPredictions += next.seqNo -> next
         }
-        predictedState = adjustedPredictions
-      }
 
-      val (lastN, lastState) = allStates.last
+        newPredictions
+      } else predictedState
+
+      val (lastN, lastState) = (adjustedPredictions ++ serverStateQueue).last
       val nextInput          = unackInput.get(lastN + 1).map(i => Seq(IdentifiedGameInput(id, i))).getOrElse(Seq())
       val nextState          = GameLogic.step(lastState, nextInput)._1
 
-      predictedState = (predictedState + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize + 5)
-      unackInput = unackInput.takeRight(serverBufferFrameSize)
-      unackDelta = unackDelta.dropWhile(_._1 < nextState.seqNo - serverBufferFrameSize)
+      // TODO: problem client input start drifting
+      predictedState = (adjustedPredictions + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize)
+      unackInput = unackInput.dropWhile(_._1 < predictedState.head._1 - 2)
+      unackDelta = unackDelta.dropWhile(_._1 < predictedState.head._1 - 2)
 //      unackDelta = SortedMap.empty
       serverStateQueue = SortedMap.empty
     }
