@@ -36,20 +36,12 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
 
     val (toDrop: BufferedInputs, toKeep: BufferedInputs) = {
       allInputs.span {
-        case (n, _) => n <= lastUnconfirmedFrameNo - serverBufferFrameSize + 1
+        case (n, _) => n <= lastUnconfirmedFrameNo - serverBufferFrameSize
       }
     }
 
     val newConfirmedState: GameState =
       ServerReconciler.reapplyInputs(lastConfirmedState, toDrop, lastUnconfirmedFrameNo - serverBufferFrameSize)
-
-//    if (allInputs.nonEmpty) {
-//      println(s"from: $lastConfirmedState")
-//      println(s"drop: $toDrop")
-//      println(s"kept: $toKeep")
-//      println(s"to: $newConfirmedState")
-//      println()
-//    }
 
     copy(lastConfirmedState = newConfirmedState,
          lastUnconfirmedFrameNo = lastUnconfirmedFrameNo + 1,

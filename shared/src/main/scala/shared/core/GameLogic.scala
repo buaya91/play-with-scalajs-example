@@ -58,7 +58,7 @@ object GameLogic {
     }
   }
 
-  private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
+  def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
 //    inputs.collect { case IdentifiedGameInput(_, s: SequencedGameRequest) => s }.foreach(s => {
 //      if (s.seqNo != state.seqNo) {
 //        println(s"Input $s does not match ${state.seqNo}")
@@ -184,6 +184,14 @@ object GameLogic {
 
     val delta = if (inputs.isEmpty) None else Some(GameStateDelta(inputs, state.seqNo + 1))
 
-    (allSteps(state).increaseSeqNo, delta)
+    val result = allSteps(state).increaseSeqNo
+
+//    if (inputs.nonEmpty) {
+//      println(s"In: ${state.seqNo}")
+//      println(s"out: ${result.seqNo}")
+//      println(s"Del: ${delta.map(_.seqNo)}")
+//    }
+
+    (result, delta)
   }
 }

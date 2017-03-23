@@ -33,11 +33,11 @@ class GameLoop(data: MutableGameData) {
       if allStates.nonEmpty
     } yield {
       val adjustedPredictions = if (unackDelta.nonEmpty) {
-        unackDelta.lastOption.foreach { delta =>
-          delta._2.inputs.foreach { _ =>
-            println(s"Diff: ${delta._1 - allStates.keys.head}")
-          }
-        }
+//        unackDelta.lastOption.foreach { delta =>
+//          delta._2.inputs.foreach { _ =>
+//            println(s"Diff: ${delta._1 - allStates.keys.head}")
+//          }
+//        }
 
         var newPredictions = SortedMap.empty[FrameNo, GameState]
 
@@ -46,7 +46,7 @@ class GameLoop(data: MutableGameData) {
         } yield {
           val serverInputs = unackDelta.get(seqNo + 1).toSeq.flatMap(_.inputs)
           val clientInputs = unackInput.get(seqNo + 1).map(IdentifiedGameInput(id, _)).toSeq
-          val (next, _)         = GameLogic.step(st, serverInputs ++ clientInputs)
+          val next         = GameLogic.applyInput(st, serverInputs ++ clientInputs)
           newPredictions += next.seqNo -> next
         }
 
@@ -59,8 +59,8 @@ class GameLoop(data: MutableGameData) {
 
       // TODO: problem client input start drifting
       predictedState = (adjustedPredictions + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize)
-      unackInput = unackInput.dropWhile(_._1 < predictedState.head._1 - 2)
-      unackDelta = unackDelta.dropWhile(_._1 < predictedState.head._1 - 2)
+      unackInput = unackInput.dropWhile(_._1 < predictedState.head._1)
+      unackDelta = unackDelta.dropWhile(_._1 < predictedState.head._1)
 //      unackDelta = SortedMap.empty
       serverStateQueue = SortedMap.empty
     }
@@ -104,6 +104,7 @@ class GameLoop(data: MutableGameData) {
   private def loop(push: GameState => Ack): Unit = {
     val startT = Date.now()
     val delay  = startT - expectedNextFrame
+    if (delay >= 5) println(s"Delay: $delay")
     stepWithDelta()
     (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
     val timeTaken = Date.now() - startT

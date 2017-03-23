@@ -10,14 +10,23 @@ object ServerReconciler {
   type BufferedInputs = SortedMap[Int, IndexedInputs]
 
   def reapplyInputs(from: GameState, bufferedInputs: BufferedInputs, end: Int): GameState = {
-    val state = (from.seqNo to end).foldLeft(from) {
-      case (st, _) =>
-        val inputs = bufferedInputs.getOrElse(st.seqNo + 1, Map.empty).values.toSeq
-        val next = GameLogic.step(st, inputs)._1
-        next
+    var st = from
+    for {
+      _ <- from.seqNo to end
+    } yield {
+      val inputs = bufferedInputs.getOrElse(st.seqNo + 1, Map.empty).values.toSeq
+      val next = GameLogic.step(st, inputs)._1
+      st = next
     }
 
-    state
+//    val state = (from.seqNo to end).foldLeft(from) {
+//      case (st, _) =>
+//        val inputs = bufferedInputs.getOrElse(st.seqNo + 1, Map.empty).values.toSeq
+//        val next = GameLogic.step(st, inputs)._1
+//        next
+//    }
+
+    st
   }
 
   private def mergeInputs(existed: IndexedInputs, newlyAdded: IndexedInputs): IndexedInputs = {

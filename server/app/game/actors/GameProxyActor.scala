@@ -25,7 +25,7 @@ class GameProxyActor(timerEc: ExecutionContext) extends Actor {
   private var expectedNextFrameTime: Long = System.currentTimeMillis() + millisNeededPerUpdate
   private var accDelay =
 
-  context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)
+  context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(timerEc)
 
   private def updateState(connectionsState: ConnectionsState, serverState: ServerGameState) = {
     context.become(running(connectionsState, serverState))
@@ -50,6 +50,7 @@ class GameProxyActor(timerEc: ExecutionContext) extends Actor {
     case NextFrame =>
       val startTime = System.currentTimeMillis()
       val delay = startTime - expectedNextFrameTime
+//      if (delay >= 10) println(s"Delay: $delay")
 
       val inputs = serverState.toSend.collect {
         case (frameN, i) if i.nonEmpty => GameStateDelta(i.values.toSeq, frameN)
@@ -59,12 +60,11 @@ class GameProxyActor(timerEc: ExecutionContext) extends Actor {
       connectionsState.broadcastState(serverState.predictedState)
       updateState(connectionsState.clearPendingState, serverState.nextState)
 
-      val endTime   = System.currentTimeMillis()
-      val timeTaken = endTime - startTime
+      val timeTaken = System.currentTimeMillis() - startTime
 
       val toWait = millisNeededPerUpdate - timeTaken - delay
       expectedNextFrameTime += millisNeededPerUpdate
-      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
+      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(timerEc)
 
     case ConnectionEstablished(id, ref) =>
       updateState(connectionsState.open(id, ref), serverState)
