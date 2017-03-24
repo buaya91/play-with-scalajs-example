@@ -23,7 +23,6 @@ class GameProxyActor(timerEc: ExecutionContext) extends Actor {
   })
 
   private var expectedNextFrameTime: Long = System.currentTimeMillis() + millisNeededPerUpdate
-  private var accDelay =
 
   context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(timerEc)
 

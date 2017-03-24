@@ -1,7 +1,8 @@
 package game
 
+import play.api.Logger
 import shared.core.IdentifiedGameInput
-import shared.protocol.{GameState, JoinGame, SequencedGameRequest}
+import shared.protocol.{GameState, SequencedGameRequest}
 import shared._
 
 import scala.collection.SortedMap
@@ -17,6 +18,8 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
       case s: SequencedGameRequest => s.seqNo
       case _                       => lastUnconfirmedFrameNo + 1
     }
+
+//    Logger.debug(s"Client req is delayed by ${lastUnconfirmedFrameNo - frameNo}")
 
     // add new request to buffer
     val updatedUnprocessedInputs = {
@@ -45,7 +48,7 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
          lastUnconfirmedFrameNo = lastUnconfirmedFrameNo + 1,
          processedInputs = toKeep,
          unprocessedInputs = SortedMap.empty,
-         toSend = toDrop)
+         toSend = unprocessedInputs)
   }
 
   val predictedState: GameState = {

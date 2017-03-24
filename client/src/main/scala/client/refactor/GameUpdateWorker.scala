@@ -45,20 +45,13 @@ object GameUpdateWorker {
     DefaultWSSource.stream().subscribe { res =>
       res match {
         case st: GameState =>
-
-//          gameData.predictedState.lastOption.foreach(p => {
-//            val diff = p._1 - st.seqNo
-//            if (diff > 50) {
-//              println(s"Diff $diff")
-//              println(s"server ${st.seqNo}")
-//            }
-//          })
-
           gameData.serverStateQueue += st.seqNo -> st
         case assigned @ AssignedID(id) =>
           gameData.assignedID = Some(id)
           forwardGameResponseToMainThread(assigned)
         case delta: GameStateDelta =>
+          val diff = gameData.predictedState.lastKey - delta.seqNo
+          println(s"Slowed by: $diff")
           gameData.unackDelta += delta.seqNo -> delta
       }
       Continue
@@ -67,10 +60,6 @@ object GameUpdateWorker {
     gameLoop
       .start()
       .subscribe(st => {
-//        if (gameData.assignedID.exists(id => !st.hasSnake(id))) {
-//          println("Clinet no snake")
-//        }
-
         forwardGameResponseToMainThread(st)
         Continue
       })
