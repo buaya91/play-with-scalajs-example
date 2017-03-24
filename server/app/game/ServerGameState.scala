@@ -1,7 +1,7 @@
 package game
 
 import shared.core.IdentifiedGameInput
-import shared.protocol.{GameState, SequencedGameRequest}
+import shared.protocol.{GameState, JoinGame, SequencedGameRequest}
 import shared._
 
 import scala.collection.SortedMap
@@ -17,8 +17,6 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
       case s: SequencedGameRequest => s.seqNo
       case _                       => lastUnconfirmedFrameNo + 1
     }
-
-    println(s"Client $frameNo - Server: $lastUnconfirmedFrameNo - Diff ${frameNo - lastUnconfirmedFrameNo}")
 
     // add new request to buffer
     val updatedUnprocessedInputs = {
@@ -36,7 +34,7 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
 
     val (toDrop: BufferedInputs, toKeep: BufferedInputs) = {
       allInputs.span {
-        case (n, _) => n <= lastUnconfirmedFrameNo - serverBufferFrameSize
+        case (n, _) => n <= lastUnconfirmedFrameNo - serverBufferFrameSize + 1
       }
     }
 

@@ -33,32 +33,27 @@ class GameLoop(data: MutableGameData) {
       if allStates.nonEmpty
     } yield {
       val adjustedPredictions = if (unackDelta.nonEmpty) {
-//        unackDelta.lastOption.foreach { delta =>
-//          delta._2.inputs.foreach { _ =>
-//            println(s"Diff: ${delta._1 - allStates.keys.head}")
-//          }
-//        }
-
-        var newPredictions = SortedMap.empty[FrameNo, GameState]
-
+        var newPredictions  = SortedMap.empty[FrameNo, GameState]
+        var lastStateHolder = allStates.head._2
         for {
-          (seqNo, st) <- allStates
+          (seqNo, _) <- allStates
         } yield {
           val serverInputs = unackDelta.get(seqNo + 1).toSeq.flatMap(_.inputs)
           val clientInputs = unackInput.get(seqNo + 1).map(IdentifiedGameInput(id, _)).toSeq
-          val next         = GameLogic.applyInput(st, serverInputs ++ clientInputs)
-          newPredictions += next.seqNo -> next
+          lastStateHolder = GameLogic.step(lastStateHolder, serverInputs ++ clientInputs)._1
+          newPredictions += lastStateHolder.seqNo -> lastStateHolder
         }
 
-        newPredictions
-      } else predictedState
+        newPredictions.dropRight(1) + allStates.head
 
-      val (lastN, lastState) = (adjustedPredictions ++ serverStateQueue).last
+      } else allStates
+
+      val (lastN, lastState) = adjustedPredictions.last
       val nextInput          = unackInput.get(lastN + 1).map(i => Seq(IdentifiedGameInput(id, i))).getOrElse(Seq())
       val nextState          = GameLogic.step(lastState, nextInput)._1
 
       // TODO: problem client input start drifting
-      predictedState = (adjustedPredictions + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize)
+      predictedState = (adjustedPredictions + (nextState.seqNo -> nextState)).takeRight(serverBufferFrameSize + 5)
       unackInput = unackInput.dropWhile(_._1 < predictedState.head._1)
       unackDelta = unackDelta.dropWhile(_._1 < predictedState.head._1)
 //      unackDelta = SortedMap.empty
@@ -104,7 +99,7 @@ class GameLoop(data: MutableGameData) {
   private def loop(push: GameState => Ack): Unit = {
     val startT = Date.now()
     val delay  = startT - expectedNextFrame
-    if (delay >= 5) println(s"Delay: $delay")
+
     stepWithDelta()
     (predictedState ++ serverStateQueue).lastOption.foreach(pair => push(pair._2))
     val timeTaken = Date.now() - startT

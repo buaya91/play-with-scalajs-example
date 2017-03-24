@@ -50,7 +50,6 @@ class GameProxyActor(timerEc: ExecutionContext) extends Actor {
     case NextFrame =>
       val startTime = System.currentTimeMillis()
       val delay = startTime - expectedNextFrameTime
-//      if (delay >= 10) println(s"Delay: $delay")
 
       val inputs = serverState.toSend.collect {
         case (frameN, i) if i.nonEmpty => GameStateDelta(i.values.toSeq, frameN)
