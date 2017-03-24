@@ -130,3 +130,14 @@ object PhysicsFormula {
     backtrackSearchContiguousBlock(Seq.empty).get
   }
 }
+
+//class XorShiftRandom(var seed: Long) {
+//  def nextInt(): Int = {
+//    seed = seed ^ seed << 21
+//    seed = seed ^ seed >>> 35
+//    val x = (seed ^ seed << 4).toInt
+//
+//    println(s"What is it? $x")
+//    x
+//  }
+//}

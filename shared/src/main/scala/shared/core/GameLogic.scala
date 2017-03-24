@@ -58,7 +58,7 @@ object GameLogic {
     }
   }
 
-  private def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
+  def applyInput(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
 //    inputs.collect { case IdentifiedGameInput(_, s: SequencedGameRequest) => s }.foreach(s => {
 //      if (s.seqNo != state.seqNo) {
 //        println(s"Input $s does not match ${state.seqNo}")
@@ -163,15 +163,16 @@ object GameLogic {
     state.copy(apples = state.apples ++ apples.toSet)
   }
 
-  def step(state: GameState, inputs: Seq[IdentifiedGameInput]): GameState = {
-    val mismatch = inputs.collectFirst {
-      case IdentifiedGameInput(_, s: SequencedGameRequest) if s.seqNo != state.seqNo + 1 =>
-        s.seqNo
-    }
-    assert(
-      mismatch.isEmpty,
-      s"input seq mismatch: Expect ${state.seqNo + 1} got ${mismatch.get}"
-    )
+  // assuming all is valid
+  def step(state: GameState, inputs: Seq[IdentifiedGameInput]): (GameState, Option[GameStateDelta]) = {
+//    val mismatch = inputs.collectFirst {
+//      case IdentifiedGameInput(_, s: SequencedGameRequest) if s.seqNo != state.seqNo + 1 =>
+//        s.seqNo
+//    }
+//    assert(
+//      mismatch.isEmpty,
+//      s"input seq mismatch: Expect ${state.seqNo + 1} got ${mismatch.get}"
+//    )
 
     val allSteps =
       (removeDeadSnakes _)
@@ -181,6 +182,16 @@ object GameLogic {
         .andThen(applyMovement)
         .andThen(replenishApple)
 
-    allSteps(state).increaseSeqNo
+    val delta = if (inputs.isEmpty) None else Some(GameStateDelta(inputs, state.seqNo + 1))
+
+    val result = allSteps(state).increaseSeqNo
+
+//    if (inputs.nonEmpty) {
+//      println(s"In: ${state.seqNo}")
+//      println(s"out: ${result.seqNo}")
+//      println(s"Del: ${delta.map(_.seqNo)}")
+//    }
+
+    (result, delta)
   }
 }

@@ -2,8 +2,8 @@ import sbt._
 
 object Server {
   object Versions {
-    lazy val akkaV = "2.4.12"
-    lazy val scalajsScriptV = "1.1.0"
+    lazy val akkaV = "2.4.9"
+    lazy val scalajsScriptV = "1.0.0"
     lazy val logbackV = "1.1.7"
     lazy val scalatestV = "3.0.0"
     lazy val scalacheckV = "1.13.0"

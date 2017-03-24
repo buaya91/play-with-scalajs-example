@@ -7,12 +7,13 @@ import akka.actor.{Actor, Props}
 import game.{ConnectionsState, ServerGameState}
 import shared.core.IdentifiedGameInput
 import shared._
-import shared.protocol.{AssignedID, JoinGame, LeaveGame}
+import shared.protocol.{AssignedID, GameStateDelta, JoinGame, LeaveGame}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class GameProxyActor extends Actor {
+class GameProxyActor(timerEc: ExecutionContext) extends Actor {
 
   List("John", "May").foreach(name => {
     val connectionID = UUID.randomUUID().toString
@@ -21,20 +22,22 @@ class GameProxyActor extends Actor {
     aiActor ! AIJoinGame
   })
 
-  context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(context.dispatcher)
+  private var expectedNextFrameTime: Long = System.currentTimeMillis() + millisNeededPerUpdate
+
+  context.system.scheduler.scheduleOnce(millisNeededPerUpdate millis, self, NextFrame)(timerEc)
 
   private def updateState(connectionsState: ConnectionsState, serverState: ServerGameState) = {
     context.become(running(connectionsState, serverState))
   }
 
-  override def receive: Receive = running(ConnectionsState(Map.empty, Map.empty), ServerGameState())
+  override def receive: Receive = running(ConnectionsState(Map.empty, Map.empty, Map.empty), ServerGameState())
 
   def running(connectionsState: ConnectionsState, serverState: ServerGameState): Receive = {
     case input: IdentifiedGameInput =>
       val updatedConnections = input.cmd match {
         case j: JoinGame =>
           val id = input.playerID
-          connectionsState.pendingConnections.get(id).foreach(_ ! AssignedID(id))
+          connectionsState.establishedConn.get(id).foreach(_ ! AssignedID(id))
           connectionsState.joinedPlayers.get(id).foreach(_ ! AssignedID(id))
           connectionsState.join(id)
         case _ =>
@@ -45,15 +48,21 @@ class GameProxyActor extends Actor {
 
     case NextFrame =>
       val startTime = System.currentTimeMillis()
-      val state = serverState.predictedState
-      connectionsState.broadcast(state)
+      val delay = startTime - expectedNextFrameTime
+
+      val inputs = serverState.toSend.collect {
+        case (frameN, i) if i.nonEmpty => GameStateDelta(i.values.toSeq, frameN)
+      }
+
+      inputs.foreach(connectionsState.broadcast)
+      connectionsState.broadcastState(serverState.predictedState)
+      updateState(connectionsState.clearPendingState, serverState.nextState)
 
       val timeTaken = System.currentTimeMillis() - startTime
-      val toWait  = Math.max(0, millisNeededPerUpdate - timeTaken - 20)
 
-      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(context.dispatcher)
-
-      updateState(connectionsState, serverState.nextState)
+      val toWait = millisNeededPerUpdate - timeTaken - delay
+      expectedNextFrameTime += millisNeededPerUpdate
+      context.system.scheduler.scheduleOnce(toWait millis, self, NextFrame)(timerEc)
 
     case ConnectionEstablished(id, ref) =>
       updateState(connectionsState.open(id, ref), serverState)
@@ -67,6 +76,6 @@ class GameProxyActor extends Actor {
 }
 
 object GameProxyActor {
-  def props: Props =
-    Props(classOf[GameProxyActor])
+  def props(timerEc: ExecutionContext): Props =
+    Props(classOf[GameProxyActor], timerEc)
 }

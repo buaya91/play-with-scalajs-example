@@ -11,10 +11,10 @@ package object shared {
 
   val snakeBodyUnitSize        = Vec2(1, 1)
   val snakeBodyInitLength      = 5
-  val distancePerSec: Double   = 15.0
+  val distancePerSec: Double   = 12.0
   val areaOccupiedPerPosition  = 1 * 1
-  val fps                      = 20
-  val serverBufferFrameSize    = (0.5 * fps).toInt // 2 seconds
+  val fps                      = 15
+  val serverBufferFrameSize    = (1 * fps).toInt // 2 seconds
   val millisNeededPerUpdate    = 1000 / fps
   val distancePerFrame: Double = distancePerSec / fps
 

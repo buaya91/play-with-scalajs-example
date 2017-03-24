@@ -1,5 +1,6 @@
 package game
 
+import play.api.Logger
 import shared.core.IdentifiedGameInput
 import shared.protocol.{GameState, SequencedGameRequest}
 import shared._
@@ -9,13 +10,16 @@ import scala.collection.SortedMap
 case class ServerGameState(private val lastConfirmedState: GameState = GameState.init,
                            private val lastUnconfirmedFrameNo: Int = GameState.init.seqNo,
                            processedInputs: BufferedInputs = SortedMap.empty,
-                           unprocessedInputs: BufferedInputs = SortedMap.empty) {
+                           unprocessedInputs: BufferedInputs = SortedMap.empty,
+                           toSend: BufferedInputs = SortedMap.empty) {
 
   def queueInput(input: IdentifiedGameInput): ServerGameState = {
     val frameNo = input.cmd match {
       case s: SequencedGameRequest => s.seqNo
-      case _                       => lastConfirmedState.seqNo + 1
+      case _                       => lastUnconfirmedFrameNo + 1
     }
+
+//    Logger.debug(s"Client req is delayed by ${lastUnconfirmedFrameNo - frameNo}")
 
     // add new request to buffer
     val updatedUnprocessedInputs = {
@@ -37,20 +41,14 @@ case class ServerGameState(private val lastConfirmedState: GameState = GameState
       }
     }
 
-    val newConfirmedState: GameState = ServerReconciler.reapplyInputs(lastConfirmedState, toDrop, lastUnconfirmedFrameNo - serverBufferFrameSize)
-
-//    if (allInputs.nonEmpty) {
-//      println(s"from: $lastConfirmedState")
-//      println(s"drop: $toDrop")
-//      println(s"kept: $toKeep")
-//      println(s"to: $newConfirmedState")
-//      println()
-//    }
+    val newConfirmedState: GameState =
+      ServerReconciler.reapplyInputs(lastConfirmedState, toDrop, lastUnconfirmedFrameNo - serverBufferFrameSize)
 
     copy(lastConfirmedState = newConfirmedState,
          lastUnconfirmedFrameNo = lastUnconfirmedFrameNo + 1,
          processedInputs = toKeep,
-         unprocessedInputs = SortedMap.empty)
+         unprocessedInputs = SortedMap.empty,
+         toSend = unprocessedInputs)
   }
 
   val predictedState: GameState = {

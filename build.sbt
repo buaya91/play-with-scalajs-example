@@ -6,7 +6,6 @@ SassKeys.assetRootURL := "/server/app/assets"
 
 def commonSettings = Seq(
   scalaVersion := scalaV,
-  fork in run := true,
   testOptions in Test += Tests.Argument("-oD"),
   scalacOptions ++= Seq("-feature", "-Ywarn-unused-import")
 )
