@@ -25,12 +25,15 @@ html, body {
 }
 
 #tips-container {
+  position: relative;
+  width: 0;
+  height: 0;
   #tips {
-    display: block;
     opacity: 0.3;
-    position: fixed;
-    bottom: 100px;
-    width: 30%;
+    position: absolute;
+    left: 20vw;
+    top: 80vh;
+    width: 30vw;
   }
 }
 
@@ -157,11 +160,4 @@ html, body {
       border: 2px solid ;
     }
   }
-}
-
-#tips {
-  position: relative;
-  float: right;
-  z-index: 100;
-  opacity: 0.6;
 }
