@@ -1,4 +1,4 @@
-package client.domain
+package client.network
 
 import monix.reactive.Observable
 import shared.protocol.{GameRequest, GameResponse}

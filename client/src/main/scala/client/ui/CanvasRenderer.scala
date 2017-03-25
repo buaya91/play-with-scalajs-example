@@ -1,12 +1,9 @@
-package client.infrastructure
+package client.ui
 
-import client.domain.GameRenderer
-import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLImageElement
 import org.scalajs.dom.{CanvasRenderingContext2D, window}
-import shared.model.{Apple, Down, Snake}
-import shared.protocol._
+import shared.model.{Apple, Snake}
 import shared.physics.{AABB, Vec2}
+import shared.protocol._
 
 trait CanvasRenderer extends GameRenderer {
   type CanvasCtx = CanvasRenderingContext2D

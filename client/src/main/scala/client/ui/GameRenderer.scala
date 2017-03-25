@@ -1,4 +1,4 @@
-package client.domain
+package client.ui
 
 import shared.protocol._
 

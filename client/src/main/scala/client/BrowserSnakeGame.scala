@@ -1,9 +1,8 @@
 package client
 
 import boopickle.Default.Unpickle
-import client.domain.InputControl
-import client.infrastructure.views.{RetryData, WelcomePrompt}
-import client.infrastructure._
+import client.ui.components.{RetryData, WelcomePrompt}
+import client.input.{InputControl, KeyboardInput}
 import client.refactor._
 import japgolly.scalajs.react.ReactDOM
 import japgolly.scalajs.react.vdom.prefix_<^._
@@ -15,12 +14,15 @@ import shared.protocol._
 import shared.serializers.Serializers._
 import monix.execution.Scheduler.Implicits.global
 import org.scalajs.dom.raw.HTMLElement
+
 import scala.scalajs.js.typedarray._
 
 object BrowserSnakeGame extends JSApp {
 
   private var latestStateToRender = GameState.init
   private val worker              = new Worker("/assets/javascript/gameUpdate.js")
+
+  private var showInstruction = true
 
   import GlobalData._
 
@@ -43,6 +45,8 @@ object BrowserSnakeGame extends JSApp {
 
   private def updateData(input: InputControl) = {
     input.captureInputs().subscribe { key =>
+      if (key == 32)
+        showInstruction = false
       worker.postMessage(key)
       Continue
     }
@@ -67,7 +71,7 @@ object BrowserSnakeGame extends JSApp {
 
       val retry = RetryData(showRetry, onSubmitName, userName.getOrElse(""))
 
-      val data = RootData(assignedID.getOrElse(""), latestStateToRender, false, retry)
+      val data = RootData(assignedID.getOrElse(""), latestStateToRender, showInstruction, retry)
       ReactDOM.render(Root(data), root)
       startRenderLoop(root)
     })

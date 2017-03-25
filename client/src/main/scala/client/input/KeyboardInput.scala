@@ -1,11 +1,8 @@
-package client.infrastructure
+package client.input
 
-import client.domain.InputControl
 import monix.execution.Cancelable
 import monix.reactive.{Observable, OverflowStrategy}
 import org.scalajs.dom.raw.{HTMLElement, KeyboardEvent}
-import shared.model
-import shared.protocol.{ChangeDirection, SequencedGameRequest, SpeedUp}
 
 class KeyboardInput(element: HTMLElement) extends InputControl {
 

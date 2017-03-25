@@ -6,8 +6,7 @@ import shared.protocol._
 import monix.execution.Scheduler.Implicits.global
 import boopickle.Default._
 import client.Utils
-import client.infrastructure.DefaultWSSource
-import shared.core.IdentifiedGameInput
+import client.network.DefaultWSSource
 import shared.model
 import shared.serializers.Serializers._
 

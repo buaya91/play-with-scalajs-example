@@ -1,7 +1,6 @@
-package client.infrastructure.views
+package client.ui.components
 
-import client.domain.GameRenderer
-import client.infrastructure.CanvasRenderer
+import client.ui.{CanvasRenderer, GameRenderer}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.scalajs.dom.{html, window}

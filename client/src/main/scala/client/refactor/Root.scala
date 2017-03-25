@@ -1,6 +1,6 @@
 package client.refactor
 
-import client.infrastructure.views._
+import client.ui.components._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import shared.protocol.GameState

@@ -1,14 +1,13 @@
-package client.infrastructure
+package client.network
 
+import boopickle.Default._
+import client.Utils
 import monix.execution.Cancelable
 import monix.reactive._
 import org.scalajs.dom._
-import boopickle.Default._
-import client.domain.AuthorityState
-import shared.protocol._
-import shared.protocol.GameRequest
+import shared.protocol.{GameRequest, _}
 import shared.serializers.Serializers._
-import client.Utils
+
 import scala.scalajs.js.typedarray._
 
 trait WebSocketSource extends AuthorityState {
