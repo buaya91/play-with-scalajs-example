@@ -4,7 +4,7 @@ import monix.execution.{Ack, Cancelable}
 import monix.reactive.{Observable, OverflowStrategy}
 import shared.{FrameNo, millisNeededPerUpdate}
 import shared.core.{GameLogic, IdentifiedGameInput}
-import shared.protocol.{GameState, JoinGame, SequencedGameRequest}
+import shared.protocol.GameState
 import shared._
 
 import scala.collection.SortedMap
@@ -17,16 +17,6 @@ class GameLoop(data: MutableGameData) {
   private var expectedNextFrame: Double = _
 
   private def stepWithDelta(): Unit = {
-
-    /**
-      * 1. if server state ++ predicted is not empty
-      * 2. pick the latest
-      * 3. check delta queue, if not empty
-      * 1. reconcile over existing predictions
-      * 2. drop the predictions < last input
-      * 3. cut predictions to be smaller than buffer size
-      * 4. one last step
-      */
     for {
       id <- assignedID
       allStates = predictedState ++ serverStateQueue

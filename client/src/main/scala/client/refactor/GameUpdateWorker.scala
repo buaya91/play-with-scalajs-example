@@ -50,8 +50,6 @@ object GameUpdateWorker {
           gameData.assignedID = Some(id)
           forwardGameResponseToMainThread(assigned)
         case delta: GameStateDelta =>
-          val diff = gameData.predictedState.lastKey - delta.seqNo
-          println(s"Slowed by: $diff")
           gameData.unackDelta += delta.seqNo -> delta
       }
       Continue

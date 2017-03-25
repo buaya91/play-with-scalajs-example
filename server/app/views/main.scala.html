@@ -9,11 +9,15 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
   </head>
   <body>
+      <div id="gh-button">
+        <a class="github-button" href="https://github.com/buaya91/scalajs-snake" data-icon="octicon-star" data-style="mega" data-count-href="/buaya91/scalajs-snake/stargazers" data-count-api="/repos/buaya91/scalajs-snake#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star buaya91/scalajs-snake on GitHub">Star</a>
+      </div>
       <div id="root"></div>
       <div id="popup"></div>
       <script src="@routes.Assets.versioned("javascript/hidpi-canvas.min.js")"></script>
       @scalajs.html.jsdeps("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
       <script src="/scripts"></script>
       @scalajs.html.launcher("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
+      <script async defer src="https://buttons.github.io/buttons.js"></script>
   </body>
 </html>

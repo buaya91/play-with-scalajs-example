@@ -18,11 +18,11 @@ object Root {
       Instruction(rootData.showInstruction),
       rootData.retry.show ?= TryAgainPrompt(rootData.retry),
       <.div(^.id := "page")(
-        GameCanvas(rootData.state, rootData.id),
         <.div(^.id := "side-panel")(
           Scoreboard(scores),
           status.map(PlayerStatus(_))
-        )
+        ),
+        GameCanvas(rootData.state, rootData.id)
       )
     )
   }

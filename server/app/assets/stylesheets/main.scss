@@ -8,6 +8,12 @@ html, body {
   font-size: 1em;
 }
 
+#gh-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
 .bolt-img {
   width: 2em;
   height: auto;
@@ -112,9 +118,12 @@ html, body {
     align-items: center;
     justify-content: space-around;
 
+    border-radius: 10px;
+    border: 2px solid rgba(66, 78, 244, 1);
+    padding: 20px;
+    color: rgba(66, 78, 244, 1);
 
-    background-color: white;
-    color: black;
+    background-color: #7ccedc;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -125,9 +134,9 @@ html, body {
     max-height: 100%;
 
     .title {
+      color: rgba(66, 78, 244, 1);
       font-size: 2em;
       text-align: center;
-      color: black;
       flex: 1.5 1 auto;
     }
 
@@ -137,8 +146,15 @@ html, body {
       font-size: 1.5em;
     }
 
-    input,button {
+    input {
       font-size: 0.8em;
+      border: 2px solid;
+      background-color: antiquewhite;
+    }
+
+    button {
+      font-size: 0.8em;
+      border: 2px solid ;
     }
   }
 }
